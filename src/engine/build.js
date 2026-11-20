@@ -193,7 +193,6 @@ function diversify(ranked, limit, locked) {
   }
   if (picked.length < limit) {
     for (const c of skipped) { if (picked.length >= limit) break; picked.push(c); }
-    picked.sort((a, b) => b.r - a.r || (a.k < b.k ? -1 : 1));
   }
   return picked;
 }
