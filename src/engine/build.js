@@ -6,11 +6,16 @@ import { leatherTone, familyOf } from './rules.js';
 
 const PAIR_KEEP = 40;      // top+bottom pairs kept after stage 1
 const SHOE_KEEP = 3;       // shoe options kept per pair
-const CAND_KEEP = 60;      // candidates that get layer/neckwear/headwear tried
+const CAND_KEEP = 130;     // candidates that get layer/neckwear/headwear tried
+const LAYER_GAIN_FREE = 5; // a layer with no weather/occasion context must raise the score by this much
 const MIN_GAIN = 2;        // an optional item must raise the raw score by this much
 const DAY = 864e5;
 
-const cmpId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+const sigCache = new WeakMap();
+// Tie-breaks use what an item LOOKS like first, and its id only as a last resort, so renaming
+// or re-id-ing a wardrobe never changes which outfits are found.
+const sigOf = (i) => { let v = sigCache.get(i); if (v === undefined) { v = strictSig(i); sigCache.set(i, v); } return v; };
+const cmpId = (a, b) => { const x = sigOf(a); const y = sigOf(b); return x < y ? -1 : x > y ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0; };
 
 function dayMs(s) {
   const t = Date.parse(`${s}T00:00:00Z`);
@@ -118,8 +123,8 @@ export function buildOutfits(items, opts = {}) {
   for (const t of pools.top) {
     for (const b of pools.bottom) pairs.push({ t, b, r: raw({ top: t, bottom: b }, pairCtx) });
   }
-  const sortDesc = (a, b) => b.r - a.r || (a.k < b.k ? -1 : a.k > b.k ? 1 : 0);
-  for (const p of pairs) p.k = `${p.t.id}|${p.b.id}`;
+  const sortDesc = (a, b) => b.r - a.r || (a.sk < b.sk ? -1 : a.sk > b.sk ? 1 : a.k < b.k ? -1 : a.k > b.k ? 1 : 0);
+  for (const p of pairs) { p.k = `${p.t.id}|${p.b.id}`; p.sk = `${sigOf(p.t)}|${sigOf(p.b)}`; }
   pairs.sort(sortDesc);
   const keepPairs = Math.max(PAIR_KEEP, ctx.weather ? 60 : 0, limit * 3);
   pairs.length = Math.min(pairs.length, Math.min(keepPairs, 150));
@@ -129,7 +134,7 @@ export function buildOutfits(items, opts = {}) {
     let bi = null; let br = -Infinity;
     for (const it of pool) {
       const r = raw({ ...base, [slot]: it }, c);
-      if (r > br || (r === br && bi && it.id < bi.id)) { br = r; bi = it; }
+      if (r > br || (r === br && bi && cmpId(it, bi) < 0)) { br = r; bi = it; }
     }
     return { item: bi, r: br };
   };
@@ -153,7 +158,8 @@ export function buildOutfits(items, opts = {}) {
     }
   }
   const keyOf = (sel) => outfitKey(sel);
-  for (const c of cands) c.k = keyOf(c.sel);
+  const skOf = (sel) => Object.keys(sel).sort().map((x) => sigOf(sel[x])).join('|');
+  for (const c of cands) { c.k = keyOf(c.sel); c.sk = skOf(c.sel); }
   cands.sort(sortDesc);
   cands = cands.slice(0, Math.max(CAND_KEEP, limit * 3));
 
@@ -162,17 +168,20 @@ export function buildOutfits(items, opts = {}) {
   const cold = w === 'cold' || w === 'freezing';
   const occ = ctx.occasion;
   const smart = occ === 'work' || occ === 'date' || occ === 'formal';
+  // without weather or a dressy occasion nobody asked for a coat: heavy coats are out, other layers must clearly earn their place
+  const layerPool = w ? pools.layer : pools.layer.filter((l) => (l.warmth || 0) < 3 || l.rain === true);
+  const layerGain = w || smart || ctx.rain ? MIN_GAIN : LAYER_GAIN_FREE;
   for (const c of cands) {
-    if (!locked.layer && pools.layer.length) tryAdd(c, 'layer', pools.layer);
+    if (!locked.layer && layerPool.length) tryAdd(c, 'layer', layerPool, layerGain);
     if (!locked.neckwear && pools.neckwear.length) {
       const pool = pools.neckwear.filter((n) => (n.kind === 'scarf' ? cold : smart && c.sel.top.collared === true));
       if (pool.length) tryAdd(c, 'neckwear', pool);
     }
     if (!locked.headwear && pools.headwear.length && cold) tryAdd(c, 'headwear', pools.headwear);
   }
-  function tryAdd(c, slot, pool) {
+  function tryAdd(c, slot, pool, gain = MIN_GAIN) {
     const b = best(c.sel, slot, pool, ctx);
-    if (b.item && b.r - c.r >= MIN_GAIN) {
+    if (b.item && b.r - c.r >= gain) {
       c.sel = { ...c.sel, [slot]: b.item };
       c.r = raw(c.sel, ctx);
     }
@@ -181,7 +190,7 @@ export function buildOutfits(items, opts = {}) {
   // dedupe and rank
   const uniq = new Map();
   for (const c of cands) {
-    c.k = keyOf(c.sel);
+    c.k = keyOf(c.sel); c.sk = skOf(c.sel);
     if (!uniq.has(c.k) || uniq.get(c.k).r < c.r) uniq.set(c.k, c);
   }
   for (const c of uniq.values()) c.n = c.r; // net raw (recent-wear included) before any diversity adjustment
@@ -210,7 +219,7 @@ export function buildOutfits(items, opts = {}) {
   return out;
 }
 
-const DIV = { pair: 10, item: 2.5, missingRequired: 1000 };
+const DIV = { pair: 10, item: 4, shoes: 12, missingRequired: 1000 };
 
 /**
  * Greedy selection: repeatedly take the candidate with the best score after penalties for what the list
@@ -234,7 +243,7 @@ function diversify(ranked, limit, locked, req, ctx) {
     for (let i = 0; i < pool.length; i++) {
       const c = pool[i];
       let v = c.n - DIV.pair * (pairs.get(c.pk) || 0);
-      for (const s of slots) if (c.sel[s]) v -= DIV.item * (counts.get(looseSig(c.sel[s])) || 0);
+      for (const s of slots) if (c.sel[s]) v -= (s === 'shoes' ? DIV.shoes : DIV.item) * (counts.get(looseSig(c.sel[s])) || 0);
       if (req.rain && !(c.sel.layer && c.sel.layer.rain === true)) v -= DIV.missingRequired;
       if (v > bv) { bv = v; bi = i; }
     }

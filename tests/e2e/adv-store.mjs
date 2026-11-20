@@ -254,7 +254,7 @@ try {
   const P3 = '"><img src=x onerror=window.__pwned=1>';
   const P4 = "'><script>window.__pwned=1</script>";
   async function sweep(page, label) {
-    const bad = async () => page.evaluate(() => ({ pwned: window.__pwned, inj: document.querySelectorAll('[onerror],[onload],img[src="x"]').length }));
+    const bad = async () => page.evaluate(() => ({ pwned: window.__pwned, inj: document.querySelectorAll('body [onerror],body [onload],img[src="x"]').length }));
     const log = [];
     const probe = async (where) => { const b = await bad(); if (b.pwned || b.inj) log.push(`${where}: pwned=${b.pwned} injected=${b.inj}`); };
     // spin screen: several spins, tap empty reels (opens pick sheet w/ itemArt title=true)

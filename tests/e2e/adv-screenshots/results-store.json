@@ -592,14 +592,14 @@
    "id": "C2.big1",
    "name": "20 MB backup (valid + padding) is handled (clear result, < 20 s, no hang)",
    "ok": true,
-   "detail": "accepted 682ms \"Restored 3 items and 2 photos.\"",
+   "detail": "accepted 680ms \"Restored 3 items and 2 photos.\"",
    "shot": ""
   },
   {
    "id": "C2.big2",
    "name": "20 MB truncated file rejected, data intact",
    "ok": true,
-   "detail": "rejected 61ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
+   "detail": "rejected 68ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
    "shot": ""
   },
   {
@@ -610,19 +610,291 @@
    "shot": ""
   },
   {
-   "id": "RUN",
-   "name": "adv-store ran without throwing",
+   "id": "C3a",
+   "name": "XSS via the Add-by-colour form: window.__pwned never set; no injected [onerror]/[onload] nodes (closet, spin, pick sheet, looks, detail, edit sheet, toasts, undo toast)",
    "ok": false,
-   "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('dialog.sheet .slot-btn').filter({ hasText: 'Headwear' })\u001b[22m\n\n    at addByForm (/home/user/Outfits/tests/e2e/adv-store.mjs:304:76)\n    at async file:///home/user/Outfits/tests/e2e/adv-store.mjs:322:5",
+   "detail": "pick-sheet#0: pwned=1 injected=1 | pick-sheet#0: pwned=1 injected=0 | pick-sheet#0: pwned=1 injected=1 | spin#1: pwned=1 injected=0 | pick-sheet#1: pwned=1 injected=1 | pick-sheet#1: pwned=1 injected=0",
+   "shot": "tests/e2e/adv-screenshots/c3-form-closet.png"
+  },
+  {
+   "id": "C3a2",
+   "name": "form-entered hostile names appear in the closet literally, as text",
+   "ok": true,
+   "detail": "not literal: []",
+   "shot": ""
+  },
+  {
+   "id": "C3a3",
+   "name": "reason stickers contain only text nodes (no element children)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C3b0",
+   "name": "hostile-but-well-formed backup is imported (or cleanly rejected)",
+   "ok": true,
+   "detail": "accepted Restored 14 items and 1 photo.",
+   "shot": ""
+  },
+  {
+   "id": "C3b1",
+   "name": "import itself (toast, sheet, settings page) does not execute payloads",
+   "ok": true,
+   "detail": "undefined",
+   "shot": ""
+  },
+  {
+   "id": "C3b",
+   "name": "XSS via import (names, colour hex, leather, pattern, photoId, worn, kind, feedback keys, settings): __pwned never set, nothing injected",
+   "ok": false,
+   "detail": "spin#0: pwned=1 injected=0 | pick-sheet#0: pwned=1 injected=0 | pick-sheet#0: pwned=1 injected=1 | pick-sheet#0: pwned=1 injected=0 | spin#1: pwned=1 injected=2 | pick-sheet#1: pwned=1 injected=2 | pick-sheet#1: pwned=1 injected=3 | pick-sheet#1: pwned=1 injected=2",
+   "shot": "tests/e2e/adv-screenshots/c3-import-closet.png"
+  },
+  {
+   "id": "C3b2",
+   "name": "imported hostile names render literally in the closet",
+   "ok": true,
+   "detail": "not literal: []",
+   "shot": ""
+  },
+  {
+   "id": "C3b3",
+   "name": "colour hex from a backup is validated before being put into SVG markup",
+   "ok": false,
+   "detail": "injected imgs=2",
+   "shot": ""
+  },
+  {
+   "id": "C4.0a",
+   "name": "IndexedDB unavailable (indexedDB getter throws): app boots in < 10 s",
+   "ok": true,
+   "detail": "ready=true 104ms",
+   "shot": ""
+  },
+  {
+   "id": "C4.0b",
+   "name": "... shows the \"won’t save\" warning banner",
+   "ok": true,
+   "detail": "banner=1",
+   "shot": ""
+  },
+  {
+   "id": "C4.0c",
+   "name": "... in-memory sample closet + spin still works",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.0d",
+   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.0e",
+   "name": "... backup download still works from memory",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.0f",
+   "name": "... clear-all in memory mode works and closet shows empty state",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.1a",
+   "name": "IndexedDB unavailable (indexedDB.open throws): app boots in < 10 s",
+   "ok": true,
+   "detail": "ready=true 155ms",
+   "shot": ""
+  },
+  {
+   "id": "C4.1b",
+   "name": "... shows the \"won’t save\" warning banner",
+   "ok": true,
+   "detail": "banner=1",
+   "shot": ""
+  },
+  {
+   "id": "C4.1c",
+   "name": "... in-memory sample closet + spin still works",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.1d",
+   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.1e",
+   "name": "... backup download still works from memory",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.1f",
+   "name": "... clear-all in memory mode works and closet shows empty state",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2a",
+   "name": "IndexedDB unavailable (indexedDB.open fires onerror): app boots in < 10 s",
+   "ok": true,
+   "detail": "ready=true 166ms",
+   "shot": ""
+  },
+  {
+   "id": "C4.2b",
+   "name": "... shows the \"won’t save\" warning banner",
+   "ok": true,
+   "detail": "banner=1",
+   "shot": ""
+  },
+  {
+   "id": "C4.2c",
+   "name": "... in-memory sample closet + spin still works",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2d",
+   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2e",
+   "name": "... backup download still works from memory",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2f",
+   "name": "... clear-all in memory mode works and closet shows empty state",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3a",
+   "name": "IndexedDB unavailable (indexedDB.open never answers (hang)): app boots in < 10 s",
+   "ok": true,
+   "detail": "ready=true 4100ms",
+   "shot": ""
+  },
+  {
+   "id": "C4.3b",
+   "name": "... shows the \"won’t save\" warning banner",
+   "ok": true,
+   "detail": "banner=1",
+   "shot": ""
+  },
+  {
+   "id": "C4.3c",
+   "name": "... in-memory sample closet + spin still works",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3d",
+   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3e",
+   "name": "... backup download still works from memory",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3f",
+   "name": "... clear-all in memory mode works and closet shows empty state",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.q1",
+   "name": "QuotaExceeded on save: user is told (toast) rather than silent failure / unhandled rejection",
+   "ok": false,
+   "detail": "toast= errors=[c4q console] UNHANDLED REJECTION: quota|[c4q pageerror] quota",
    "shot": ""
   },
   {
    "id": "C.errors",
    "name": "no console errors / page errors / unhandled rejections during the whole storage run",
-   "ok": true,
-   "detail": "",
+   "ok": false,
+   "detail": "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (",
    "shot": ""
   }
  ],
- "errors": []
+ "errors": [
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
+  "[c4q console] UNHANDLED REJECTION: quota",
+  "[c4q pageerror] quota"
+ ]
 }
