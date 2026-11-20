@@ -323,6 +323,8 @@ try {
   check('no horizontal overflow @320 (today)', o.sw <= o.cw && o.bw <= o.cw, JSON.stringify(o));
   const st320 = await page.locator('.t-stamp').boundingBox();
   check('stamp visible @320x640 without scrolling', st320 && st320.y + st320.height <= 640 && st320.x >= 0 && st320.x + st320.width <= 320, JSON.stringify(st320));
+  const sh320 = await page.locator('.t-shuffle').boundingBox();
+  check('SHUFFLE visible @320x640', sh320 && sh320.y + sh320.height <= 640 && sh320.y > 0, JSON.stringify(sh320));
   await page.screenshot({ path: `${shots}/18-today-320.png` });
   await page.screenshot({ path: `${shots}/18b-today-320-full.png`, fullPage: true });
   await page.locator('.fm-ctl[data-slot="top"] .fm-swap').click();

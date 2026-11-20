@@ -220,57 +220,57 @@
   {
    "id": "C2.22",
    "name": "import item name is a number (TypeError in makeItem?) (replace): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "rejected \"(partial.name || \"\").trim is not a function\" intact=true",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=1",
    "shot": ""
   },
   {
    "id": "C2.22m",
    "name": "import item name is a number (TypeError in makeItem?) (merge): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "rejected \"(partial.name || \"\").trim is not a function\" intact=true",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=4",
    "shot": ""
   },
   {
    "id": "C2.23",
    "name": "import item name is an object (replace): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "rejected \"(partial.name || \"\").trim is not a function\" intact=true",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=1",
    "shot": ""
   },
   {
    "id": "C2.23m",
    "name": "import item name is an object (merge): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "rejected \"(partial.name || \"\").trim is not a function\" intact=true",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=4",
    "shot": ""
   },
   {
    "id": "C2.24",
    "name": "import item id is boolean true (invalid IndexedDB key) in replace (replace): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "FAILED mid-import msg=\"Failed to execute 'put' on 'IDBObjectStore': Evaluating the object store's key path yielded a value that is not a valid \" dataIntact=false (replace wipes first)",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=1",
    "shot": ""
   },
   {
    "id": "C2.24m",
    "name": "import item id is boolean true (invalid IndexedDB key) in replace (merge): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "FAILED mid-import msg=\"Failed to execute 'put' on 'IDBObjectStore': Evaluating the object store's key path yielded a value that is not a valid \" dataIntact=true (replace wipes first)",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=4",
    "shot": ""
   },
   {
    "id": "C2.25",
    "name": "import item id is an object (replace): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "FAILED mid-import msg=\"Failed to execute 'put' on 'IDBObjectStore': Evaluating the object store's key path yielded a value that is not a valid \" dataIntact=false (replace wipes first)",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=1",
    "shot": ""
   },
   {
    "id": "C2.25m",
    "name": "import item id is an object (merge): rejected cleanly or accepted sanely, never half-applied",
-   "ok": false,
-   "detail": "FAILED mid-import msg=\"Failed to execute 'put' on 'IDBObjectStore': Evaluating the object store's key path yielded a value that is not a valid \" dataIntact=true (replace wipes first)",
+   "ok": true,
+   "detail": "accepted: \"Restored 1 item and 2 photos.\" items=4",
    "shot": ""
   },
   {
@@ -592,14 +592,14 @@
    "id": "C2.big1",
    "name": "20 MB backup (valid + padding) is handled (clear result, < 20 s, no hang)",
    "ok": true,
-   "detail": "accepted 680ms \"Restored 3 items and 2 photos.\"",
+   "detail": "accepted 682ms \"Restored 3 items and 2 photos.\"",
    "shot": ""
   },
   {
    "id": "C2.big2",
    "name": "20 MB truncated file rejected, data intact",
    "ok": true,
-   "detail": "rejected 68ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
+   "detail": "rejected 89ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
    "shot": ""
   },
   {
@@ -612,8 +612,8 @@
   {
    "id": "C3a",
    "name": "XSS via the Add-by-colour form: window.__pwned never set; no injected [onerror]/[onload] nodes (closet, spin, pick sheet, looks, detail, edit sheet, toasts, undo toast)",
-   "ok": false,
-   "detail": "pick-sheet#0: pwned=1 injected=1 | pick-sheet#0: pwned=1 injected=0 | pick-sheet#0: pwned=1 injected=1 | spin#1: pwned=1 injected=0 | pick-sheet#1: pwned=1 injected=1 | pick-sheet#1: pwned=1 injected=0",
+   "ok": true,
+   "detail": "",
    "shot": "tests/e2e/adv-screenshots/c3-form-closet.png"
   },
   {
@@ -647,8 +647,8 @@
   {
    "id": "C3b",
    "name": "XSS via import (names, colour hex, leather, pattern, photoId, worn, kind, feedback keys, settings): __pwned never set, nothing injected",
-   "ok": false,
-   "detail": "spin#0: pwned=1 injected=0 | pick-sheet#0: pwned=1 injected=0 | pick-sheet#0: pwned=1 injected=1 | pick-sheet#0: pwned=1 injected=0 | spin#1: pwned=1 injected=2 | pick-sheet#1: pwned=1 injected=2 | pick-sheet#1: pwned=1 injected=3 | pick-sheet#1: pwned=1 injected=2",
+   "ok": true,
+   "detail": "",
    "shot": "tests/e2e/adv-screenshots/c3-import-closet.png"
   },
   {
@@ -661,15 +661,15 @@
   {
    "id": "C3b3",
    "name": "colour hex from a backup is validated before being put into SVG markup",
-   "ok": false,
-   "detail": "injected imgs=2",
+   "ok": true,
+   "detail": "injected imgs=0",
    "shot": ""
   },
   {
    "id": "C4.0a",
    "name": "IndexedDB unavailable (indexedDB getter throws): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 104ms",
+   "detail": "ready=true 148ms",
    "shot": ""
   },
   {
@@ -682,7 +682,7 @@
   {
    "id": "C4.0c",
    "name": "... in-memory sample closet + spin still works",
-   "ok": true,
+   "ok": false,
    "detail": "",
    "shot": ""
   },
@@ -711,7 +711,7 @@
    "id": "C4.1a",
    "name": "IndexedDB unavailable (indexedDB.open throws): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 155ms",
+   "detail": "ready=true 192ms",
    "shot": ""
   },
   {
@@ -722,179 +722,19 @@
    "shot": ""
   },
   {
-   "id": "C4.1c",
-   "name": "... in-memory sample closet + spin still works",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.1d",
-   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.1e",
-   "name": "... backup download still works from memory",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.1f",
-   "name": "... clear-all in memory mode works and closet shows empty state",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.2a",
-   "name": "IndexedDB unavailable (indexedDB.open fires onerror): app boots in < 10 s",
-   "ok": true,
-   "detail": "ready=true 166ms",
-   "shot": ""
-  },
-  {
-   "id": "C4.2b",
-   "name": "... shows the \"won’t save\" warning banner",
-   "ok": true,
-   "detail": "banner=1",
-   "shot": ""
-  },
-  {
-   "id": "C4.2c",
-   "name": "... in-memory sample closet + spin still works",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.2d",
-   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.2e",
-   "name": "... backup download still works from memory",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.2f",
-   "name": "... clear-all in memory mode works and closet shows empty state",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.3a",
-   "name": "IndexedDB unavailable (indexedDB.open never answers (hang)): app boots in < 10 s",
-   "ok": true,
-   "detail": "ready=true 4100ms",
-   "shot": ""
-  },
-  {
-   "id": "C4.3b",
-   "name": "... shows the \"won’t save\" warning banner",
-   "ok": true,
-   "detail": "banner=1",
-   "shot": ""
-  },
-  {
-   "id": "C4.3c",
-   "name": "... in-memory sample closet + spin still works",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.3d",
-   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.3e",
-   "name": "... backup download still works from memory",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.3f",
-   "name": "... clear-all in memory mode works and closet shows empty state",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "C4.q1",
-   "name": "QuotaExceeded on save: user is told (toast) rather than silent failure / unhandled rejection",
+   "id": "RUN",
+   "name": "adv-store ran without throwing",
    "ok": false,
-   "detail": "toast= errors=[c4q console] UNHANDLED REJECTION: quota|[c4q pageerror] quota",
+   "detail": "locator.count: Target page, context or browser has been closed\n    at /home/user/Outfits/tests/e2e/adv-store.mjs:394:54",
    "shot": ""
   },
   {
    "id": "C.errors",
    "name": "no console errors / page errors / unhandled rejections during the whole storage run",
-   "ok": false,
-   "detail": "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (File not found) | [c3form console] Failed to load resource: the server responded with a status of 404 (",
+   "ok": true,
+   "detail": "",
    "shot": ""
   }
  ],
- "errors": [
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3form console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c3imp console] Failed to load resource: the server responded with a status of 404 (File not found)",
-  "[c4q console] UNHANDLED REJECTION: quota",
-  "[c4q pageerror] quota"
- ]
+ "errors": []
 }

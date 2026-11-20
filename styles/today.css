@@ -304,3 +304,7 @@
   .fm-piece, .t-fill, .gu-top, .gu-line { transition: none !important; }
   .t-shuffle:disabled .t-shuffle-ico { animation: none; }
 }
+
+.t-links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 14px; }
+.t-links .btn { text-decoration: none; color: var(--text); }
+.sw-row, .sw-text, .bt-why li, .bt-card { min-width: 0; overflow-wrap: anywhere; }

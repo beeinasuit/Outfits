@@ -122,9 +122,12 @@ export function mount(root, { navigate }) {
         none ? h('button', { class: 'btn btn-ghost', type: 'button', onclick: async () => { await loadDemo(); toast('Sample closet loaded.'); } }, 'Try a sample closet') : null)));
   }
 
+  let loading = false;
   async function next() {
-    if (!alive) return;
-    ctx = await getContext();
+    if (!alive || loading) return;
+    loading = true;
+    voted = true;
+    try { ctx = await getContext(); } finally { loading = false; }
     if (!alive) return;
     voted = false;
     const pair = nextPair(ctx);

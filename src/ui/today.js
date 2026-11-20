@@ -21,6 +21,7 @@ const signed = (n) => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '±0');
 export function mount(root, { navigate }) {
   let alive = true;
   let busy = false;
+  let sheetOpen = false;
   let els = {};
   let board = null;
   let picker = null;
@@ -171,12 +172,16 @@ export function mount(root, { navigate }) {
   }
 
   async function swapSlot(slot) {
-    if (busy || !S.current) return;
-    const ctx = await ctxNow();
-    openSwap(slot, S.current.items, ctx, applyChange);
+    if (busy || sheetOpen || !S.current) return;
+    sheetOpen = true;
+    try {
+      const ctx = await ctxNow();
+      const sh = openSwap(slot, S.current.items, ctx, applyChange);
+      const done = sh.el; new MutationObserver((_, ob) => { if (!done.isConnected) { sheetOpen = false; ob.disconnect(); } }).observe(document.body, { childList: true });
+    } catch (e) { sheetOpen = false; throw e; }
   }
   async function removeSlot(slot) {
-    if (busy || !S.current) return;
+    if (busy || sheetOpen || !S.current) return;
     const ctx = await ctxNow();
     const row = rankForSlot(data.items, S.current.items, slot, ctx).find((r) => r.item === null);
     if (!row) return;
@@ -196,9 +201,13 @@ export function mount(root, { navigate }) {
   }
 
   async function improve() {
-    if (busy || !S.current) return;
-    const ctx = await ctxNow();
-    openGlowUp(S.current.items, ctx, applyChange);
+    if (busy || sheetOpen || !S.current) return;
+    sheetOpen = true;
+    try {
+      const ctx = await ctxNow();
+      const sh = openGlowUp(S.current.items, ctx, applyChange);
+      const done = sh.el; new MutationObserver((_, ob) => { if (!done.isConnected) { sheetOpen = false; ob.disconnect(); } }).observe(document.body, { childList: true });
+    } catch (e) { sheetOpen = false; throw e; }
   }
 
   function like(val) {
@@ -270,6 +279,9 @@ export function mount(root, { navigate }) {
       score, stage,
       h('div', { class: 't-dock' }, shuffleBtn),
       h('div', { class: 't-actions' }, h('div', { class: 'feel-row t-feel' }, dislike, wear_, likeB), h('div', { class: 't-extra' }, improveBtn, battle)),
+      h('div', { class: 't-links' },
+        !(data.settings.profile && data.settings.profile.cutoutId) ? h('a', { class: 'btn btn-ghost btn-small', href: '#/profile' }, '🎨 Find your colours') : null,
+        h('a', { class: 'btn btn-ghost btn-small', href: '#/plan' }, '🗓️ Plan the week')),
       lockHint, h('h2', { class: 't-why-title' }, 'Why it works'), stickers,
       shakeChip ? h('div', { class: 'center' }, shakeChip) : null);
     els = { score, meter, num, fill, stamp, stickers, stage, shuffle: shuffleBtn, like: likeB, dislike, wear: wear_, improve: improveBtn, battle, note, lockHint, wx: wxChips };
@@ -340,6 +352,7 @@ export function mount(root, { navigate }) {
   api.update = (what) => {
     if (!alive) return;
     if (what === 'items') {
+      S.sig = '';
       if (stateKind() !== kind) { S.sig = ''; render(); return; }
       if (kind !== 'ok' || busy) return;
       if (!S.current) return;
