@@ -1,0 +1,266 @@
+{
+ "lowest": [
+  {
+   "screen": "confirm",
+   "sel": "dialog .btn",
+   "text": "Delete it all",
+   "ratio": 2.29,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile small",
+   "text": "Pick one or many",
+   "ratio": 4.68,
+   "size": "13.3333px",
+   "weight": "700",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile small",
+   "text": "Camera",
+   "ratio": 4.86,
+   "size": "13.3333px",
+   "weight": "700",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "onboarding",
+   "sel": ".onboard .btn",
+   "text": "Next",
+   "ratio": 5.86,
+   "size": "24px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "closet",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile b",
+   "text": "Take a photo",
+   "ratio": 5.86,
+   "size": "19px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "settings",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "empty",
+   "sel": ".empty .btn",
+   "text": "Add clothes",
+   "ratio": 5.86,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .btn",
+   "text": "Delete",
+   "ratio": 5.87,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(255, 122, 94)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "settings",
+   "sel": ".btn",
+   "text": "Clear all data",
+   "ratio": 5.87,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(255, 122, 94)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".btn",
+   "text": "Improve this look",
+   "ratio": 5.88,
+   "size": "14px",
+   "weight": "800",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .btn",
+   "text": "Save changes",
+   "ratio": 5.88,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile b",
+   "text": "From library",
+   "ratio": 5.88,
+   "size": "19px",
+   "weight": "800",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".look-score b",
+   "text": "85",
+   "ratio": 5.88,
+   "size": "18px",
+   "weight": "800",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".look-score b",
+   "text": "84",
+   "ratio": 5.88,
+   "size": "18px",
+   "weight": "800",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "settings",
+   "sel": ".btn",
+   "text": "Find my colours",
+   "ratio": 5.88,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "settings",
+   "sel": ".btn",
+   "text": "Download backup",
+   "ratio": 5.88,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".t-meter-label",
+   "text": "FIT SCORE",
+   "ratio": 6.86,
+   "size": "10px",
+   "weight": "800",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .toggle-text small",
+   "text": "Counts when it’s wet out",
+   "ratio": 6.86,
+   "size": "12px",
+   "weight": "600",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".look-score small",
+   "text": "Certified fit",
+   "ratio": 6.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".look-score small",
+   "text": "Certified fit",
+   "ratio": 6.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".look-score small",
+   "text": "Certified fit",
+   "ratio": 6.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".look-score small",
+   "text": "Certified fit",
+   "ratio": 6.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  }
+ ],
+ "failures": [
+  {
+   "screen": "confirm",
+   "sel": "dialog .btn",
+   "text": "Delete it all",
+   "ratio": 2.29,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  }
+ ]
+}

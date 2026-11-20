@@ -1,0 +1,40 @@
+{
+ "results": [
+  {
+   "id": "N18a",
+   "name": "60 s seeded monkey across all 8 routes (727 actions): zero console errors / page errors / unhandled rejections",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N18b",
+   "name": "monkey: no modal survived Escape x2; no XSS",
+   "ok": false,
+   "detail": "stuck=1 Add hat@#/today after: tap button \"Undo\" > tap a \"Today\" > escape x2 > tap button \"Add a hat\"",
+   "shot": ""
+  },
+  {
+   "id": "N20a",
+   "name": "every interactive element on the new screens has an accessible name",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N20b",
+   "name": "every interactive element on the new screens is >= 44x44 px",
+   "ok": false,
+   "detail": "18 undersized: today-toolbar: button.t-bar-btn primary[Change] 143x41 | today-toolbar: button.t-bar-btn[🔓 Lock] 143x41 | occasion-editor: button.occ-emoji-pick[Use 🎬] 40x40 | occasion-editor: button.occ-emoji-pick[Use 🎓] 40x40 | occasion-editor: button.occ-emoji-pick[Use 🍽️] 40x40 | occasion-editor: button.occ-emoji-pick[Use 🏋️] 40x40 | occasion-editor: button.occ-emoji-pick[Use 🎸] 40x40 | occasion-editor: button.occ-emoji-pick[Use 🏖️] 40x40 | occasion-editor: button.occ-emoji-pick[Use ⛷️] 40x40 | occasion-editor: button.occ-emoji-pick[Use 🎂] 40x40 | occasion-editor: button.occ-emoji-p",
+   "shot": ""
+  },
+  {
+   "id": "N.errors",
+   "name": "zero console errors / page errors / unhandled rejections across the whole board run",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  }
+ ],
+ "errors": []
+}

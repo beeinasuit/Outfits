@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Fit Machine</title>
+  <meta name="description" content="Your clothes, styled. Outfits that actually look good together — and on you. Private, offline, free.">
+  <meta name="theme-color" content="#f7f0e1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Fit Machine">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Display font is optional: loads non-blocking and the CSS falls back to system rounded fonts when offline. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="styles/app.css">
+  <link rel="stylesheet" href="styles/today.css">
+  <link rel="stylesheet" href="styles/extra.css">
+</head>
+<body>
+  <a class="skip" href="#screen">Skip to content</a>
+  <div id="banner"></div>
+  <header class="topbar">
+    <a class="brand" href="#/today" aria-label="Fit Machine, home">
+      <svg class="brand-mark" viewBox="0 0 110 110" aria-hidden="true"><path d="M55 46V38C55 30 66 28 66 19C66 11 56 7 49 13" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><path d="M55 46L98 84Q103 93 92 96H18Q7 93 12 84Z" fill="#ffc933" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><circle cx="42" cy="75" r="5" fill="currentColor"/><circle cx="68" cy="75" r="5" fill="currentColor"/></svg>
+      <span class="brand-name">Fit <b>Machine</b></span>
+    </a>
+    <a class="icon-btn gear" data-route="settings" href="#/settings" aria-label="Settings">
+      <svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>
+    </a>
+  </header>
+  <main id="screen" tabindex="-1"><noscript>Fit Machine needs JavaScript to run.</noscript></main>
+  <nav class="tabbar" aria-label="Main">
+    <div class="tabbar-in">
+      <a class="tab" data-route="today" href="#/today"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg><span>Today</span></a>
+      <a class="tab" data-route="closet" href="#/closet"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9V7.5a2.2 2.2 0 1 0-2.2-2.2M12 9 3.5 15.5a1.5 1.5 0 0 0 1 2.7h15a1.5 1.5 0 0 0 1-2.7L12 9Z"/></svg><span>Closet</span></a>
+      <a class="tab tab-snap" data-route="snap" href="#/snap" aria-label="Snap: add clothes"><span class="snap-fab"><svg class="ico" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="t">Snap</span></a>
+      <a class="tab" data-route="looks" href="#/looks"><svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4ZM5 17a3 3 0 0 1 3-3h10"/></svg><span>Looks</span></a>
+    </div>
+  </nav>
+  <div id="toasts"></div>
+  <div id="live" class="sr-only" aria-live="polite" role="status"></div>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

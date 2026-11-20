@@ -1,0 +1,256 @@
+{
+ "samples": 328,
+ "lowest": [
+  {
+   "screen": "battle/light",
+   "sel": ".bt-vs",
+   "text": "VS",
+   "ratio": 3.1,
+   "size": "19px",
+   "weight": "900",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "battle/dark",
+   "sel": ".bt-vs",
+   "text": "VS",
+   "ratio": 3.1,
+   "size": "19px",
+   "weight": "900",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "battle-voted/light",
+   "sel": ".bt-stamp",
+   "text": "YOUR PICK",
+   "ratio": 5.38,
+   "size": "13px",
+   "weight": "900",
+   "fg": "rgb(6, 112, 80)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "today/light",
+   "sel": ".t-hint",
+   "text": "Tap any piece to change, lock ",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "today/light",
+   "sel": ".hint",
+   "text": "Tap any piece to change, lock ",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "swap-suggest/light",
+   "sel": "dialog .sw-intro",
+   "text": "Now: Blue stripe shirt",
+   "ratio": 5.39,
+   "size": "14px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "swap-suggest/light",
+   "sel": "dialog .sw-text small",
+   "text": "Brown belt matches your brown ",
+   "ratio": 5.39,
+   "size": "12px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "swap-pick/light",
+   "sel": "dialog .sw-tile small",
+   "text": "on now",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "800",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "battle/light",
+   "sel": ".bt-count",
+   "text": "Battle 1",
+   "ratio": 5.39,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "battle/light",
+   "sel": ".hint",
+   "text": "Two strong looks with differen",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "battle-voted/light",
+   "sel": ".bt-verdict",
+   "text": "Looking sharp",
+   "ratio": 5.39,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "battle-voted/light",
+   "sel": ".bt-verdict",
+   "text": "Looking sharp",
+   "ratio": 5.39,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "battle-voted/light",
+   "sel": ".bt-note",
+   "text": "Plot twist: I scored the other",
+   "ratio": 5.39,
+   "size": "16px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "plan/light",
+   "sel": ".plan-date",
+   "text": "Nov 20",
+   "ratio": 5.39,
+   "size": "12.5px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "plan/light",
+   "sel": ".hint",
+   "text": "Each day gets its own occasion",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "drape/light",
+   "sel": ".hint",
+   "text": "Look at your face and skin, no",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "drape/light",
+   "sel": ".page-sub",
+   "text": "Round 1 of 6",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "today/light",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "battle-voted/light",
+   "sel": ".btn",
+   "text": "Next battle",
+   "ratio": 5.86,
+   "size": "24px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "plan/light",
+   "sel": ".btn",
+   "text": "Plan whole week",
+   "ratio": 5.86,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "profile/light",
+   "sel": ".btn",
+   "text": "Start the drape test",
+   "ratio": 5.86,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "today/dark",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "battle-voted/dark",
+   "sel": ".btn",
+   "text": "Next battle",
+   "ratio": 5.86,
+   "size": "24px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "plan/dark",
+   "sel": ".btn",
+   "text": "Plan whole week",
+   "ratio": 5.86,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "profile/dark",
+   "sel": ".btn",
+   "text": "Start the drape test",
+   "ratio": 5.86,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  }
+ ],
+ "failures": []
+}

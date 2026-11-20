@@ -1,0 +1,23 @@
+{
+ "noName": [],
+ "small": [
+  "today-toolbar: button.t-bar-btn primary[Change] 143x41",
+  "today-toolbar: button.t-bar-btn[🔓 Lock] 143x41",
+  "occasion-editor: button.occ-emoji-pick[Use 🎬] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🎓] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🍽️] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🏋️] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🎸] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🏖️] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use ⛷️] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🎂] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🧳] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🐶] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use ☕] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🎨] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 📚] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🏕️] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 💃] 40x40",
+  "occasion-editor: button.occ-emoji-pick[Use 🛍️] 40x40"
+ ]
+}

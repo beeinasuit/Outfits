@@ -1,0 +1,266 @@
+{
+ "lowest": [
+  {
+   "screen": "confirm",
+   "sel": "dialog .btn",
+   "text": "Delete it all",
+   "ratio": 2.29,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile small",
+   "text": "Pick one or many",
+   "ratio": 4.68,
+   "size": "13.3333px",
+   "weight": "700",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile small",
+   "text": "Camera",
+   "ratio": 4.86,
+   "size": "13.3333px",
+   "weight": "700",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "onboarding",
+   "sel": ".onboard p",
+   "text": "It lays your real clothes out ",
+   "ratio": 5.39,
+   "size": "17px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".hint",
+   "text": "Tap any piece to change, lock ",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".t-hint",
+   "text": "Tap any piece to change, lock ",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "closet",
+   "sel": ".page-sub",
+   "text": "20 pieces",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .edit-meta small",
+   "text": "Business · worn 0×",
+   "ratio": 5.39,
+   "size": "13.3333px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .edit-meta small",
+   "text": "0 wears since last wash",
+   "ratio": 5.39,
+   "size": "13.3333px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Lounge",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Casual",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Smart casual",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Business",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Formal",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".page-sub",
+   "text": "One photo can hold a whole out",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".page-sub",
+   "text": "Your best combinations",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Top",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Belt",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Bottom",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Shoes",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-score",
+   "text": "91/100",
+   "ratio": 5.39,
+   "size": "14px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "confirm",
+   "sel": "dialog .confirm-body",
+   "text": "This permanently deletes every",
+   "ratio": 5.39,
+   "size": "16px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "empty",
+   "sel": ".empty p",
+   "text": "Snap a few of your clothes, or",
+   "ratio": 5.39,
+   "size": "16px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "onboarding",
+   "sel": ".onboard .btn",
+   "text": "Next",
+   "ratio": 5.86,
+   "size": "24px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  }
+ ],
+ "failures": [
+  {
+   "screen": "confirm",
+   "sel": "dialog .btn",
+   "text": "Delete it all",
+   "ratio": 2.29,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  }
+ ]
+}
