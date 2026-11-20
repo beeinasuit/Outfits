@@ -112,6 +112,38 @@ export const PATTERNS = ['solid', 'stripe', 'check', 'plaid', 'houndstooth', 'fl
 /** "Busy" patterns: two of these in one outfit usually clash. */
 export const BUSY_PATTERNS = ['plaid', 'floral', 'graphic', 'print', 'camo', 'houndstooth'];
 
+/**
+ * Wears before an item goes to the hamper automatically (when auto-hamper is on).
+ * 0 = never needs washing (belts, shoes, hats, ties...). Per-kind overrides beat per-slot defaults.
+ */
+export const WEARS_BEFORE_WASH = {
+  slot: { top: 2, bottom: 4, layer: 10, shoes: 0, belt: 0, neckwear: 0, headwear: 0, extra: 0 },
+  kind: {
+    't-shirt': 1, 'graphic tee': 1, 'tank top': 1, 'polo': 1,
+    'dress shirt': 1, 'button-down': 2, 'oxford': 2, 'flannel': 3, 'henley': 2,
+    'sweater': 3, 'hoodie': 3, 'sweatshirt': 3, 'turtleneck': 2,
+    'shorts': 2, 'athletic shorts': 1, 'joggers': 3, 'sweatpants': 3,
+    'socks': 1, 'scarf': 0,
+  },
+};
+
+export function defaultWearsBeforeWash(slot, kind) {
+  if (kind in WEARS_BEFORE_WASH.kind) return WEARS_BEFORE_WASH.kind[kind];
+  return WEARS_BEFORE_WASH.slot[slot] ?? 0;
+}
+
+/** Wears since the item was last washed (counts worn[] dates after lastWashed). */
+export function wearsSinceWash(item) {
+  const since = item?.lastWashed || '';
+  return (item?.worn || []).filter((d) => d > since).length;
+}
+
+/** True when auto-hamper should send this item to the wash. */
+export function needsWash(item) {
+  const limit = item?.wearsBeforeWash ?? 0;
+  return limit > 0 && wearsSinceWash(item) >= limit;
+}
+
 /** Dress level scale used everywhere. */
 export const FORMALITY = { 1: 'Lounge', 2: 'Casual', 3: 'Smart casual', 4: 'Business', 5: 'Formal' };
 
@@ -194,6 +226,8 @@ export const COLOR_FAMILIES = {
  * @property {boolean} available   false = in the laundry / unavailable; never suggested
  * @property {string|null} photoId key of the photo blob in storage (null for photo-less items)
  * @property {string[]} worn       ISO dates (YYYY-MM-DD) the item was worn, newest last
+ * @property {string|null} lastWashed  ISO date of the last wash/laundry day; wears after it count toward the hamper
+ * @property {number}  wearsBeforeWash 0 = never auto-hamper; else wears until it goes to the hamper
  * @property {number}  createdAt   epoch ms
  */
 
@@ -257,6 +291,8 @@ export function makeItem(partial = {}) {
     available: partial.available !== false,
     photoId: partial.photoId || null,
     worn: Array.isArray(partial.worn) ? partial.worn.filter((s) => typeof s === 'string') : [],
+    lastWashed: typeof partial.lastWashed === 'string' ? partial.lastWashed : null,
+    wearsBeforeWash: clamp(partial.wearsBeforeWash, 0, 30, defaultWearsBeforeWash(slot, kind)),
     createdAt: Number.isFinite(partial.createdAt) ? partial.createdAt : Date.now(),
   };
 }

@@ -163,3 +163,12 @@ Outfits → `listItems` → `buildOutfits(items, {occasion, weather, locks, feed
 
 A tiny serverless proxy holding the API key, calling Claude Haiku 5.5 to label crops (kind, pattern, colours, leather tone).
 The review form already has every field the AI would fill, so v2 only adds an "auto-fill" step.
+
+## Laundry
+
+- `item.available === false` means "in the hamper": never suggested.
+- **Auto-hamper** (setting, default on): "Wearing it!" appends today to `worn[]` (once per day per item), then any item where
+  `needsWash(item)` is true gets `available = false`. Limits come from `item.wearsBeforeWash` (defaults per kind/slot in
+  `WEARS_BEFORE_WASH`; 0 = never, e.g. belts and shoes), editable per item.
+- **Laundry day** button: every item gets `available = true` and `lastWashed = today`, so wear counts reset.
+- Manual per-item toggle stays; manually washing one item also sets its `lastWashed`.
