@@ -1,0 +1,68 @@
+{
+ "results": [
+  {
+   "id": "D4a",
+   "name": "Spin screen switches to the empty state when the closet is emptied underneath it",
+   "ok": true,
+   "detail": "empty=1",
+   "shot": ""
+  },
+  {
+   "id": "D4.spin",
+   "name": "empty closet: spin renders something sensible, no overflow",
+   "ok": true,
+   "detail": "len=198 overflow=[]",
+   "shot": ""
+  },
+  {
+   "id": "D4.closet",
+   "name": "empty closet: closet renders something sensible, no overflow",
+   "ok": true,
+   "detail": "len=163 overflow=[]",
+   "shot": ""
+  },
+  {
+   "id": "D4.snap",
+   "name": "empty closet: snap renders something sensible, no overflow",
+   "ok": true,
+   "detail": "len=291 overflow=[]",
+   "shot": ""
+  },
+  {
+   "id": "D4.looks",
+   "name": "empty closet: looks renders something sensible, no overflow",
+   "ok": true,
+   "detail": "len=158 overflow=[]",
+   "shot": ""
+  },
+  {
+   "id": "D4.settings",
+   "name": "empty closet: settings renders something sensible, no overflow",
+   "ok": true,
+   "detail": "len=980 overflow=[]",
+   "shot": ""
+  },
+  {
+   "id": "D4b",
+   "name": "after wiping and re-loading the sample closet, the machine spins normally (no stale S.current/locks)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "D4c",
+   "name": "deleting every item one by one via the edit sheet ends on the empty closet state",
+   "ok": true,
+   "detail": "deleted=20",
+   "shot": ""
+  },
+  {
+   "id": "D.errors",
+   "name": "zero console errors / page errors / unhandled rejections across the whole UI run",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  }
+ ],
+ "errors": []
+}

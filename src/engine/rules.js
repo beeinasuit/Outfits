@@ -20,7 +20,7 @@ export const WEIGHTS = {
   pattern: { twoBusy: -14, extraBusy: -6, busyPlusLines: -5, linesClash: -6, single: 1, graphicFormal: -8 },
   statement: { each: -6 },
   formality: { close: 3, shoesAligned: 2, spread2: -10, spread3: -20, shoes2: -9, shoes3: -14 },
-  occasion: { perLevel: -6, cap: -36, fits: 4, avoidKind: -14,
+  occasion: { perLevel: -8, cap: -48, fits: 4, avoidKind: -14,
     preferFamily: 2, preferCap: 4, wantKind: 2.5, wantCap: 5,
     avoidFamilyNear: -14, avoidFamilyFar: -5, avoidFamilyCap: -24,
     mutedLoud: -8, mutedBusy: -6, mutedCap: -16, missingLayer: -8, hat: -12 },
@@ -351,7 +351,7 @@ export function occasionRules(P) {
       else if (BUSY.has(patternOf(i))) { muted += Wo.mutedBusy; out.push(R(`${cap(nm(i))} is too busy a pattern for ${phrase}.`, Wo.mutedBusy, 'occasion-muted')); }
     }
   }
-  if (occ.wantLayer && !P.layer) out.push(R(`A blazer or jacket is expected for ${phrase}.`, Wo.missingLayer, 'occasion-layer'));
+  if (occ.wantLayer && !P.layer) out.push(R(`A smart layer is expected for ${phrase}.`, Wo.missingLayer, 'occasion-layer'));
   if (occ.noHeadwear && P.headwear) out.push(R(`Leave the ${P.headwear.kind} at home for ${phrase}.`, Wo.hat, 'occasion-hat'));
   return out;
 }

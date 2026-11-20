@@ -1,0 +1,306 @@
+{
+ "lowest": [
+  {
+   "screen": "confirm",
+   "sel": "dialog .btn",
+   "text": "Delete it all",
+   "ratio": 2.29,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .stamp",
+   "text": "CERTIFIED FIT",
+   "ratio": 3.85,
+   "size": "17px",
+   "weight": "900",
+   "fg": "rgb(7, 138, 94)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".stamp",
+   "text": "CERTIFIED FIT",
+   "ratio": 4.2,
+   "size": "17px",
+   "weight": "900",
+   "fg": "rgb(7, 138, 94)",
+   "bg": "rgb(255,250,240)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .btn",
+   "text": "Delete",
+   "ratio": 4.41,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(217, 58, 28)",
+   "bg": "rgb(255,250,240)"
+  },
+  {
+   "screen": "settings",
+   "sel": ".btn",
+   "text": "Clear all data",
+   "ratio": 4.41,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(217, 58, 28)",
+   "bg": "rgb(255,250,240)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile small",
+   "text": "Pick one or many",
+   "ratio": 4.68,
+   "size": "13.3333px",
+   "weight": "700",
+   "fg": "rgb(255, 255, 255)",
+   "bg": "rgb(47,75,255)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".big-tile small",
+   "text": "Camera",
+   "ratio": 4.86,
+   "size": "13.3333px",
+   "weight": "700",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  },
+  {
+   "screen": "onboarding",
+   "sel": ".onboard p",
+   "text": "A slot machine for your wardro",
+   "ratio": 5.39,
+   "size": "17px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".hint",
+   "text": "Tap a reel to lock it. Spins w",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".lock-hint",
+   "text": "Tap a reel to lock it. Spins w",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "closet",
+   "sel": ".page-sub",
+   "text": "20 pieces",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .edit-meta small",
+   "text": "Business · worn 0×",
+   "ratio": 5.39,
+   "size": "13.3333px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Lounge",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Casual",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Smart casual",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Business",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .range-ticks span",
+   "text": "Formal",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "snap",
+   "sel": ".page-sub",
+   "text": "One photo can hold a whole out",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "looks",
+   "sel": ".page-sub",
+   "text": "Your best combinations",
+   "ratio": 5.39,
+   "size": "13px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Top",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Belt",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Bottom",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-list small",
+   "text": "Shoes",
+   "ratio": 5.39,
+   "size": "10px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .detail-score",
+   "text": "90/100",
+   "ratio": 5.39,
+   "size": "14px",
+   "weight": "700",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "confirm",
+   "sel": "dialog .confirm-body",
+   "text": "This permanently deletes every",
+   "ratio": 5.39,
+   "size": "16px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  }
+ ],
+ "failures": [
+  {
+   "screen": "spin",
+   "sel": ".stamp",
+   "text": "CERTIFIED FIT",
+   "ratio": 4.2,
+   "size": "17px",
+   "weight": "900",
+   "fg": "rgb(7, 138, 94)",
+   "bg": "rgb(255,250,240)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .btn",
+   "text": "Delete",
+   "ratio": 4.41,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(217, 58, 28)",
+   "bg": "rgb(255,250,240)"
+  },
+  {
+   "screen": "look-detail",
+   "sel": "dialog .stamp",
+   "text": "CERTIFIED FIT",
+   "ratio": 3.85,
+   "size": "17px",
+   "weight": "900",
+   "fg": "rgb(7, 138, 94)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "settings",
+   "sel": ".btn",
+   "text": "Clear all data",
+   "ratio": 4.41,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(217, 58, 28)",
+   "bg": "rgb(255,250,240)"
+  },
+  {
+   "screen": "confirm",
+   "sel": "dialog .btn",
+   "text": "Delete it all",
+   "ratio": 2.29,
+   "size": "16px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  }
+ ]
+}

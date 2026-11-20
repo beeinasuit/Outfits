@@ -369,3 +369,67 @@ export function gapAnalysis(items, opts = {}) {
     return out;
   });
 }
+
+// ---------------------------------------------------------------------------
+// rankForSlot: "swap one item"
+// ---------------------------------------------------------------------------
+
+const OPTIONAL_SLOTS = new Set(['layer', 'neckwear', 'headwear', 'extra', 'belt']);
+
+/**
+ * Rank every available item for `slot` as a replacement in `outfitItems` (other slots held fixed).
+ * Optional/conditional slots also get a `null` ("none") option. Swapping the bottom manages the belt:
+ * a loopless bottom drops it, a bottom with loops and no belt gets the best available belt.
+ * @returns {Array<{ item: Object|null, items: Object, score: number, delta: number, reasons: Array }>} best first
+ */
+export function rankForSlot(allItems, outfitItems, slot, ctx = {}) {
+  const c = ctx && typeof ctx === 'object' ? ctx : {};
+  const cur = outfitItems && typeof outfitItems === 'object' ? outfitItems : {};
+  if (!SLOTS.includes(slot)) return [];
+  const avail = (Array.isArray(allItems) ? allItems : []).filter((i) => i && typeof i === 'object' && i.id && i.slot === slot && i.available !== false);
+  const belts = (Array.isArray(allItems) ? allItems : []).filter((i) => i && i.id && i.slot === 'belt' && i.available !== false);
+  const sctx = { occasion: c.occasion || 'any', weather: c.weather || null, rain: !!c.rain, feedback: c.feedback, profile: c.profile,
+    occasionDef: c.occasionDef, taste: c.taste, beltAvailable: belts.length > 0 };
+  const { penalty } = recentPenalty(c);
+  const evalSel = (sel) => {
+    const res = rawScore(sel, sctx);
+    let r = res.raw;
+    const reasons = res.reasons.slice();
+    const pen = penalty(sel);
+    if (pen > 0) { r -= pen; reasons.push({ text: 'Some of these were worn recently.', delta: -Math.round(pen * 10) / 10, tag: 'recently-worn' }); }
+    return { r, score: squash(r), reasons: finalizeReasons(reasons, 6) };
+  };
+  const bestBelt = (sel) => {
+    let bi = null; let br = -Infinity;
+    for (const b of belts.slice().sort(cmpId)) {
+      const r = rawScore({ ...sel, belt: b }, sctx).raw;
+      if (r > br) { br = r; bi = b; }
+    }
+    return bi;
+  };
+  const curEval = evalSel(cur);
+  const curItem = cur[slot] || null;
+  const options = avail.slice().sort(cmpId);
+  const seen = new Set(options.map((i) => i.id));
+  if (curItem && curItem.id && !seen.has(curItem.id) && curItem.available !== false) options.unshift(curItem);
+  const rows = [];
+  const candidates = options.concat(OPTIONAL_SLOTS.has(slot) ? [null] : []);
+  for (const it of candidates) {
+    let sel;
+    if ((it === null && !curItem) || (it && curItem && it.id === curItem.id)) sel = { ...cur };
+    else {
+      sel = { ...cur };
+      if (it) sel[slot] = it; else delete sel[slot];
+      if (slot === 'bottom' && it) {
+        if (it.beltLoops !== true) delete sel.belt;
+        else if (!sel.belt) { const b = bestBelt(sel); if (b) sel.belt = b; }
+      }
+    }
+    const e = it && curItem && it.id === curItem.id || (it === null && !curItem) ? curEval : evalSel(sel);
+    rows.push({ item: it, items: sel, score: e.score, delta: e.score - curEval.score, reasons: e.reasons, _r: e.r });
+  }
+  const idOf = (r) => (r.item ? String(r.item.id) : '');
+  rows.sort((a, b) => b.score - a.score || b._r - a._r || (idOf(a) < idOf(b) ? -1 : idOf(a) > idOf(b) ? 1 : 0));
+  for (const r of rows) delete r._r;
+  return rows;
+}
