@@ -592,14 +592,14 @@
    "id": "C2.big1",
    "name": "20 MB backup (valid + padding) is handled (clear result, < 20 s, no hang)",
    "ok": true,
-   "detail": "accepted 707ms \"Restored 3 items and 2 photos.\"",
+   "detail": "accepted 691ms \"Restored 3 items and 2 photos.\"",
    "shot": ""
   },
   {
    "id": "C2.big2",
    "name": "20 MB truncated file rejected, data intact",
    "ok": true,
-   "detail": "rejected 74ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
+   "detail": "rejected 64ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
    "shot": ""
   },
   {
@@ -669,7 +669,7 @@
    "id": "C4.0a",
    "name": "IndexedDB unavailable (indexedDB getter throws): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 126ms",
+   "detail": "ready=true 110ms",
    "shot": ""
   },
   {
@@ -711,7 +711,7 @@
    "id": "C4.1a",
    "name": "IndexedDB unavailable (indexedDB.open throws): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 167ms",
+   "detail": "ready=true 127ms",
    "shot": ""
   },
   {
@@ -753,7 +753,7 @@
    "id": "C4.2a",
    "name": "IndexedDB unavailable (indexedDB.open fires onerror): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 152ms",
+   "detail": "ready=true 111ms",
    "shot": ""
   },
   {
@@ -795,7 +795,7 @@
    "id": "C4.3a",
    "name": "IndexedDB unavailable (indexedDB.open never answers (hang)): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 4102ms",
+   "detail": "ready=true 4099ms",
    "shot": ""
   },
   {
