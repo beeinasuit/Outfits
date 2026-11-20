@@ -1,7 +1,7 @@
 // Flat-lay segmentation: split a photo of several clothes on a plain background into item boxes.
 // Pure (no DOM). Works on {width,height,data: Uint8ClampedArray RGBA}.
 //
-// Pipeline (all at a working resolution of <= ~384px on the long edge, then scaled back up):
+// Pipeline (all at a working resolution of <= ~512px on the long edge, then scaled back up):
 //   1. area-average downsample, convert to CIELAB
 //   2. model the background from the border ring: robust plane (or quadratic, for vignettes) fit per Lab channel
 //   3. foreground = far from the model in chroma, or lighter, or much darker. Mild darkening with the same hue is
@@ -15,7 +15,7 @@
 // backgrounds raise the tolerance and can swallow low-contrast items.
 import { rgbToLab } from './color.js';
 
-const WORK_MAX = 384;
+const WORK_MAX = 512;
 
 function solveLinear(A, b, n) { // gaussian elimination with partial pivoting; A is n*n row-major (mutated)
   for (let c = 0; c < n; c++) {
@@ -253,6 +253,10 @@ function segment(im, opts) {
     }
   }
   if (us.length < 24) return [];
+  if (us.length > 1500) {   // the fits only need a few hundred samples; decimate to keep it fast
+    const st = Math.ceil(us.length / 1500), keep = (arr) => arr.filter((_, i) => i % st === 0);
+    us.splice(0, us.length, ...keep(us)); vs.splice(0, vs.length, ...keep(vs)); lv.splice(0, lv.length, ...keep(lv)); av.splice(0, av.length, ...keep(av)); bv.splice(0, bv.length, ...keep(bv));
+  }
   const mL = median(lv), mA = median(av), mB = median(bv);
   const fit = (vals, init, start) => {
     const pl = robustFit(us, vs, vals, basisPlane, init, start);
@@ -295,11 +299,12 @@ function segment(im, opts) {
       const bad = Math.abs(dl) > tolL || cd > tolC;
       if (bad) { out++; if (!prev && gap > 2) runs++; prev = true; gap = 0; } else { prev = false; gap++; }
     }
-    if (n > 40 && out / n > 0.12 && runs >= 4) mixture = fitMixture(us, vs, lv, av, bv, tolL);
+    if (n > 40 && ((out / n > 0.12 && runs >= 4) || tolL > 30 || tolC > 30)) mixture = fitMixture(us, vs, lv, av, bv, tolL);
   }
 
   // 3. classify
   let M = new Uint8Array(N);
+  const dev = new Float32Array(N).fill(9);   // how far each pixel is from the background model, in tolerance units
   let patterned = false;
   if (mixture) {
     patterned = mixture.cl.length >= 2;
@@ -319,6 +324,7 @@ function segment(im, opts) {
         const dL = L[p] - bl;
         if (dL < 0 && bl > 1) { const ratio = Math.max(0, L[p] / bl); ba *= ratio; bb *= ratio; }
         const cd = Math.hypot(A[p] - ba, B[p] - bb);
+        dev[p] = Math.max(Math.abs(dL) / tolL, cd / tolC);
         if (cd > tolC || dL > tolL || dL < -(tolL + 0.2 * Math.max(bl, 0))) M[p] = 1;
       }
     }
@@ -372,7 +378,13 @@ function segment(im, opts) {
   // 4. morphology
   const T1 = new Uint8Array(N), T2 = new Uint8Array(N);
   erode(M, w, h, 1, T1, T2); dilate(T2, w, h, 1, T1, M);           // open 3x3
-  dilate(M, w, h, 2, T1, T2); erode(T2, w, h, 2, T1, M);           // close 5x5
+  // close 5x5, but only across pixels that deviate somewhat from the background model: a gap that is clearly
+  // sheet-coloured (two items laid a few px apart) stays open, a faint stripe inside a striped shirt is bridged.
+  {
+    const Mo = M.slice();
+    dilate(M, w, h, 2, T1, T2); erode(T2, w, h, 2, T1, M);
+    if (!mixture) for (let p = 0; p < N; p++) if (M[p] && !Mo[p] && dev[p] < 0.5) M[p] = 0;
+  }
   // fill enclosed holes: flood the background from the frame
   {
     const seen = new Uint8Array(N), q = new Int32Array(N);
@@ -424,6 +436,12 @@ function segment(im, opts) {
       }
     }
     comps.push({ id, area: cnt, x0, y0, x1, y1 });
+  }
+  // a busy print filling the frame (close-up of a garment): dozens of small scattered fragments spread over the frame
+  if (comps.length >= 40) {
+    let ux0 = w, uy0 = h, ux1 = 0, uy1 = 0, bigN = 0;
+    for (const c of comps) { ux0 = Math.min(ux0, c.x0); uy0 = Math.min(uy0, c.y0); ux1 = Math.max(ux1, c.x1); uy1 = Math.max(uy1, c.y1); if (c.area >= 0.02 * N) bigN++; }
+    if (bigN === 0 && (ux1 - ux0 + 1) * (uy1 - uy0 + 1) >= 0.8 * N) return [{ x: 0, y: 0, w: W, h: H, area: W * H, mask: new Uint8Array(W * H).fill(1) }];
   }
   let live = comps.filter((c) => c.area >= tinyArea);
   live.sort((a, b) => b.area - a.area);

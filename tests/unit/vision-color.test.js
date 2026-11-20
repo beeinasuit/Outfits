@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { nameColor, extractColors, guessPattern } from '../../src/vision/color.js';
+import { nameColor, extractColors, guessPattern, estimateWhitePoint } from '../../src/vision/color.js';
 import { COLOR_FAMILIES } from '../../src/model.js';
-import { solid, noise, stripes, checks, print, addNoise, blank } from './fixtures/synth.js';
+import { solid, noise, stripes, checks, print, polka, addNoise, blank } from './fixtures/synth.js';
 
 const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const dim = (rgb, k) => rgb.map((v) => Math.round(v * k));
@@ -188,4 +188,35 @@ test('guessPattern', () => {
   const mask = new Uint8Array(128 * 128);
   for (let y = 0; y < 128; y++) for (let x = 64; x < 128; x++) mask[y * 128 + x] = 1;
   assert.equal(guessPattern(im, { mask }), 'solid');
+});
+
+// ---- white balance, robustness, polka (added with the adversarial fixes) ----
+const tintRgb = (rgb, k) => rgb.map((v, i) => Math.min(255, Math.round(v * k[i])));
+test('extractColors with whitePoint recovers >= 85% of the table under strong warm/cool tints, neutral unchanged', () => {
+  for (const [label, k] of [['warm', [1.15, 1, 0.85]], ['cool', [0.85, 1, 1.15]], ['neutral', [1, 1, 1]]]) {
+    let ok = 0;
+    for (const [hex, fam] of TABLE) {
+      const im = addNoise(solid(40, 40, tintRgb(hexRgb(hex), k)), 3, 5);
+      const wp = tintRgb([205, 205, 205], k);
+      if (extractColors(im, { whitePoint: wp })[0].family === fam) ok++;
+    }
+    assert.ok(ok / TABLE.length >= (label === 'neutral' ? 0.9 : 0.85), `${label}: ${ok}/${TABLE.length}`);
+  }
+});
+test('estimateWhitePoint: neutral sheet -> ~neutral, tinted sheet -> pulled toward neutral, never throws', () => {
+  const n = estimateWhitePoint(solid(100, 80, [220, 220, 220]));
+  assert.ok(n.every((v) => Math.abs(v - 220) < 3));
+  const w = estimateWhitePoint(solid(100, 80, [253, 220, 187]));
+  assert.ok(w[0] > w[1] && w[1] > w[2]);
+  assert.equal(estimateWhitePoint(null), null);
+  const cs = extractColors(solid(40, 40, [247, 205, 160]), { autoWhiteBalance: true });
+  assert.ok(cs.length >= 1);
+});
+test('robust input: nameColor(null/undefined/NaN) -> grey; maxColors NaN/0/negative never returns []', () => {
+  for (const v of [null, undefined, [NaN, NaN, NaN], 'x']) assert.equal(nameColor(v), 'grey');
+  for (const mc of [NaN, 0, -3, 50]) { const c = extractColors(print(60, 60), { maxColors: mc }); assert.ok(c.length >= 1 && c.length <= 4); }
+});
+test('guessPattern: regular polka dots -> polka, not check', () => {
+  assert.equal(guessPattern(polka(160, 160, { noiseSigma: 3 })), 'polka');
+  assert.equal(guessPattern(checks(160, 160, { size: 12, noiseSigma: 3 })), 'check');
 });

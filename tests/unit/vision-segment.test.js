@@ -162,3 +162,20 @@ test('refineMaskAlpha: opaque inside, transparent outside, smooth edge, no holes
   for (let x = 9; x < 30; x++) assert.ok(a[25 * w + x] >= a[25 * w + x - 1], 'monotonic edge');
   assert.deepEqual(refineMaskAlpha(null, mask), new Uint8ClampedArray(0));
 });
+
+import { render, gridItems, stripedSheet, bestIous } from './fixtures/adv-scenes.js';
+import { segmentItems as segItems2 } from '../../src/vision/segment.js';
+import { stripes as stripesIm, checks as checksIm } from './fixtures/synth.js';
+test('segmentItems: striped sheet background still yields one box per item; close-up pattern -> one full-frame box', () => {
+  const im = render({ width: 1024, height: 768, bg: stripedSheet(), items: gridItems(4), noise: 3, seed: 7 });
+  const b = segItems2(im);
+  assert.equal(b.length, 4);
+  assert.ok(bestIous(im.truth, b).every((v) => v >= 0.6));
+  for (const c of [stripesIm(400, 300, { period: 14, noiseSigma: 3 }), checksIm(400, 300, { size: 20, noiseSigma: 3 })]) {
+    const r = segItems2(c); assert.equal(r.length, 1); assert.ok(r[0].w * r[0].h >= 0.8 * 120000);
+  }
+});
+test('segmentItems: two items 4px apart are split', () => {
+  const im = render({ width: 1024, height: 768, items: [{ shape: 'rect', x: 150, y: 150, w: 330, h: 450, color: [31, 42, 68] }, { shape: 'rect', x: 484, y: 150, w: 330, h: 450, color: [60, 90, 60] }], noise: 3, seed: 3 });
+  assert.equal(segItems2(im).length, 2);
+});

@@ -220,8 +220,8 @@ export function estimateWhitePoint(imageData) {
   }
 }
 
-/** Per-channel gains that map `wp` to neutral grey of the same mean level; clamped to [0.6, 1.7]. */
-function whiteGains(wp) {
+/** Per-channel gains that map `wp` to neutral grey of the same mean level; clamped to [0.6, 1.7]; null = no correction. */
+export function whiteGains(wp) {
   if (!Array.isArray(wp) && !ArrayBuffer.isView(wp)) return null;
   const v = [+wp[0], +wp[1], +wp[2]];
   if (!v.every((x) => Number.isFinite(x) && x > 5)) return null;
