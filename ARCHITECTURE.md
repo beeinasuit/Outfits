@@ -242,4 +242,35 @@ a formality window plus optional colour/kind preferences that the engine applies
 busy patterns, `noHeadwear`). Users can add their own occasions (label, emoji, formality range) — stored in
 `settings.customOccasions`, same shape, passed to the engine via `ctx.occasionDef`.
 
-Not planned (decided with the user): outfit battles, streaks, week planner, improve-this-look, any AI/API features.
+Not planned (decided with the user): streaks, and any AI/API features.
+
+## Glow-up, battle, week plan
+
+- **Outfit glow-up ("Improve this look")** — one tap finds the single best swap across all slots (loop `rankForSlot`
+  over every slot, take the max positive delta) and shows before/after with a drag slider; "Apply" swaps it in.
+  If no swap gains ≥ 3 points, say so cheerfully ("Already peak — nothing to improve").
+- **Outfit battle** — two outfits side by side (two top suggestions, the user's own build vs the app's pick, or two
+  liked looks). The user taps the winner; the vote is recorded as a `battle` event for taste learning, then both scores
+  and the deciding reasons are revealed. "Next battle" keeps them coming; variety is forced (different tops/bottoms).
+- **Plan the week** — assign outfits to the next 7 days, each with its own occasion; the builder avoids reusing tops and
+  bottoms across planned days and respects the hamper (planned items count as worn on their day). Stored in settings.plan.
+
+## Taste learning (`src/engine/taste.js`, pure)
+
+Learns the user's preferences from events, not just exact outfits:
+```js
+/** events: Array<{ type:'battle'|'like'|'dislike'|'wear', at:number, winner?:Object<slot,Item>, loser?:Object<slot,Item>,
+ *                  items?:Object<slot,Item> }>   (items are snapshots; ids may no longer exist)
+ * @returns {Taste}  per-feature weights in [-1, 1] with evidence counts */
+export function learnTaste(events, { now = Date.now(), halfLifeDays = 60 } = {})
+/** Score adjustment for an outfit: bounded to ±8 total, 0 when evidence is thin.
+ * @returns {{ delta:number, reasons: Reason[] }} reasons like "You tend to pick olive — it's a favourite" */
+export function tasteDelta(items, taste)
+/** Human-readable summary for Settings: top likes / dislikes with strength. */
+export function describeTaste(taste)
+```
+Features: colour family per slot group (near-face / lower / feet), kind, pattern, formality relative to the occasion,
+layering habit, contrast level (light-over-dark vs tonal). Battle = pairwise (winner features +, loser −); like/wear
+= +, dislike = −; wear is weaker than an explicit vote. Recency-weighted. `scoreOutfit` applies `tasteDelta` when
+`ctx.taste` is set. The store keeps an append-only `events` log (capped ~5 000) and settings shows `describeTaste`
+with a reset.
