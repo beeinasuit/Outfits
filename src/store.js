@@ -4,15 +4,16 @@
 import { makeItem, newId, todayISO, SLOTS } from './model.js';
 
 const DB_NAME = 'fit-machine';
-const DB_VERSION = 1;
-const KEYS = { items: 'id', photos: 'id', feedback: 'key', settings: 'k' };
-const DEFAULT_SETTINGS = { onboarded: false, occasion: 'any', weather: 'none', theme: 'auto', haptics: true, shake: false, lastBackup: null, remindedAt: 0 };
+const DB_VERSION = 2;
+const KEYS = { items: 'id', photos: 'id', feedback: 'key', settings: 'k', events: 'id' };
+export const MAX_EVENTS = 5000;
+const DEFAULT_SETTINGS = { onboarded: false, autoHamper: true, useTaste: true, profile: null, customOccasions: {}, plan: {}, occasion: 'any', weather: 'none', theme: 'auto', haptics: true, shake: false, lastBackup: null, remindedAt: 0 };
 
 let db = null;
 let mode = 'idb';
 let reason = '';
 let initPromise = null;
-const mem = { items: new Map(), photos: new Map(), feedback: new Map(), settings: new Map() };
+const mem = { items: new Map(), photos: new Map(), feedback: new Map(), settings: new Map(), events: new Map() };
 const urlCache = new Map();
 
 export function storageInfo() { return { mode, persistent: mode === 'idb', reason }; }
@@ -105,6 +106,37 @@ export async function setFeedback(key, value, meta = {}) {
   await kv.put('feedback', { key, value, kind: meta.kind || 'pair', slots: meta.slots || null, at: Date.now() });
 }
 
+// ---- taste events: { id, type:'battle'|'like'|'dislike'|'wear', at, winner?, loser?, items? } ----
+// Items inside events are attribute snapshots (no photos), so learning survives deleted items.
+const snap = (items) => {
+  if (!items || typeof items !== 'object') return undefined;
+  const out = {};
+  for (const [slot, it] of Object.entries(items)) {
+    if (!it || typeof it !== 'object') continue;
+    const { photoId, cutoutId, worn, ...rest } = it; // eslint-disable-line no-unused-vars
+    out[slot] = rest;
+  }
+  return out;
+};
+export async function appendEvent(evt) {
+  if (!evt || !['battle', 'like', 'dislike', 'wear'].includes(evt.type)) return null;
+  const rec = { id: newId(), type: evt.type, at: Number.isFinite(evt.at) ? evt.at : Date.now(),
+    winner: snap(evt.winner), loser: snap(evt.loser), items: snap(evt.items) };
+  try {
+    await kv.put('events', rec);
+    const all = await kv.all('events');
+    if (all.length > MAX_EVENTS) {
+      all.sort((a, b) => a.at - b.at);
+      for (const old of all.slice(0, all.length - MAX_EVENTS)) await kv.del('events', old.id);
+    }
+  } catch (e) { console.warn('appendEvent failed', e); }
+  return rec;
+}
+export async function listEvents() {
+  try { return (await kv.all('events')).sort((a, b) => a.at - b.at); } catch { return []; }
+}
+export async function clearEvents() { try { await kv.clear('events'); } catch { /* ignore */ } }
+
 // ---- settings ----
 export async function getSettings() {
   try { const out = { ...DEFAULT_SETTINGS }; for (const r of await kv.all('settings')) out[r.k] = r.v; return out; } catch { return { ...DEFAULT_SETTINGS }; }
@@ -137,15 +169,18 @@ function dataURLToBlob(url) {
 export function backupFileName(d = new Date()) { return `fit-machine-backup-${todayISO(d)}.json`; }
 
 export async function exportBackup() {
-  const [items, feedback, settings, photoRecs] = await Promise.all([listItems(), listFeedback(), getSettings(), kv.all('photos')]);
+  const [items, feedback, settings, photoRecs, events] = await Promise.all([listItems(), listFeedback(), getSettings(), kv.all('photos'), listEvents()]);
   const photos = {};
-  const wanted = new Set(items.map((i) => i.photoId).filter(Boolean));
+  const wanted = new Set(items.flatMap((i) => [i.photoId, i.cutoutId]).filter(Boolean));
+  const prof = settings.profile;
+  if (prof && prof.includeSelfieInBackup) { if (prof.selfieId) wanted.add(prof.selfieId); if (prof.cutoutId) wanted.add(prof.cutoutId); }
   for (const r of photoRecs) {
     if (!wanted.has(r.id)) continue;
     try { photos[r.id] = await blobToDataURL(r.blob); } catch { /* skip unreadable photo */ }
   }
   const { lastBackup, remindedAt, ...keep } = settings; // eslint-disable-line no-unused-vars
-  const payload = { app: 'fit-machine', version: 1, exportedAt: new Date().toISOString(), items, feedback, settings: keep, photos };
+  if (keep.profile && !keep.profile.includeSelfieInBackup) keep.profile = { ...keep.profile, selfieId: null, cutoutId: null };
+  const payload = { app: 'fit-machine', version: 1, exportedAt: new Date().toISOString(), items, feedback, settings: keep, photos, events };
   return new Blob([JSON.stringify(payload)], { type: 'application/json' });
 }
 
@@ -173,7 +208,10 @@ export function parseBackup(text) {
     for (const [id, url] of Object.entries(data.photos)) if (typeof url === 'string' && url.startsWith('data:')) photos[id] = url;
   }
   const settings = data.settings && typeof data.settings === 'object' && !Array.isArray(data.settings) ? data.settings : {};
-  return { items, feedback, photos, settings, skipped };
+  const events = Array.isArray(data.events)
+    ? data.events.filter((e) => e && typeof e === 'object' && ['battle', 'like', 'dislike', 'wear'].includes(e.type)).slice(-MAX_EVENTS)
+    : [];
+  return { items, feedback, photos, settings, skipped, events };
 }
 
 export async function importBackup(file, { mode: how = 'merge' } = {}) {
@@ -186,6 +224,7 @@ export async function importBackup(file, { mode: how = 'merge' } = {}) {
   }
   for (const it of b.items) await putItem(it);
   for (const r of b.feedback) await kv.put('feedback', r);
+  for (const e of b.events) await appendEvent(e);
   const { onboarded, ...rest } = b.settings; // eslint-disable-line no-unused-vars
   await putSettings({ ...(how === 'replace' ? rest : {}), onboarded: true });
   return { items: b.items.length, photos: photoCount, skipped: b.skipped };

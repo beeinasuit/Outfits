@@ -274,3 +274,16 @@ layering habit, contrast level (light-over-dark vs tonal). Battle = pairwise (wi
 = +, dislike = −; wear is weaker than an explicit vote. Recency-weighted. `scoreOutfit` applies `tasteDelta` when
 `ctx.taste` is set. The store keeps an append-only `events` log (capped ~5 000) and settings shows `describeTaste`
 with a reset.
+
+## UI data layer (src/ui/data.js) — shared foundation for all screens
+
+- `data` = { items, feedback, records, settings, events, taste, ready }; `subscribe(fn)` / `emit(what)`.
+- `getContext()` → `{ occasion, occasionDef, weather, rain, feedback, note, profile, taste }` — pass straight to the engine.
+- `allOccasions()` built-ins + `settings.customOccasions` (normalised with `makeOccasion`).
+- `recordEvent({type:'battle', winner, loser})` / like / dislike / wear (snapshots stored in the `events` IDB store,
+  capped at 5 000; `data.taste` re-learned on every event). `resetTaste()`.
+- `setFeedback(outfit, 'like'|'dislike'|null)` also records a like/dislike event.
+- `logWorn(outfit)` → `{ hampered }`: appends today, records a wear event, applies auto-hamper (`settings.autoHamper`).
+- `laundryDay()` → number of items that came out of the hamper; `setClean(item, bool)`.
+- Settings keys: `autoHamper`, `useTaste`, `profile` (Profile), `customOccasions`, `plan` ({ 'YYYY-MM-DD': { occasion, slots:{slot:id} } }).
+- Backups include `events`; selfie photos only when `profile.includeSelfieInBackup`.

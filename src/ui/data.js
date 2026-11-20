@@ -1,17 +1,19 @@
 // App data layer: in-memory mirror of the store + change notifications + shared context (occasion/weather).
 import * as store from '../store.js';
-import { makeItem, COLOR_FAMILIES, todayISO } from '../model.js';
+import { makeItem, makeProfile, makeOccasion, needsWash, OCCASIONS, COLOR_FAMILIES, todayISO } from '../model.js';
+import { learnTaste } from '../engine/taste.js';
 import { prefs } from './fx.js';
 
-export const data = { items: [], feedback: {}, records: [], settings: {}, ready: false };
+export const data = { items: [], feedback: {}, records: [], settings: {}, events: [], taste: null, ready: false };
 const listeners = new Set();
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 export function emit(what = 'items') { for (const fn of [...listeners]) { try { fn(what); } catch (e) { console.error(e); } } }
 
 export async function load() {
   await store.init();
-  const [items, feedback, records, settings] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings()]);
-  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings; data.ready = true;
+  const [items, feedback, records, settings, events] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings(), store.listEvents()]);
+  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings; data.events = events; data.ready = true;
+  data.taste = learnTaste(events);
   prefs.haptics = settings.haptics !== false;
   applyTheme();
 }
@@ -57,8 +59,9 @@ export async function removeItem(id) {
 }
 
 export async function reload() {
-  const [items, feedback, records, settings] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings()]);
-  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings;
+  const [items, feedback, records, settings, events] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings(), store.listEvents()]);
+  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings; data.events = events;
+  data.taste = learnTaste(events);
   prefs.haptics = settings.haptics !== false;
   applyTheme();
   emit('items');
@@ -76,10 +79,55 @@ export async function removeDemo() {
   return ids.length;
 }
 
+/** Record a taste event (battle/like/dislike/wear) and re-learn taste. */
+export async function recordEvent(evt) {
+  const rec = await store.appendEvent(evt);
+  if (rec) { data.events.push(rec); data.taste = learnTaste(data.events); emit('taste'); }
+  return rec;
+}
+export async function resetTaste() { await store.clearEvents(); data.events = []; data.taste = learnTaste([]); emit('taste'); }
+
+/** All occasions: built-ins plus the user's custom ones (settings.customOccasions: { [key]: occasion }). */
+export function allOccasions() {
+  const custom = {};
+  const raw = data.settings.customOccasions;
+  if (raw && typeof raw === 'object') for (const [k, v] of Object.entries(raw)) custom[k] = makeOccasion(v);
+  return { ...OCCASIONS, ...custom };
+}
+
+/** Auto-hamper (settings.autoHamper, default on) after a wear. */
+async function hamperCheck(ids) {
+  if (data.settings.autoHamper === false) return 0;
+  let n = 0;
+  for (const id of ids) {
+    const it = data.items.find((x) => x.id === id);
+    if (it && it.available && needsWash(it)) { await saveItem({ ...it, available: false }, { silent: true }); n++; }
+  }
+  return n;
+}
+
+/** Laundry day: everything clean, wear counters reset. Returns how many items came out of the hamper. */
+export async function laundryDay() {
+  const today = todayISO();
+  let n = 0;
+  for (const it of data.items) {
+    if (!it.available) n++;
+    await saveItem({ ...it, available: true, lastWashed: today }, { silent: true });
+  }
+  emit('items');
+  return n;
+}
+/** Wash (or un-wash) one item manually. */
+export async function setClean(item, clean) {
+  const cur = data.items.find((x) => x.id === item.id) || item;
+  await saveItem(clean ? { ...cur, available: true, lastWashed: todayISO() } : { ...cur, available: false });
+}
+
 export async function setFeedback(outfit, value) {
   const slots = {};
   for (const [s, it] of Object.entries(outfit.items)) if (it) slots[s] = it.id;
   await store.setFeedback(outfit.key, value, { kind: 'outfit', slots });
+  if (value === 'like' || value === 'dislike') await recordEvent({ type: value, items: outfit.items });
   const pair = pairKey(outfit);
   if (pair) await store.setFeedback(pair, value, { kind: 'pair' });
   const [feedback, records] = await Promise.all([store.getFeedback(), store.listFeedback()]);
@@ -104,7 +152,11 @@ export async function logWorn(outfit) {
     if (cur.worn.includes(today)) continue;
     await saveItem({ ...cur, worn: [...cur.worn, today] }, { silent: true });
   }
+  await recordEvent({ type: 'wear', items: outfit.items });
+  const hampered = await hamperCheck(Object.values(outfit.items).filter(Boolean).map((i) => i.id));
   emit('worn');
+  emit('items');
+  return { hampered };
 }
 export const wornToday = (outfit) => Object.values(outfit.items).filter(Boolean).every((it) => (data.items.find((x) => x.id === it.id) || it).worn.includes(todayISO()));
 
@@ -145,7 +197,14 @@ export async function getContext() {
     try { const w = await fetchAutoWeather(); weather = w.bucket; rain = w.rain; note = `${Math.round(w.temp)}°C${w.rain ? ', rain' : ''}`; }
     catch { note = 'Couldn’t get the weather: pick one by hand'; }
   } else if (s.weather && s.weather !== 'none') weather = s.weather;
-  return { occasion: s.occasion || 'any', weather, rain, feedback: feedbackSets(), note };
+  const occs = allOccasions();
+  const occasion = occs[s.occasion] ? s.occasion : 'any';
+  const profile = makeProfile(s.profile || {});
+  return {
+    occasion, occasionDef: occs[occasion], weather, rain, feedback: feedbackSets(), note,
+    profile: profile.enabled ? profile : null,
+    taste: data.settings.useTaste === false ? null : data.taste,
+  };
 }
 
 // ---------- demo closet ----------
