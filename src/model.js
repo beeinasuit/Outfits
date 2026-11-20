@@ -225,6 +225,7 @@ export const COLOR_FAMILIES = {
  * @property {boolean} rain        true for rain-suitable layers
  * @property {boolean} available   false = in the laundry / unavailable; never suggested
  * @property {string|null} photoId key of the photo blob in storage (null for photo-less items)
+ * @property {string|null} cutoutId key of a transparent-background cutout blob (null if none)
  * @property {string[]} worn       ISO dates (YYYY-MM-DD) the item was worn, newest last
  * @property {string|null} lastWashed  ISO date of the last wash/laundry day; wears after it count toward the hamper
  * @property {number}  wearsBeforeWash 0 = never auto-hamper; else wears until it goes to the hamper
@@ -290,6 +291,7 @@ export function makeItem(partial = {}) {
     rain: typeof partial.rain === 'boolean' ? partial.rain : !!d.rain,
     available: partial.available !== false,
     photoId: partial.photoId || null,
+    cutoutId: partial.cutoutId || null,
     worn: Array.isArray(partial.worn) ? partial.worn.filter((s) => typeof s === 'string') : [],
     lastWashed: typeof partial.lastWashed === 'string' ? partial.lastWashed : null,
     wearsBeforeWash: clamp(partial.wearsBeforeWash, 0, 30, defaultWearsBeforeWash(slot, kind)),

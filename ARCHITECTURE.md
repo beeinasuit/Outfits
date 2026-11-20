@@ -172,3 +172,33 @@ The review form already has every field the AI would fill, so v2 only adds an "a
   `WEARS_BEFORE_WASH`; 0 = never, e.g. belts and shoes), editable per item.
 - **Laundry day** button: every item gets `available = true` and `lastWashed = today`, so wear counts reset.
 - Manual per-item toggle stays; manually washing one item also sets its `lastWashed`.
+
+## Outfit board & single-item swap (replaces the slot-machine reels)
+
+The Today screen shows the outfit as a **flat-lay board**: the real photos (background removed) composed head-to-toe
+(hat, layer overlapping top, neckwear, belt across the waist, bottom, shoes; extras off to the side). Each piece has a
+**swap** button opening a sheet with two tabs:
+- **Suggest** — `rankForSlot` ranks candidates for that slot with the rest of the outfit held fixed, showing each score delta.
+- **I'll pick** — the user's items for that slot, no hints; on pick, `scoreOutfit` rescores and the meter animates the delta.
+Optional slots can be removed ("skip") or added ("+ add a layer").
+
+### `src/engine/build.js` (addition)
+```js
+/**
+ * Rank every available item for `slot` as a replacement in `outfitItems` (other slots held fixed).
+ * Includes the "none" option for optional/conditional slots (and drops the belt automatically when the
+ * candidate bottom has no loops / adds the best belt when it gains loops).
+ * @returns {Array<{ item: Item|null, items: Object<string,Item>, score: number, delta: number, reasons: Reason[] }>}
+ *          best first; `delta` = score - current score; `items` = the full resulting outfit.
+ */
+export function rankForSlot(allItems, outfitItems, slot, ctx = {})
+```
+
+### `src/vision/image.js` (addition)
+```js
+/** Apply a segmentation mask to a crop: pixels outside the item become transparent; edge feathered ~2px;
+ *  trimmed to the item's bounding box. Mask is box-sized (w*h) as returned by segmentItems. */
+export function cutoutCanvas(sourceCanvas, box, mask, { feather = 2 } = {})
+```
+Store `item.cutoutId` (photo store key of a transparent WebP/PNG) alongside `photoId`. `canvasToBlob` must keep alpha
+(WebP keeps alpha; the JPEG fallback must not be used for cutouts — fall back to PNG).
