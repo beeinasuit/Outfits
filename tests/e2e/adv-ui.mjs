@@ -26,6 +26,10 @@ async function demoSpin(page, hash = '', viewport) {
 const reelNames = (page) => page.evaluate(() => [...document.querySelectorAll('.reel[data-state="filled"] .cell b')].map((b) => b.textContent));
 const spinNow = async (page) => { await page.locator('.spin-btn').click(); await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 }); await page.waitForTimeout(1600); };
 
+async function toStart(page) {
+  await hashTo(page, 'spin', 150); await hashTo(page, 'snap', 400);
+  for (let i = 0; i < 8 && (await page.locator('.snap-start').count()) === 0; i++) { await page.getByRole('button', { name: /Start over|Skip this one/ }).first().click({ timeout: 1500 }).catch(() => {}); await page.waitForTimeout(250); }
+}
 const SCREENS = ['spin', 'closet', 'snap', 'looks', 'settings'];
 const png1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
 
@@ -405,13 +409,13 @@ try {
       await shot(page, 'd9-transparent-review');
     }
     await page.getByRole('button', { name: /Start over|Skip this one/ }).first().click().catch(() => {});
-    await hashTo(page, 'spin', 300); await hashTo(page, 'snap', 400);
+    await toStart(page);
     const semi = await makeCanvasFile(page, { w: 400, h: 300, kind: 'semi' });
     await input().setInputFiles({ name: 'semi.png', mimeType: 'image/png', buffer: semi.buffer });
     await page.waitForSelector('.stage .bbox, .error-note', { timeout: 15000 }).catch(() => {});
     check('D9g', 'semi-transparent PNG is handled', (await page.locator('.busy').count()) === 0);
     // 6000x4000 JPEG
-    await hashTo(page, 'spin', 200); await hashTo(page, 'snap', 400);
+    await toStart(page);
     const big = await makeCanvasFile(page, { w: 6000, h: 4000, kind: 'flat' });
     console.log(`   6000x4000 JPEG is ${(big.size / 1e6).toFixed(2)} MB`);
     const t0 = Date.now();
@@ -433,7 +437,7 @@ try {
       check('D9i', 'saved photos from a 24 MP image are downscaled (each < 150 KB)', pinfo.maxPhotoKB < 150 && pinfo.items >= 1, JSON.stringify(pinfo));
     }
     // multi-file mix: txt + 2 images
-    await hashTo(page, 'spin', 200); await hashTo(page, 'snap', 400);
+    await toStart(page);
     const f1 = await makeCanvasFile(page, { w: 900, h: 700, kind: 'flat' });
     await input().setInputFiles([{ name: 'a.txt', mimeType: 'text/plain', buffer: Buffer.from('x') }, { name: 'p1.jpg', mimeType: 'image/jpeg', buffer: f1.buffer }, { name: 'p2.jpg', mimeType: 'image/jpeg', buffer: f1.buffer }]);
     await page.waitForSelector('.stage .bbox', { timeout: 15000 }).catch(() => {});
@@ -541,10 +545,13 @@ try {
       check(`D11.${r}`, `offline cold reload of #/${r}: shell loads and data is intact`, ok && cnt === countOn && body > 5, `ready=${ok} items=${cnt}/${countOn}`);
     }
     // offline: lazy vision modules (Snap flow) still work
-    await hashTo(page, 'snap', 500);
-    const fl = await makeCanvasFile(page, { w: 600, h: 450, kind: 'flat' });
-    await page.locator('input[type=file][multiple]').setInputFiles({ name: 'f.jpg', mimeType: 'image/jpeg', buffer: fl.buffer });
-    const boxesOff = await page.waitForSelector('.stage .bbox', { timeout: 15000 }).then(() => true).catch(() => false);
+    let boxesOff = false;
+    try {
+      await hashTo(page, 'snap', 500);
+      const fl = await makeCanvasFile(page, { w: 600, h: 450, kind: 'flat' });
+      await page.locator('input[type=file][multiple]').setInputFiles({ name: 'f.jpg', mimeType: 'image/jpeg', buffer: fl.buffer }, { timeout: 4000 });
+      boxesOff = await page.waitForSelector('.stage .bbox', { timeout: 15000 }).then(() => true).catch(() => false);
+    } catch { /* app did not boot offline */ }
     check('D11.snap', 'offline: photo flow (lazy-loaded vision modules) works', boxesOff);
     await ctx.setOffline(false);
     // SHELL completeness
@@ -957,7 +964,7 @@ try {
     // Settings count excludes demos
     await loadDemo(page);
     await hashTo(page, 'settings', 500);
-    const txt = await page.locator('.set-card', { hasText: 'Back up' }).innerText();
+    const txt = await page.locator('.set-card:not(.warn)', { hasText: 'Back up' }).innerText();
     check('E6b', 'Settings "items in your closet" counts only real items while the sample is loaded', /\b2 items/.test(txt), txt.replace(/\n/g, ' ').slice(0, 100));
     // adopt a demo item (rename it) then remove sample
     await hashTo(page, 'closet', 600);

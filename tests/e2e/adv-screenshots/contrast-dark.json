@@ -173,7 +173,7 @@
   {
    "screen": "looks",
    "sel": ".look-score b",
-   "text": "89",
+   "text": "85",
    "ratio": 5.88,
    "size": "18px",
    "weight": "800",
@@ -183,37 +183,7 @@
   {
    "screen": "looks",
    "sel": ".look-score b",
-   "text": "89",
-   "ratio": 5.88,
-   "size": "18px",
-   "weight": "800",
-   "fg": "rgb(255, 255, 255)",
-   "bg": "rgb(47,75,255)"
-  },
-  {
-   "screen": "looks",
-   "sel": ".look-score b",
-   "text": "89",
-   "ratio": 5.88,
-   "size": "18px",
-   "weight": "800",
-   "fg": "rgb(255, 255, 255)",
-   "bg": "rgb(47,75,255)"
-  },
-  {
-   "screen": "looks",
-   "sel": ".look-score b",
-   "text": "82",
-   "ratio": 5.88,
-   "size": "18px",
-   "weight": "800",
-   "fg": "rgb(255, 255, 255)",
-   "bg": "rgb(47,75,255)"
-  },
-  {
-   "screen": "looks",
-   "sel": ".look-score b",
-   "text": "82",
+   "text": "84",
    "ratio": 5.88,
    "size": "18px",
    "weight": "800",
@@ -247,6 +217,36 @@
    "ratio": 6.86,
    "size": "11px",
    "weight": "600",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".cell-text small",
+   "text": "chinos",
+   "ratio": 6.86,
+   "size": "11px",
+   "weight": "600",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".cell-text small",
+   "text": "boots",
+   "ratio": 6.86,
+   "size": "11px",
+   "weight": "600",
+   "fg": "rgb(179, 172, 192)",
+   "bg": "rgb(41,36,52)"
+  },
+  {
+   "screen": "spin",
+   "sel": ".swipe-hint",
+   "text": "or swipe this card: right = lo",
+   "ratio": 6.86,
+   "size": "11px",
+   "weight": "700",
    "fg": "rgb(179, 172, 192)",
    "bg": "rgb(41,36,52)"
   }

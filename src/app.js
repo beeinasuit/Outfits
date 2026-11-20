@@ -4,15 +4,19 @@ import { data, load, subscribe, loadDemo, emit } from './ui/data.js';
 import { h, $, $$ } from './ui/dom.js';
 import { toast } from './ui/overlay.js';
 import { showOnboarding } from './ui/onboarding.js';
-import { mount as spin } from './ui/spin.js';
+import { mount as today } from './ui/today.js';
+import { mount as battle } from './ui/battle.js';
+import { mount as plan } from './ui/plan.js';
+import { mount as profile } from './ui/profile.js';
 import { mount as closet } from './ui/closet.js';
 import { mount as snap } from './ui/snap.js';
 import { mount as looks } from './ui/looks.js';
 import { mount as settings } from './ui/settings.js';
 import { setSetting } from './ui/data.js';
 
-const ROUTES = { spin, closet, snap, looks, settings };
-const TITLES = { spin: 'Spin', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings' };
+const ROUTES = { today, closet, snap, looks, settings, battle, plan, profile };
+const ALIASES = { spin: 'today' };
+const TITLES = { today: 'Today', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings', battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colours' };
 let current = null;
 let currentName = null;
 let first = true;
@@ -24,7 +28,8 @@ export function navigate(name) {
 
 function routeName() {
   const m = /^#\/([a-z]+)/.exec(location.hash);
-  return m && ROUTES[m[1]] ? m[1] : 'spin';
+  if (m && ALIASES[m[1]]) return ALIASES[m[1]];
+  return m && ROUTES[m[1]] ? m[1] : 'today';
 }
 
 function render() {
@@ -57,7 +62,7 @@ async function boot() {
   showStorageBanner();
   subscribe((what) => { if (current && current.update) current.update(what); });
   window.addEventListener('hashchange', render);
-  if (!location.hash) history.replaceState(null, '', '#/spin');
+  if (!location.hash) history.replaceState(null, '', '#/today');
   render();
   if (!data.settings.onboarded) {
     showOnboarding({
