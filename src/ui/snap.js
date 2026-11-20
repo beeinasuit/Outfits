@@ -67,7 +67,7 @@ export function mount(root, { navigate }) {
       h('aside', { class: 'tip-card' }, tipArt,
         h('div', {}, h('h3', {}, 'Flat-lay trick'),
           h('ul', {}, h('li', {}, 'Plain background (a bed sheet is perfect)'), h('li', {}, 'Leave a small gap between items: touching pieces merge into one'), h('li', {}, 'Shoot straight down from above'), h('li', {}, 'Daylight, no harsh shadows')))),
-      h('div', { class: 'center' }, h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => addNoPhoto(), html: `${icon('plus', { size: 18 })} No photo? Add by colour` })),
+      h('div', { class: 'center' }, h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => addNoPhoto(), html: `${icon('plus', { size: 18 })} No photo? Add by color` })),
       S.error ? h('p', { class: 'error-note', role: 'alert' }, S.error) : null);
   }
 
@@ -79,7 +79,7 @@ export function mount(root, { navigate }) {
 
   // ---------- file handling ----------
   async function onFiles(list) {
-    if (!list || !list.length) { camInput.value = ''; libInput.value = ''; return; } // cancelled picker: do nothing
+    if (!list || !list.length) { camInput.value = ''; libInput.value = ''; return; } // canceled picker: do nothing
     const files = [...(list || [])].filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
     camInput.value = ''; libInput.value = '';
     if (!files.length) { toast('That doesn’t look like a photo.'); return; }
@@ -118,7 +118,7 @@ export function mount(root, { navigate }) {
       go('boxes');
     } catch (e) {
       console.warn(e);
-      S.error = 'Couldn’t read that photo. Try another, or add the item by colour.';
+      S.error = 'Couldn’t read that photo. Try another, or add the item by color.';
       if (alive) go('start');
     }
   }
@@ -218,7 +218,7 @@ export function mount(root, { navigate }) {
 
   async function finishBoxes() {
     const P = S.photo;
-    busy('Measuring colours…');
+    busy('Measuring colors…');
     try {
       const v = await vision();
       for (const b of P.boxes) {
@@ -253,7 +253,7 @@ export function mount(root, { navigate }) {
         S.drafts.push(d);
       }
     } catch (e) {
-      console.warn(e); S.error = 'Something went wrong while measuring colours.'; go('start'); return;
+      console.warn(e); S.error = 'Something went wrong while measuring colors.'; go('start'); return;
     }
     if (S.fileIdx < S.files.length - 1) { S.fileIdx++; await processFile(); return; }
     S.cur = 0;
@@ -320,7 +320,7 @@ export function mount(root, { navigate }) {
       save.disabled = again.disabled = d.colors.length === 0;
     };
     paint();
-    const s = sheet({ title: 'Add by colour', content: h('div', { class: 'edit' }, holder, h('div', { class: 'sheet-actions' }, save, again)) });
+    const s = sheet({ title: 'Add by color', content: h('div', { class: 'edit' }, holder, h('div', { class: 'sheet-actions' }, save, again)) });
     const commit = async () => { const it = await saveItem(draftToItem(d)); toast(`Added ${it.name}.`); buzz(14); return it; };
     save.addEventListener('click', async () => { await commit(); s.close(); maybeRemind(navigate); navigate('closet'); });
     again.addEventListener('click', async () => { await commit(); const keep = { slot: d.slot }; d = newDraft(keep); paint(); const sb = s.el.querySelector('.sheet-body'); if (sb) sb.scrollTop = 0; });

@@ -1,8 +1,512 @@
 {
  "results": [
   {
+   "id": "N1a",
+   "name": "10 SHUFFLE taps in one task: at most 1 new outfit announced, no duplicate pieces on the board",
+   "ok": true,
+   "detail": "announcements=1 pieces=bottom,shoes,belt,top",
+   "shot": ""
+  },
+  {
+   "id": "N1b",
+   "name": "5 rapid taps on \"Wearing it!\" create exactly ONE wear event and one worn date per item",
+   "ok": false,
+   "detail": "wear events +5, worn lengths 1,1,1,1",
+   "shot": ""
+  },
+  {
+   "id": "N1c",
+   "name": "4 rapid thumbs-up taps: at most one like event and one feedback record",
+   "ok": false,
+   "detail": "like events +4, feedback records 2",
+   "shot": ""
+  },
+  {
+   "id": "N1d",
+   "name": "triple-tap on a Suggest row applies the swap once (one score announcement; 2nd/3rd tap should be ignored)",
+   "ok": true,
+   "detail": "rows=2 announcements=1",
+   "shot": ""
+  },
+  {
+   "id": "N1e",
+   "name": "only one score-delta pop after a swap",
+   "ok": true,
+   "detail": "pops=1",
+   "shot": ""
+  },
+  {
+   "id": "N2a",
+   "name": "select a piece then SHUFFLE: toolbar closes and no piece stays selected",
+   "ok": true,
+   "detail": "{\"barHidden\":true,\"selected\":0,\"pressed\":0}",
+   "shot": ""
+  },
+  {
+   "id": "N2b",
+   "name": "tapping elsewhere deselects the piece (toolbar hidden)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N2c",
+   "name": "locked top survives 5 shuffles",
+   "ok": true,
+   "detail": "aria-pressed=true kept=true",
+   "shot": ""
+  },
+  {
+   "id": "N2d",
+   "name": "toolbar offers no Remove for the top (required piece)",
+   "ok": true,
+   "detail": "remove buttons=0",
+   "shot": ""
+  },
+  {
+   "id": "N3a",
+   "name": "I'll pick: choosing a top puts exactly that top on the board",
+   "ok": true,
+   "detail": "picked demo-4 got demo-4",
+   "shot": ""
+  },
+  {
+   "id": "N3b",
+   "name": "swap to an item, send it to the hamper, return to Today: it is no longer on the board",
+   "ok": true,
+   "detail": "demo-4 -> demo-7",
+   "shot": ""
+  },
+  {
+   "id": "N3c",
+   "name": "every item in the hamper while on Today: board is replaced by the \"in the wash\" state with a laundry-day button",
+   "ok": true,
+   "detail": "{\"h2\":\"Everything good is in the wash 🧺\",\"laundry\":true,\"board\":0,\"txt\":\"Today’s outfit\\nSample closet — not your clothes\\nRemove\\nEverything good is in the\"}",
+   "shot": ""
+  },
+  {
+   "id": "N3d",
+   "name": "laundry day while on Today: everything is back, board shows an outfit, no manual reload",
+   "ok": true,
+   "detail": "{\"avail\":20,\"all\":20,\"pieces\":4}",
+   "shot": ""
+  },
+  {
+   "id": "N3e",
+   "name": "laundryDay() with nothing in the hamper while on Today is a no-op (returns 0, board intact)",
+   "ok": true,
+   "detail": "returned 0",
+   "shot": ""
+  },
+  {
+   "id": "N4a",
+   "name": "closet emptied while a SHUFFLE is in flight: no TypeError (board is null after re-render)",
+   "ok": false,
+   "detail": "[n4 console] UNHANDLED REJECTION: Cannot read properties of null (reading 'setOptions') | [n4 pageerror] Cannot read properties of null (reading 'setOptions')",
+   "shot": "tests/e2e/adv-screenshots/n4-empty.png"
+  },
+  {
+   "id": "N4b",
+   "name": "... and the empty state is shown",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N4c",
+   "name": "everything sent to the hamper while a SHUFFLE is in flight: no TypeError",
+   "ok": false,
+   "detail": "[n4b console] UNHANDLED REJECTION: Cannot read properties of null (reading 'setOptions') | [n4b pageerror] Cannot read properties of null (reading 'setOptions')",
+   "shot": ""
+  },
+  {
+   "id": "N4d",
+   "name": "swap sheet open, closet wiped underneath, then a row is tapped: no crash",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N5a",
+   "name": "no literal \"null\" / \"undefined\" / \"NaN\" text on any screen (own closet, no sample)",
+   "ok": false,
+   "detail": "today: null",
+   "shot": "tests/e2e/adv-screenshots/n5-today-null-text.png"
+  },
+  {
+   "id": "N6a",
+   "name": "a shuffled outfit with an available glow-up was found within 14 shuffles",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N6b",
+   "name": "Apply tapped 3x in one task: applied once (single announcement) and the meter shows the promised score",
+   "ok": true,
+   "detail": "before=87 promised=\"Score goes from 87 to 90\" after=90 announcements=1",
+   "shot": ""
+  },
+  {
+   "id": "N6c",
+   "name": "glow-up sheet closes after Apply",
+   "ok": true,
+   "detail": "open dialogs=0",
+   "shot": ""
+  },
+  {
+   "id": "N6d",
+   "name": "Improve again right after Apply opens a sheet (peak or another glow-up)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N6e",
+   "name": "minimal closet (1 top, 1 bottom, 1 pair of shoes): Improve says \"already peak\" (no empty sheet, no crash)",
+   "ok": true,
+   "detail": "peak=1",
+   "shot": ""
+  },
+  {
+   "id": "N7a",
+   "name": "battle with 1 top + 1 bottom: friendly empty state, no cards, no crash",
+   "ok": true,
+   "detail": "{\"h2\":\"Not enough outfits to battle yet\",\"cards\":0,\"empty\":true}",
+   "shot": ""
+  },
+  {
+   "id": "N7b",
+   "name": "battle with 2 tops + 1 bottom: either two cards or the empty state; never half a screen",
+   "ok": true,
+   "detail": "{\"h2\":\"Which would you wear?\",\"cards\":2,\"empty\":false}",
+   "shot": ""
+  },
+  {
+   "id": "N7c",
+   "name": "battle with the full closet renders two cards",
+   "ok": true,
+   "detail": "cards=2",
+   "shot": ""
+  },
+  {
+   "id": "N7d",
+   "name": "rapid A, A, B, A taps record exactly one battle event",
+   "ok": true,
+   "detail": "battle events +1",
+   "shot": ""
+  },
+  {
+   "id": "N7e",
+   "name": "after voting, scores are revealed on both cards and a Next battle button appears",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N7f",
+   "name": "Next battle tapped 3x in one task: exactly two cards on screen",
+   "ok": true,
+   "detail": "cards=2",
+   "shot": ""
+  },
+  {
+   "id": "N7g",
+   "name": "leaving Battle during the reveal timer and returning is fine",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N8a",
+   "name": "custom occasion labels (HTML payload, 600 chars, emoji spam, RTL) render as text on Today, the picker and Plan: no script, no injected nodes",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N8b",
+   "name": "long / hostile custom occasion labels do not cause horizontal overflow at 320px (Today pill, picker sheet, Plan)",
+   "ok": true,
+   "detail": "",
+   "shot": "tests/e2e/adv-screenshots/n8-today-long-label-320.png"
+  },
+  {
+   "id": "N8c",
+   "name": "the HTML payload label shows literally as text in the Today occasion pill",
+   "ok": true,
+   "detail": "<img<img src=x onerror=window.__pwned=1>▾",
+   "shot": ""
+  },
+  {
+   "id": "N9a",
+   "name": "Plan whole week fills 7 days",
+   "ok": true,
+   "detail": "{\"days\":7,\"filled\":7}",
+   "shot": ""
+  },
+  {
+   "id": "N9b",
+   "name": "deleting a planned top while Plan is open: still 7 day cards, affected day shows a \"pieces are gone\" prompt, no crash",
+   "ok": true,
+   "detail": "{\"cards\":7,\"stale\":1}",
+   "shot": ""
+  },
+  {
+   "id": "N9c",
+   "name": "Re-fill on the stale day rebuilds an outfit",
+   "ok": true,
+   "detail": "filled=7",
+   "shot": ""
+  },
+  {
+   "id": "N9d",
+   "name": "delete a planned bottom in Closet, return to Plan: stale day flagged, other days intact",
+   "ok": true,
+   "detail": "{\"cards\":7,\"stale\":2}",
+   "shot": ""
+  },
+  {
+   "id": "N9e",
+   "name": "Plan whole week tapped 3x in one task: result is still 7 consistent days",
+   "ok": true,
+   "detail": "plan days=7",
+   "shot": ""
+  },
+  {
+   "id": "N9f",
+   "name": "plan the week with one top and one bottom: at least day 1 planned, remaining days explained (hamper), no crash",
+   "ok": true,
+   "detail": "filled=1/7 (observation: single tee hits wash limit; other days read \"Nothing planned yet\")",
+   "shot": ""
+  },
+  {
+   "id": "N10a",
+   "name": "drape test abandoned after 3 rounds (navigate away): profile untouched, returning shows Home not a half test",
+   "ok": true,
+   "detail": "round=Round 4 of 6 profile=null",
+   "shot": ""
+  },
+  {
+   "id": "N10b",
+   "name": "Back during the drape test leaves the Profile screen cleanly (no half-written profile)",
+   "ok": true,
+   "detail": "hash=#/closet",
+   "shot": ""
+  },
+  {
+   "id": "N10c",
+   "name": "six taps on one drape option in a task advance exactly one round",
+   "ok": true,
+   "detail": "Round 2 of 6",
+   "shot": ""
+  },
+  {
+   "id": "N10d",
+   "name": "completing the drape test shows the reveal and saves undertone + enables matching",
+   "ok": true,
+   "detail": "{\"p\":{\"enabled\":true,\"undertone\":\"warm\",\"depth\":null,\"contrast\":\"low\",\"skinHex\":null,\"selfieId\":null,\"cutoutId\":null,\"includeSelfieInBackup\":false},\"reveal\":true}",
+   "shot": ""
+  },
+  {
+   "id": "N10e",
+   "name": "Today works with complexion matching on (no selfie)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N11.blank",
+   "name": "selfie of a blank image: graceful (ends on Profile home with a message, no errors, app usable)",
+   "ok": true,
+   "detail": "home 1215ms toast=Saved your photo, but I couldn’t read skin. Pick by hand or try the drape test. errs=",
+   "shot": "tests/e2e/adv-screenshots/n11-blank.png"
+  },
+  {
+   "id": "N11.blank.board",
+   "name": "... then Today still shows the whole outfit (pieces=4, face piece=0)",
+   "ok": true,
+   "detail": "pieces=4 face=0",
+   "shot": ""
+  },
+  {
+   "id": "N11.black",
+   "name": "selfie of a black image: graceful (ends on Profile home with a message, no errors, app usable)",
+   "ok": true,
+   "detail": "home 1129ms toast=Saved your photo, but I couldn’t read skin. Pick by hand or try the drape test. errs=",
+   "shot": "tests/e2e/adv-screenshots/n11-black.png"
+  },
+  {
+   "id": "N11.black.board",
+   "name": "... then Today still shows the whole outfit (pieces=4, face piece=0)",
+   "ok": true,
+   "detail": "pieces=4 face=0",
+   "shot": ""
+  },
+  {
+   "id": "N11.noise",
+   "name": "selfie of a noise image: graceful (ends on Profile home with a message, no errors, app usable)",
+   "ok": true,
+   "detail": "home 1472ms toast=Saved your photo, but I couldn’t read skin. Pick by hand or try the drape test. errs=",
+   "shot": "tests/e2e/adv-screenshots/n11-noise.png"
+  },
+  {
+   "id": "N11.noise.board",
+   "name": "... then Today still shows the whole outfit (pieces=4, face piece=0)",
+   "ok": true,
+   "detail": "pieces=4 face=0",
+   "shot": ""
+  },
+  {
+   "id": "N11.text",
+   "name": "a text file renamed .jpg as selfie: error note shown, stays on Profile",
+   "ok": true,
+   "detail": "error-note",
+   "shot": ""
+  },
+  {
+   "id": "N12a",
+   "name": "6000x4000 selfie (156 KB): analysed and saved in < 30 s, no errors",
+   "ok": true,
+   "detail": "home 1376ms ",
+   "shot": ""
+  },
+  {
+   "id": "N12b",
+   "name": "after saving a selfie (before enabling complexion matching) the board shows the face as the UI copy promises",
+   "ok": false,
+   "detail": "face pieces=0 (profile.enabled is false until the drape test / toggle)",
+   "shot": "tests/e2e/adv-screenshots/n12-today-after-selfie.png"
+  },
+  {
+   "id": "N12g.390",
+   "name": "face + outfit: the \"+ layer / hat / tie\" chips are not hidden behind the SHUFFLE dock at 390x844",
+   "ok": true,
+   "detail": "covered chips=",
+   "shot": "tests/e2e/adv-screenshots/n12-face-390.png"
+  },
+  {
+   "id": "N12c.390",
+   "name": "with face + outfit, every piece (incl. face) is inside the viewport above the tab bar at 390x844",
+   "ok": true,
+   "detail": "{\"probs\":[],\"tab\":780,\"shuffleBottom\":754,\"faces\":1}",
+   "shot": "tests/e2e/adv-screenshots/n12-face-390.png"
+  },
+  {
+   "id": "N12g.320",
+   "name": "face + outfit: the \"+ layer / hat / tie\" chips are not hidden behind the SHUFFLE dock at 320x640",
+   "ok": false,
+   "detail": "covered chips=layer,headwear,neckwear",
+   "shot": "tests/e2e/adv-screenshots/n12-face-320.png"
+  },
+  {
+   "id": "N12c.320",
+   "name": "with face + outfit, every piece (incl. face) is inside the viewport above the tab bar at 320x640",
+   "ok": true,
+   "detail": "{\"probs\":[],\"tab\":576,\"shuffleBottom\":568,\"faces\":1}",
+   "shot": "tests/e2e/adv-screenshots/n12-face-320.png"
+  },
+  {
+   "id": "N13a",
+   "name": "browser Back with each Today sheet open (swap, glow-up, occasion, weather, custom editor) closes it (no sheet floating over another route)",
+   "ok": true,
+   "detail": "",
+   "shot": "tests/e2e/adv-screenshots/n13-swap-sheet.png"
+  },
+  {
+   "id": "N13b",
+   "name": "Today is still usable after the Back-with-sheet gauntlet (sheetOpen flag not stuck)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N13c",
+   "name": "swap sheet can still be opened after Back with a sheet open (sheetOpen flag not stuck)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N14.battle",
+   "name": "cold deep link #/battle: right screen (\"Outfit battle\"), document.title matches, content rendered",
+   "ok": true,
+   "detail": "h1=Outfit battle title=Outfit battle · Fit Machine {\"cards\":10,\"onboarding\":false}",
+   "shot": ""
+  },
+  {
+   "id": "N14.plan",
+   "name": "cold deep link #/plan: right screen (\"Plan the week\"), document.title matches, content rendered",
+   "ok": true,
+   "detail": "h1=Plan the week title=Plan the week · Fit Machine {\"cards\":7,\"onboarding\":false}",
+   "shot": ""
+  },
+  {
+   "id": "N14.profile",
+   "name": "cold deep link #/profile: right screen (\"Your colours\"), document.title matches, content rendered",
+   "ok": true,
+   "detail": "h1=Your colours title=Your colours · Fit Machine {\"cards\":4,\"onboarding\":false}",
+   "shot": ""
+  },
+  {
+   "id": "N14.today",
+   "name": "cold deep link #/today: right screen (\"Today’s outfit\"), document.title matches, content rendered",
+   "ok": true,
+   "detail": "h1=Today’s outfit title=Today · Fit Machine {\"cards\":4,\"onboarding\":false}",
+   "shot": ""
+  },
+  {
+   "id": "N14.spin",
+   "name": "cold deep link #/spin: right screen (\"Today’s outfit\"), document.title matches, content rendered",
+   "ok": true,
+   "detail": "h1=Today’s outfit title=Today · Fit Machine {\"cards\":4,\"onboarding\":false}",
+   "shot": ""
+  },
+  {
+   "id": "N14f",
+   "name": "fresh install deep link #/battle: onboarding + friendly \"battles need a closet\" empty state behind it",
+   "ok": true,
+   "detail": "{\"onboard\":true,\"h1\":\"Outfit battle\",\"empty\":true}",
+   "shot": ""
+  },
+  {
+   "id": "N15a",
+   "name": "offline reload of every route (today, closet, looks, snap, settings, battle, plan, profile): app boots, right screen, data intact",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N16a",
+   "name": "every new screen x light/dark x 390/320 (44 shots): no horizontal overflow or off-screen elements",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N17.full.390x844",
+   "name": "outfit with layer + hat + tie (top,bottom,shoes,belt,layer,headwear,neckwear) is entirely visible and uncovered at 390x844",
+   "ok": true,
+   "detail": "have=top,bottom,shoes,belt,layer,headwear,neckwear problems=[] tabTop=780",
+   "shot": "tests/e2e/adv-screenshots/n17-full-390x844.png"
+  },
+  {
+   "id": "N17.full.320x640",
+   "name": "outfit with layer + hat + tie (top,bottom,shoes,belt,layer,headwear,neckwear) is entirely visible and uncovered at 320x640",
+   "ok": true,
+   "detail": "have=top,bottom,shoes,belt,layer,headwear,neckwear problems=[] tabTop=576",
+   "shot": "tests/e2e/adv-screenshots/n17-full-320x640.png"
+  },
+  {
+   "id": "N17a",
+   "name": "whole outfit (top to shoes, plus hat/layer/tie when present) in the viewport, above the tab bar and not covered, after 10 shuffles x 3 closets x 2 viewports (60 samples)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
    "id": "N18a",
-   "name": "60 s seeded monkey across all 8 routes (727 actions): zero console errors / page errors / unhandled rejections",
+   "name": "60 s seeded monkey across all 8 routes (618 actions): zero console errors / page errors / unhandled rejections",
    "ok": true,
    "detail": "",
    "shot": ""
@@ -10,8 +514,22 @@
   {
    "id": "N18b",
    "name": "monkey: no modal survived Escape x2; no XSS",
-   "ok": false,
-   "detail": "stuck=1 Add hat@#/today after: tap button \"Undo\" > tap a \"Today\" > escape x2 > tap button \"Add a hat\"",
+   "ok": true,
+   "detail": "stuck=0 ",
+   "shot": ""
+  },
+  {
+   "id": "N19.light",
+   "name": "light: text contrast >= 4.5:1 (3:1 large) on Today, swap, glow-up, battle, plan, profile, drape (164 samples)",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "N19.dark",
+   "name": "dark: text contrast >= 4.5:1 (3:1 large) on Today, swap, glow-up, battle, plan, profile, drape (164 samples)",
+   "ok": true,
+   "detail": "",
    "shot": ""
   },
   {
@@ -31,10 +549,16 @@
   {
    "id": "N.errors",
    "name": "zero console errors / page errors / unhandled rejections across the whole board run",
-   "ok": true,
-   "detail": "",
+   "ok": false,
+   "detail": "[n4 console] UNHANDLED REJECTION: Cannot read properties of null (reading 'setOptions') | [n4 pageerror] Cannot read properties of null (reading 'setOptions') | [n4b console] UNHANDLED REJECTION: Cannot read properties of null (reading 'setOptions') | [n4b pageerror] Cannot read properties of null (reading 'setOptions') | [n15 console] Blocked call to navigator.vibrate because user hasn't tapped on the frame or any embedded frame yet: https://www.chromestatus.com/feature/5644273861001216.",
    "shot": ""
   }
  ],
- "errors": []
+ "errors": [
+  "[n4 console] UNHANDLED REJECTION: Cannot read properties of null (reading 'setOptions')",
+  "[n4 pageerror] Cannot read properties of null (reading 'setOptions')",
+  "[n4b console] UNHANDLED REJECTION: Cannot read properties of null (reading 'setOptions')",
+  "[n4b pageerror] Cannot read properties of null (reading 'setOptions')",
+  "[n15 console] Blocked call to navigator.vibrate because user hasn't tapped on the frame or any embedded frame yet: https://www.chromestatus.com/feature/5644273861001216."
+ ]
 }

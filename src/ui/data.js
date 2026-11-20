@@ -214,12 +214,12 @@ const C = (family, weight = 1) => ({ hex: COLOR_FAMILIES[family].hex, family, we
 export function demoItems() {
   const d = [
     ['top', 't-shirt', 'White tee', [C('white')]],
-    ['top', 't-shirt', 'Heather grey tee', [C('grey')]],
+    ['top', 't-shirt', 'Heather gray tee', [C('gray')]],
     ['top', 'oxford', 'Navy oxford', [C('navy')]],
     ['top', 'button-down', 'Crisp white shirt', [C('white')]],
     ['top', 'button-down', 'Blue stripe shirt', [C('light-blue', 0.6), C('white', 0.4)], { pattern: 'stripe' }],
     ['top', 'henley', 'Olive henley', [C('olive')]],
-    ['top', 'sweater', 'Grey crew sweater', [C('grey')]],
+    ['top', 'sweater', 'Gray crew sweater', [C('gray')]],
     ['bottom', 'jeans', 'Dark denim jeans', [C('denim')]],
     ['bottom', 'chinos', 'Khaki chinos', [C('beige')]],
     ['bottom', 'chinos', 'Navy chinos', [C('navy')]],
@@ -232,7 +232,7 @@ export function demoItems() {
     ['layer', 'blazer', 'Navy blazer', [C('navy')]],
     ['layer', 'denim jacket', 'Denim jacket', [C('denim')], { material: 'denim' }],
     ['neckwear', 'tie', 'Burgundy tie', [C('burgundy')]],
-    ['headwear', 'beanie', 'Grey beanie', [C('grey')]],
+    ['headwear', 'beanie', 'Gray beanie', [C('gray')]],
   ];
   return d.map(([slot, kind, name, colors, extra], i) => makeItem({ id: `demo-${i + 1}`, slot, kind, name, colors, ...extra, createdAt: Date.now() + i }));
 }

@@ -28,7 +28,7 @@ test('segment: dark floor with light shirts, strong noise', () => {
   assert.equal(segmentItems(im).length, 5);
 });
 
-test('segment: coloured sheet', () => {
+test('segment: colored sheet', () => {
   const im = flatLay({ bg: [120, 150, 190], items: standardItems(4).map((it) => ({ ...it, color: [235, 235, 232] })), noise: 5, shadow: 0.35, gradient: 0.2 });
   assert.equal(segmentItems(im).length, 4);
 });

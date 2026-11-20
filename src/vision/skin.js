@@ -15,7 +15,7 @@ function ellipseOf(im, e) {
   return { cx: num(o.cx, im.width / 2), cy: num(o.cy, im.height / 2), rx: Math.max(2, rx), ry: Math.max(2, ry) };
 }
 
-/** Is this Lab colour plausibly skin? (pink-red .. yellow-olive hue, modest chroma, not black/white). */
+/** Is this Lab color plausibly skin? (pink-red .. yellow-olive hue, modest chroma, not black/white). */
 function skinLike(L, a, b) {
   if (L < 12 || L > 96) return false;
   const C = Math.hypot(a, b);
@@ -31,7 +31,7 @@ function skinLike(L, a, b) {
  * chroma window) and takes a trimmed mean in Lab.
  * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData
  * @param {{cx?:number,cy?:number,rx?:number,ry?:number,whitePoint?:number[]}} [opts]  whitePoint: RGB believed neutral
- *   (e.g. estimateWhitePoint of the same photo); channels are rescaled so it becomes grey.
+ *   (e.g. estimateWhitePoint of the same photo); channels are rescaled so it becomes gray.
  * @returns {{hex:string,lab:number[],depth:'light'|'medium'|'deep',undertoneGuess:'warm'|'cool'|'neutral',confidence:number}|null}
  *   null when fewer than ~40 skin-like pixels (or < 20% of the sampled region) are found.
  */
@@ -139,7 +139,7 @@ export function guessContrast(imageData, ellipse, skinLab) {
 
 /**
  * Head-and-shoulders mask: models the background from the image border (same approach as segmentItems), keeps the
- * foreground component that overlaps the oval most, and always includes the inner oval so a face close to the wall colour
+ * foreground component that overlaps the oval most, and always includes the inner oval so a face close to the wall color
  * is not cut out. Feed the result to refineMaskAlpha / cutoutCanvas.
  * @returns {{x:number,y:number,w:number,h:number,mask:Uint8Array,area:number}|null}  box-sized mask like segmentItems
  */

@@ -17,7 +17,7 @@ const HANGER = `<svg class="hanger-svg" viewBox="0 0 60 30" aria-hidden="true" f
 const HAMPER = `<svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true" focusable="false"><path d="M8 18h32l-3 22a3 3 0 0 1-3 2.6H14a3 3 0 0 1-3-2.6L8 18Z" fill="#ffc933" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M6 18h36M16 24v12M24 24v12M32 24v12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M14 18c1-6 5-9 10-9s9 3 10 9" fill="#3fd6a0" stroke="currentColor" stroke-width="2.6"/></svg>`;
 const safeHex = (x) => (typeof x === 'string' && /^#[0-9a-f]{6}$/i.test(x) ? x : '#8e9196');
 
-/** Joyful washing machine: spinning drum full of the actual colours, bubbles, FRESH! stamp. Resolves when it is gone. */
+/** Joyful washing machine: spinning drum full of the actual colors, bubbles, FRESH! stamp. Resolves when it is gone. */
 async function washAnimation(items) {
   const hexes = items.slice(0, 7).map((i) => safeHex(i.colors && i.colors[0] && i.colors[0].hex));
   while (hexes.length < 5) hexes.push(['#ff5a3c', '#2f4bff', '#ffc933', '#3fd6a0', '#ff8fb1'][hexes.length]);
@@ -130,7 +130,7 @@ export function mount(root, { navigate }) {
     return h('section', { class: 'laundry-bar', 'aria-label': 'Laundry' },
       h('div', { class: 'hamper' },
         h('span', { class: 'hamper-ico', 'aria-hidden': 'true', html: HAMPER }),
-        h('div', {}, h('b', { class: 'hamper-count', 'aria-live': 'polite' }, n ? `${n} in the hamper` : 'Hamper’s empty'), h('small', {}, n ? 'Greyed out below and left out of outfits' : 'Everything is fresh'))),
+        h('div', {}, h('b', { class: 'hamper-count', 'aria-live': 'polite' }, n ? `${n} in the hamper` : 'Hamper’s empty'), h('small', {}, n ? 'Grayed out below and left out of outfits' : 'Everything is fresh'))),
       h('button', { class: 'laundry-btn', type: 'button', onclick: runLaundry },
         h('span', { class: 'laundry-btn-ico', 'aria-hidden': 'true', html: icon('droplet', { size: 24, sw: 2.6 }) }),
         h('span', { class: 'laundry-btn-txt' }, h('b', {}, 'Laundry Day'), h('small', {}, 'Wash everything, reset wears'))));

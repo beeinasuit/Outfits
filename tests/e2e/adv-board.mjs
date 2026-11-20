@@ -30,7 +30,7 @@ const ccol = (f) => [col(f)];
 const FORMAL = [
   { id: 'f-top1', slot: 'top', kind: 'button-down', name: 'White dress shirt', colors: ccol('white'), collared: true },
   { id: 'f-top2', slot: 'top', kind: 'oxford', name: 'Navy oxford', colors: ccol('navy'), collared: true },
-  { id: 'f-bot1', slot: 'bottom', kind: 'chinos', name: 'Grey trousers', colors: ccol('grey'), beltLoops: true },
+  { id: 'f-bot1', slot: 'bottom', kind: 'chinos', name: 'Gray trousers', colors: ccol('gray'), beltLoops: true },
   { id: 'f-bot2', slot: 'bottom', kind: 'chinos', name: 'Navy chinos', colors: ccol('navy'), beltLoops: true },
   { id: 'f-sh1', slot: 'shoes', kind: 'derbies', name: 'Black derbies', colors: ccol('black'), leather: 'black' },
   { id: 'f-sh2', slot: 'shoes', kind: 'boots', name: 'Brown boots', colors: ccol('brown'), leather: 'brown' },
@@ -39,7 +39,7 @@ const FORMAL = [
   { id: 'f-lay1', slot: 'layer', kind: 'blazer', name: 'Navy blazer', colors: ccol('navy') },
   { id: 'f-lay2', slot: 'layer', kind: 'denim jacket', name: 'Denim jacket', colors: ccol('denim') },
   { id: 'f-tie1', slot: 'neckwear', kind: 'tie', name: 'Burgundy tie', colors: ccol('burgundy') },
-  { id: 'f-hat1', slot: 'headwear', kind: 'beanie', name: 'Grey beanie', colors: ccol('grey') },
+  { id: 'f-hat1', slot: 'headwear', kind: 'beanie', name: 'Gray beanie', colors: ccol('gray') },
 ];
 const MINIMAL = [
   { id: 'm-top', slot: 'top', kind: 't-shirt', name: 'Only tee', colors: ccol('white') },
@@ -455,7 +455,7 @@ try {
     const view = await page.waitForSelector('.fit-view, .error-note', { timeout: 40000 }).then((e) => e.evaluate((n) => n.className)).catch(() => 'timeout');
     let outcome = view;
     if (/fit-view/.test(view)) {
-      await page.locator('.analyse-btn').click();
+      await page.locator('.analyze-btn').click();
       await page.waitForFunction(() => !document.querySelector('.busy') && (document.querySelector('.selfie-card') || document.querySelector('.fit-view')), null, { timeout: 60000 }).catch(() => {});
       await page.waitForTimeout(800);
       outcome = (await page.locator('.selfie-card').count()) ? 'home' : 'fit';
@@ -495,7 +495,7 @@ try {
     const e0 = errors.length;
     const r = await selfieFlow(page, buf, 'huge.jpg', 'image/jpeg');
     const mine = errors.slice(e0).filter((x) => /n12 /.test(x));
-    check('N12a', `6000x4000 selfie (${Math.round(buf.length / 1024)} KB): analysed and saved in < 30 s, no errors`, r.outcome === 'home' && r.ms < 30000 && mine.length === 0, `${r.outcome} ${r.ms}ms ${mine.slice(0, 2).join('|')}`);
+    check('N12a', `6000x4000 selfie (${Math.round(buf.length / 1024)} KB): analyzed and saved in < 30 s, no errors`, r.outcome === 'home' && r.ms < 30000 && mine.length === 0, `${r.outcome} ${r.ms}ms ${mine.slice(0, 2).join('|')}`);
     await shot(page, 'n12-huge-selfie');
     await hashTo(page, 'today', 1800); await settleShuffle(page).catch(() => {});
     await shot(page, 'n12-today-after-selfie');
@@ -554,7 +554,7 @@ try {
     const { ctx, page } = await newCtx(browser, R, { tag: 'n14 ' });
     await demoToday(page);
     await page.close();
-    const exp = { battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colours', today: 'Today’s outfit', spin: 'Today’s outfit' };
+    const exp = { battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colors', today: 'Today’s outfit', spin: 'Today’s outfit' };
     for (const r of ['battle', 'plan', 'profile', 'today', 'spin']) {
       const p = await ctx.newPage(); attach(p, R, 'n14 ');
       await p.goto(BASE + `#/${r}`, { waitUntil: 'load' });
@@ -588,7 +588,7 @@ try {
     await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 8000 }).catch(() => {});
     await page.waitForTimeout(1500);
     await ctx.setOffline(true);
-    const exp = { today: 'Today’s outfit', closet: 'Closet', looks: 'Lookbook', snap: 'Add clothes', settings: 'Settings', battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colours' };
+    const exp = { today: 'Today’s outfit', closet: 'Closet', looks: 'Lookbook', snap: 'Add clothes', settings: 'Settings', battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colors' };
     const bad = [];
     for (const [r, t] of Object.entries(exp)) {
       await page.goto(BASE + `#/${r}`, { waitUntil: 'load' }).catch(() => {});

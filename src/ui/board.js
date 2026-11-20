@@ -4,8 +4,8 @@
 //   items  Object<slot, Item>   slot -> item (top + bottom normally present; everything else optional)
 //   opts   {
 //     profile?:     Profile | null   when profile.cutoutId is set, the user's head-and-shoulders cutout sits at the top
-//                                    so colours are seen next to their own face (pass ctx.profile; null = no face)
-//     interactive?: boolean = true   swap / remove / lock controls + ghost "+ layer" chips (only honoured for size 'full')
+//                                    so colors are seen next to their own face (pass ctx.profile; null = no face)
+//     interactive?: boolean = true   swap / remove / lock controls + ghost "+ layer" chips (only honored for size 'full')
 //     size?:        'full' | 'card' | 'mini' = 'full'   card/mini are static thumbnails sized by their parent's width
 //     animate?:     boolean = (size === 'full')        pieces drop onto the surface on first render
 //     locks?:       Object<slot, itemId>               pieces whose id matches show a pressed lock toggle
@@ -17,7 +17,7 @@
 //   }
 //
 // The element is self-contained: it sizes to its parent's width (aspect ratio follows the pieces present), uses
-// container-query units for shadows, honours prefers-reduced-motion, and needs only styles/today.css.
+// container-query units for shadows, honors prefers-reduced-motion, and needs only styles/today.css.
 // Extra methods on the returned element:
 //   el.update(items, { animate = true })  diff by slot: unchanged pieces stay, new ones land, gone ones leave
 //   el.flyOut({ keep = [] }) -> Promise   pieces (except `keep` slots) fly off the surface

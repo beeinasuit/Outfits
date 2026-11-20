@@ -77,7 +77,7 @@ export function mount(root, { navigate }) {
         : h('div', { class: 'taste-body' },
           t.likes.length ? h('div', {}, h('h3', { class: 'taste-h' }, 'You tend to love'), rowsOf(t.likes, 'like')) : null,
           t.dislikes.length ? h('div', {}, h('h3', { class: 'taste-h' }, 'You tend to skip'), rowsOf(t.dislikes, 'dislike')) : null,
-          h('p', { class: 'hint' }, `Learned from ${signals} signal${signals === 1 ? '' : 's'}, recent ones count more. It nudges scores a little; it never overrules the colour rules.`)),
+          h('p', { class: 'hint' }, `Learned from ${signals} signal${signals === 1 ? '' : 's'}, recent ones count more. It nudges scores a little; it never overrules the color rules.`)),
       toggle('useTaste', 'Use my taste in scoring', 'Nudge outfits toward what you usually pick', on, () => setSetting({ useTaste: !on }).then(render)),
       signals ? h('button', { class: 'btn btn-danger-ghost', type: 'button', onclick: async () => {
         const ok = await confirmDialog({ title: 'Forget your taste?', body: 'This clears everything learned from your battles, likes and wears. Your clothes and settings stay.', confirmText: 'Forget it', danger: true });
@@ -88,14 +88,14 @@ export function mount(root, { navigate }) {
   const toggle = (key, label, hint, on, fn) => h('button', { class: 'toggle-row', type: 'button', role: 'switch', 'aria-checked': String(on), 'data-key': key, onclick: fn },
     h('span', { class: 'toggle-text' }, h('b', {}, label), h('small', {}, hint)), h('span', { class: 'switch' + (on ? ' on' : ''), 'aria-hidden': 'true' }, h('i'), h('em', {}, on ? 'On' : 'Off')));
 
-  function colourCard(s) {
+  function colorCard(s) {
     const p = makeProfile(s.profile || {});
     const has = p.undertone || p.depth || p.contrast;
     const bits = [p.undertone && `${p.undertone} undertone`, p.depth && `${p.depth} depth`, p.contrast && `${p.contrast} contrast`].filter(Boolean);
     return h('section', { class: 'set-card' },
-      h('h2', {}, h('span', { html: icon('sparkle') }), 'Your colours'),
-      h('p', {}, has ? `${bits.join(', ')}${p.enabled ? '' : ' (matching is off)'}. Outfits get a small nudge toward colours that flatter you.` : 'Take a selfie and a quick drape test so outfits can favour colours that flatter you. Optional, private, on your phone only.'),
-      h('a', { class: 'btn btn-cobalt', href: '#/profile', 'data-goto': 'profile' }, has ? 'Open Your colours' : 'Find my colours'),
+      h('h2', {}, h('span', { html: icon('sparkle') }), 'Your colors'),
+      h('p', {}, has ? `${bits.join(', ')}${p.enabled ? '' : ' (matching is off)'}. Outfits get a small nudge toward colors that flatter you.` : 'Take a selfie and a quick drape test so outfits can favor colors that flatter you. Optional, private, on your phone only.'),
+      h('a', { class: 'btn btn-cobalt', href: '#/profile', 'data-goto': 'profile' }, has ? 'Open Your colors' : 'Find my colors'),
       p.selfieId ? toggle('selfieBackup', 'Include selfie in backups', 'Off by default. Your face stays out of backup files unless you say so.', p.includeSelfieInBackup, () => setSetting({ profile: makeProfile({ ...p, includeSelfieInBackup: !p.includeSelfieInBackup }) }).then(render)) : null);
   }
 
@@ -113,12 +113,12 @@ export function mount(root, { navigate }) {
       !info.persistent ? h('section', { class: 'set-card warn' }, h('h2', {}, h('span', { html: icon('alert') }), 'Not saving'), h('p', {}, 'This browser is blocking storage (private mode?), so your closet will vanish when you close the tab. Open the app in a normal window to keep your clothes.')) : '',
       h('section', { class: 'set-card' }, h('h2', {}, h('span', { html: icon('droplet') }), 'Laundry'),
         toggle('autoHamper', 'Auto-hamper', 'After you wear something enough times it hops into the hamper by itself. Set the limit per item.', s.autoHamper !== false, () => setSetting({ autoHamper: !(s.autoHamper !== false) }).then(render))),
-      colourCard(s),
+      colorCard(s),
       tasteCard(s),
       h('section', { class: 'set-card' }, h('h2', {}, h('span', { html: icon('download') }), 'Back up'),
         h('p', {}, `${real} item${real === 1 ? '' : 's'} in your closet. Last backup: ${last}.`),
         h('button', { class: 'btn btn-cobalt', type: 'button', onclick: backup, html: `${icon('download', { size: 20 })} Download backup` }),
-        h('p', {}, 'Saves clothes, photos, ratings and your taste history as one file named fit-machine-backup-YYYY-MM-DD.json. Your selfie stays out unless you opt in under Your colours.')),
+        h('p', {}, 'Saves clothes, photos, ratings and your taste history as one file named fit-machine-backup-YYYY-MM-DD.json. Your selfie stays out unless you opt in under Your colors.')),
       h('section', { class: 'set-card' }, h('h2', {}, h('span', { html: icon('upload') }), 'Restore'),
         h('p', {}, 'Bring a backup file back. You can merge it into what’s here or replace everything.'),
         h('button', { class: 'btn', type: 'button', onclick: () => fileInput.click(), html: `${icon('upload', { size: 20 })} Choose backup file` }), fileInput),
@@ -143,7 +143,7 @@ export function mount(root, { navigate }) {
       h('section', { class: 'set-card' }, h('h2', {}, h('span', { html: icon('info') }), 'About'),
         h('div', { class: 'kv' }, h('span', {}, 'Fit Machine'), h('span', {}, `v${APP_VERSION}`)),
         h('div', { class: 'kv' }, h('span', {}, 'Storage'), h('span', {}, info.persistent ? 'On this device (IndexedDB)' : 'Memory only')),
-        h('p', {}, 'Your clothes, your phone, no account, no server. Photos are analysed right here and never uploaded.')));
+        h('p', {}, 'Your clothes, your phone, no account, no server. Photos are analyzed right here and never uploaded.')));
   }
 
   render();

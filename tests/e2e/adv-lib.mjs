@@ -74,11 +74,11 @@ export async function loadDemo(page) {
   await page.evaluate(async () => { const d = await import('./src/ui/data.js'); await d.loadDemo(); });
 }
 
-export const col = (family, hex) => ({ family, hex: hex || ({ black: '#1c1c1e', white: '#f5f5f2', navy: '#1f2a44', grey: '#8e9196', denim: '#4a6286', brown: '#6b4a2f', beige: '#d8c3a0', olive: '#5d6136', red: '#d13b3b' }[family] || '#8e9196'), weight: 1 });
+export const col = (family, hex) => ({ family, hex: hex || ({ black: '#1c1c1e', white: '#f5f5f2', navy: '#1f2a44', gray: '#8e9196', denim: '#4a6286', brown: '#6b4a2f', beige: '#d8c3a0', olive: '#5d6136', red: '#d13b3b' }[family] || '#8e9196'), weight: 1 });
 
 /** n deterministic items spread across slots. */
 export function bigCloset(n, rnd) {
-  const fam = ['black', 'white', 'navy', 'grey', 'denim', 'brown', 'beige', 'olive', 'red'];
+  const fam = ['black', 'white', 'navy', 'gray', 'denim', 'brown', 'beige', 'olive', 'red'];
   const slots = [['top', 't-shirt', 0.34], ['bottom', 'jeans', 0.24], ['shoes', 'sneakers', 0.14], ['belt', 'leather belt', 0.08], ['layer', 'blazer', 0.1], ['neckwear', 'tie', 0.05], ['headwear', 'beanie', 0.05]];
   const out = [];
   for (let i = 0; i < n; i++) {

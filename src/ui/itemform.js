@@ -42,7 +42,7 @@ export const draftToItem = (d, extra = {}) => makeItem({ ...d, ...extra });
 const famLabel = (f) => cap(f.replace('-', ' '));
 const lumOf = (hex) => { const n = parseInt(hex.slice(1), 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
 
-function normaliseWeights(colors) {
+function normalizeWeights(colors) {
   const sum = colors.reduce((a, c) => a + (c.weight || 0), 0) || 1;
   colors.forEach((c) => { c.weight = Math.round((c.weight / sum) * 100) / 100; });
 }
@@ -76,20 +76,20 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
     }
   };
 
-  // --- colours
+  // --- colors
   const selBox = h('div', { class: 'sel-colors' });
-  const palBox = h('div', { class: 'palette', role: 'group', 'aria-label': 'Colour palette' });
+  const palBox = h('div', { class: 'palette', role: 'group', 'aria-label': 'Color palette' });
   const colorHint = h('p', { class: 'hint' });
   const renderColors = () => {
     clear(selBox); clear(palBox);
     d.colors.forEach((c, i) => {
       selBox.append(h('span', { class: 'sel-chip' },
-        h('button', { class: 'sel-main', type: 'button', 'aria-label': `${famLabel(c.family)}${i === 0 ? ' (main colour)' : ': make main colour'}`, onclick: () => { if (i === 0) return; d.colors.unshift(d.colors.splice(i, 1)[0]); renderColors(); changed(); } },
+        h('button', { class: 'sel-main', type: 'button', 'aria-label': `${famLabel(c.family)}${i === 0 ? ' (main color)' : ': make main color'}`, onclick: () => { if (i === 0) return; d.colors.unshift(d.colors.splice(i, 1)[0]); renderColors(); changed(); } },
           h('i', { class: 'dot', style: { background: c.hex } }), famLabel(c.family), i === 0 ? h('b', { class: 'main-tag' }, 'main') : null),
-        h('button', { class: 'sel-x', type: 'button', 'aria-label': `Remove ${famLabel(c.family)}`, html: icon('x', { size: 14 }), onclick: () => { d.colors.splice(i, 1); normaliseWeights(d.colors); renderColors(); changed(); } })));
+        h('button', { class: 'sel-x', type: 'button', 'aria-label': `Remove ${famLabel(c.family)}`, html: icon('x', { size: 14 }), onclick: () => { d.colors.splice(i, 1); normalizeWeights(d.colors); renderColors(); changed(); } })));
     });
-    if (!d.colors.length) selBox.append(h('span', { class: 'hint' }, 'Tap a colour below'));
-    colorHint.textContent = d.colors.length > 1 ? 'Tap a chip to make it the main colour.' : 'Add a second colour for stripes, trims or two-tone pieces.';
+    if (!d.colors.length) selBox.append(h('span', { class: 'hint' }, 'Tap a color below'));
+    colorHint.textContent = d.colors.length > 1 ? 'Tap a chip to make it the main color.' : 'Add a second color for stripes, trims or two-tone pieces.';
     for (const [fam, info] of Object.entries(COLOR_FAMILIES)) {
       const on = d.colors.some((c) => c.family === fam);
       palBox.append(h('button', { class: 'swatch' + (lumOf(info.hex) > 0.6 ? ' light' : ''), type: 'button', style: { background: info.hex }, title: famLabel(fam), 'aria-label': famLabel(fam), 'aria-pressed': String(on),
@@ -98,7 +98,7 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
           const idx = d.colors.findIndex((c) => c.family === fam);
           if (idx >= 0) d.colors.splice(idx, 1);
           else { if (d.colors.length >= 3) d.colors.pop(); d.colors.push({ hex: info.hex, family: fam, weight: 0.25 }); }
-          normaliseWeights(d.colors); renderColors(); changed();
+          normalizeWeights(d.colors); renderColors(); changed();
         } }, on ? h('span', { html: icon('check', { size: 16, sw: 3.4 }) }) : null));
     }
   };
@@ -174,7 +174,7 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
   root.append(
     fieldset('What is it?', slotBox),
     fieldset('Kind', kindBox),
-    fieldset('Colours', selBox, palBox, colorHint),
+    fieldset('Colors', selBox, palBox, colorHint),
     fieldset('Pattern', patBox),
     h('div', { class: 'fld' }, h('label', { class: 'legend', for: fid }, 'Dress level'), fRange, fLabel,
       h('div', { class: 'range-ticks', 'aria-hidden': 'true' }, Object.values(FORMALITY).map((t) => h('span', {}, t)))),

@@ -63,7 +63,7 @@ export function checks(width, height, { c1 = [180, 30, 40], c2 = [235, 235, 235]
   }
   return noiseSigma ? addNoise(im, noiseSigma, seed) : im;
 }
-/** Multi-colour irregular blobs, e.g. a floral/graphic print. */
+/** Multi-color irregular blobs, e.g. a floral/graphic print. */
 export function print(width, height, { seed = 9, palette = [[200, 40, 60], [240, 200, 60], [40, 120, 200], [250, 250, 250], [30, 140, 80], [120, 40, 140]] } = {}) {
   const r = rng(seed), im = solid(width, height, palette[3]);
   for (let k = 0; k < 140; k++) {
@@ -157,7 +157,7 @@ export function flatLay({ width = 1024, height = 768, bg = [225, 222, 215], item
   return im;
 }
 
-/** Standard layouts (1024x768) with distinct clothing colours. n = 3, 5 or 6. */
+/** Standard layouts (1024x768) with distinct clothing colors. n = 3, 5 or 6. */
 export function standardItems(n, { belt = false } = {}) {
   const cols = [[31, 42, 68], [196, 60, 50], [60, 90, 60], [200, 160, 60], [90, 70, 120], [40, 40, 44]];
   const spots = n <= 3

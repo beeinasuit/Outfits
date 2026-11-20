@@ -1,4 +1,4 @@
-// YOUR COLOURS: selfie (optional) + drape test + manual pickers. Writes settings.profile (see makeProfile in model.js).
+// YOUR COLORS: selfie (optional) + drape test + manual pickers. Writes settings.profile (see makeProfile in model.js).
 // The selfie never leaves the device and is left out of backups unless the user opts in.
 import { COLOR_FAMILIES, UNDERTONES, DEPTHS, CONTRASTS, makeProfile } from '../model.js';
 import { h, clear, cap, html, nextFrame, shuffle, drag } from './dom.js';
@@ -22,13 +22,13 @@ async function vision() {
   return visionMods;
 }
 
-/** The six drape rounds. vote = which undertone the colour belongs to; con = contrast nudge (+ = high). */
+/** The six drape rounds. vote = which undertone the color belongs to; con = contrast nudge (+ = high). */
 export const ROUNDS = [
   { a: { name: 'Gold', hex: '#d6a62b', vote: 'warm' }, b: { name: 'Silver', hex: '#bfc4cd', vote: 'cool' } },
   { a: { name: 'Rust', hex: '#a4502a', vote: 'warm' }, b: { name: 'Burgundy', hex: '#6d1f2f', vote: 'cool' } },
   { a: { name: 'Cream', hex: '#efe2c2', vote: 'warm', con: -0.5 }, b: { name: 'Pure white', hex: '#ffffff', vote: 'cool', con: 0.5 } },
   { a: { name: 'Black', hex: '#1c1c1e', vote: null, con: 1 }, b: { name: 'Charcoal', hex: '#3d4046', vote: null, con: -1 } },
-  { a: { name: 'Camel', hex: '#c19a6b', vote: 'warm' }, b: { name: 'Grey', hex: '#8e9196', vote: 'cool' } },
+  { a: { name: 'Camel', hex: '#c19a6b', vote: 'warm' }, b: { name: 'Gray', hex: '#8e9196', vote: 'cool' } },
   { a: { name: 'Coral', hex: '#ff7f6b', vote: 'warm' }, b: { name: 'Fuchsia pink', hex: '#d8318f', vote: 'cool' } },
 ];
 
@@ -48,7 +48,7 @@ export function tallyDrape(picks, { contrastGuess = null } = {}) {
 
 const FLATTER = {
   warm: ['olive', 'rust', 'beige', 'cream', 'mustard', 'brown', 'forest', 'orange'],
-  cool: ['navy', 'burgundy', 'white', 'grey', 'blue', 'pink', 'lavender', 'teal'],
+  cool: ['navy', 'burgundy', 'white', 'gray', 'blue', 'pink', 'lavender', 'teal'],
   neutral: ['navy', 'olive', 'cream', 'charcoal', 'denim', 'burgundy', 'teal', 'beige'],
 };
 const FRIENDS = {
@@ -134,10 +134,10 @@ export function mount(root, { navigate }) {
       h('p', { class: 'hint' }, 'Daylight, no filters, no heavy shadows. The oval should sit over forehead, cheeks and chin. Hair and background are fine, I only sample skin.'),
       h('div', { class: 'row gap between wrap' },
         h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => { URL.revokeObjectURL(F.url); S.fit = null; S.view = 'home'; render(); } }, 'Cancel'),
-        h('button', { class: 'btn btn-cobalt analyse-btn', type: 'button', onclick: analyse }, 'Looks good, read my colours')));
+        h('button', { class: 'btn btn-cobalt analyze-btn', type: 'button', onclick: analyze }, 'Looks good, read my colors')));
   }
 
-  async function analyse() {
+  async function analyze() {
     const F = S.fit, o = F.oval;
     S.view = 'busy'; S.busyMsg = 'Reading your skin tone…'; render();
     try {
@@ -222,7 +222,7 @@ export function mount(root, { navigate }) {
       h('div', { class: 'drape-dots', 'aria-hidden': 'true' }, ROUNDS.map((_, i) => h('i', { class: i < S.round ? 'done' : i === S.round ? 'now' : '' }))),
       h('h3', { class: 'drape-q' }, 'Which one makes you glow?'),
       h('div', { class: 'drape-pair', key: S.round }, opts.map(panel)),
-      h('p', { class: 'hint' }, 'Look at your face and skin, not the cloth. Which colour makes you look brighter and healthier? Gut feeling wins.'),
+      h('p', { class: 'hint' }, 'Look at your face and skin, not the cloth. Which color makes you look brighter and healthier? Gut feeling wins.'),
       h('div', { class: 'row gap between' },
         S.round > 0 ? h('button', { class: 'btn btn-small btn-ghost', type: 'button', onclick: () => { S.round--; render(); } }, 'Back') : h('span'),
         h('button', { class: 'btn btn-small btn-ghost', type: 'button', onclick: () => { S.view = 'home'; render(); } }, 'Quit test')));
@@ -246,11 +246,11 @@ export function mount(root, { navigate }) {
     const c = S.reveal.contrast || p.contrast || 'medium';
     const extra = c === 'high' ? 'Bold pairings like black and white work for you.' : c === 'low' ? 'Soft, tonal outfits flatter you more than stark contrast.' : 'You can go bold or soft, both land.';
     return h('section', { class: 'reveal', 'aria-live': 'polite' },
-      h('div', { class: 'reveal-stamp' }, 'YOUR COLOURS'),
+      h('div', { class: 'reveal-stamp' }, 'YOUR COLORS'),
       h('h2', { class: 'reveal-title' }, `You’re ${u}-toned with ${c} contrast`),
       h('p', {}, `${cap(FRIENDS[u])} are your friends. ${extra}`),
-      h('ul', { class: 'swatches', 'aria-label': 'Colours that flatter you' }, FLATTER[u].map((f) => h('li', {}, h('i', { class: 'sw', style: { background: COLOR_FAMILIES[f].hex } }), h('span', {}, famLabel(f))))),
-      h('p', { class: 'hint' }, 'Saved. Outfit scores now give these colours a small nudge near your face. It never vetoes anything.'));
+      h('ul', { class: 'swatches', 'aria-label': 'Colors that flatter you' }, FLATTER[u].map((f) => h('li', {}, h('i', { class: 'sw', style: { background: COLOR_FAMILIES[f].hex } }), h('span', {}, famLabel(f))))),
+      h('p', { class: 'hint' }, 'Saved. Outfit scores now give these colors a small nudge near your face. It never vetoes anything.'));
   }
 
   function selfieCard() {
@@ -263,8 +263,8 @@ export function mount(root, { navigate }) {
       h('div', { class: 'selfie-row' },
         h('div', { class: 'selfie-view' + (S.cutoutUrl ? ' has' : ''), 'aria-label': S.cutoutUrl ? 'Your head-and-shoulders cutout' : 'No selfie yet' }, S.cutoutUrl ? h('img', { src: S.cutoutUrl, alt: 'Your head-and-shoulders cutout' }) : h('span', { html: SILHOUETTE() })),
         h('div', { class: 'selfie-info' },
-          has ? h('p', {}, 'This is the cutout the outfit board shows at the top, so you see colours next to your own face.') : h('p', {}, 'Optional, but the board gets personal: your face sits above the outfit, and colours are matched to you.'),
-          p.skinHex ? h('div', { class: 'skin-read' }, h('i', { class: 'sw skin-sw', style: { background: p.skinHex }, role: 'img', 'aria-label': `Sampled skin colour ${p.skinHex}` }),
+          has ? h('p', {}, 'This is the cutout the outfit board shows at the top, so you see colors next to your own face.') : h('p', {}, 'Optional, but the board gets personal: your face sits above the outfit, and colors are matched to you.'),
+          p.skinHex ? h('div', { class: 'skin-read' }, h('i', { class: 'sw skin-sw', style: { background: p.skinHex }, role: 'img', 'aria-label': `Sampled skin color ${p.skinHex}` }),
             h('span', {}, [dTxt, S.analysis && S.analysis.undertone ? `${S.analysis.undertone} undertone` : null].filter(Boolean).join(', '))) : null,
           conf ? h('p', { class: 'hint' }, `Undertone from a photo is ${conf}. Lighting can fool cameras, so the drape test below decides.`) : (p.skinHex ? h('p', { class: 'hint' }, 'Depth from a photo is fairly reliable. Undertone is not: lighting can fool cameras, so the drape test decides.') : null))),
       S.error ? h('p', { class: 'error-note', role: 'alert' }, S.error) : null,
@@ -276,7 +276,7 @@ export function mount(root, { navigate }) {
   }
 
   async function deleteSelfie() {
-    const ok = await confirmDialog({ title: 'Delete your selfie?', body: 'The photo and cutout are removed from this phone. Your colour settings stay.', confirmText: 'Delete selfie', danger: true });
+    const ok = await confirmDialog({ title: 'Delete your selfie?', body: 'The photo and cutout are removed from this phone. Your color settings stay.', confirmText: 'Delete selfie', danger: true });
     if (!ok) return;
     const p = profile();
     for (const id of [p.selfieId, p.cutoutId]) if (id) { try { await store.deletePhoto(id); } catch { /* ignore */ } }
@@ -290,7 +290,7 @@ export function mount(root, { navigate }) {
     const p = profile();
     return h('section', { class: 'set-card' },
       h('h2', {}, h('span', { html: icon('sparkle') }), 'The drape test'),
-      h('p', {}, 'Stylists hold colours under your chin and watch your face. Six quick rounds, gold against silver, rust against burgundy, and so on. Pick the one that makes you glow.'),
+      h('p', {}, 'Stylists hold colors under your chin and watch your face. Six quick rounds, gold against silver, rust against burgundy, and so on. Pick the one that makes you glow.'),
       h('button', { class: 'btn btn-tomato drape-start', type: 'button', onclick: startDrape }, p.undertone ? 'Take the test again' : 'Start the drape test'),
       !S.cutoutUrl ? h('p', { class: 'hint' }, 'No selfie? No problem: you’ll see a friendly silhouette instead.') : null);
   }
@@ -304,7 +304,7 @@ export function mount(root, { navigate }) {
       h('small', { class: 'hint' }, hint));
     return h('section', { class: 'set-card' },
       h('h2', {}, h('span', { html: icon('pencil') }), 'Set by hand'),
-      group('undertone', 'Undertone', UNDERTONES, 'Warm leans golden, cool leans pink or blue. Gold jewellery flattering you means warm.'),
+      group('undertone', 'Undertone', UNDERTONES, 'Warm leans golden, cool leans pink or blue. Gold jewelry flattering you means warm.'),
       group('depth', 'Skin depth', DEPTHS, 'How light or deep your skin is overall.'),
       group('contrast', 'Contrast', CONTRASTS, 'The gap between your skin, hair and eyes. Dark hair on pale skin is high. Soft hair on skin of similar depth is low.'));
   }
@@ -316,16 +316,16 @@ export function mount(root, { navigate }) {
     return h('section', { class: 'set-card' },
       h('button', { class: 'toggle-row', type: 'button', role: 'switch', 'aria-checked': String(!!on), disabled: !any, 'data-key': 'complexion',
         onclick: () => { buzz(8); save({ enabled: !on }); } },
-        h('span', { class: 'toggle-text' }, h('b', {}, 'Match colours to my complexion'), h('small', {}, any ? 'A small nudge for colours worn near your face' : 'Set something above to switch this on')),
+        h('span', { class: 'toggle-text' }, h('b', {}, 'Match colors to my complexion'), h('small', {}, any ? 'A small nudge for colors worn near your face' : 'Set something above to switch this on')),
         h('span', { class: 'switch' + (on ? ' on' : ''), 'aria-hidden': 'true' }, h('i'), h('em', {}, on ? 'On' : 'Off'))));
   }
 
   function homeView() {
     return h('div', { class: 'profile' },
-      h('div', { class: 'page-head' }, h('h2', { class: 'page-title' }, 'Your colours'), h('a', { class: 'page-sub link', href: '#/settings' }, 'Settings')),
-      h('section', { class: 'colours-intro' },
+      h('div', { class: 'page-head' }, h('h2', { class: 'page-title' }, 'Your colors'), h('a', { class: 'page-sub link', href: '#/settings' }, 'Settings')),
+      h('section', { class: 'colors-intro' },
         h('div', { class: 'intro-art', html: mascot('wink', { size: 84 }) }),
-        h('div', {}, h('p', {}, 'The board shows you next to your outfit, and the machine checks colours against your complexion: undertone, depth and contrast.'),
+        h('div', {}, h('p', {}, 'The board shows you next to your outfit, and the machine checks colors against your complexion: undertone, depth and contrast.'),
           h('p', { class: 'privacy' }, h('span', { html: icon('lock', { size: 16 }) }), ' Your selfie never leaves this phone, and it’s left out of backups unless you switch that on in Settings.'))),
       revealCard(),
       selfieCard(), drapeCard(), manualCard(), enableCard());
@@ -339,7 +339,7 @@ export function mount(root, { navigate }) {
     if (!alive) return;
     const y = window.scrollY;
     clear(root);
-    root.append(h('h1', { class: 'sr-only', tabindex: '-1', id: 'screen-title' }, 'Your colours'));
+    root.append(h('h1', { class: 'sr-only', tabindex: '-1', id: 'screen-title' }, 'Your colors'));
     root.append(({ home: homeView, fit: fitView, drape: drapeView, busy: busyView }[S.view] || homeView)());
     if (S.view === 'home') window.scrollTo(0, y);
   }

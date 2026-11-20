@@ -16,7 +16,7 @@ import { setSetting } from './ui/data.js';
 
 const ROUTES = { today, closet, snap, looks, settings, battle, plan, profile };
 const ALIASES = { spin: 'today' };
-const TITLES = { today: 'Today', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings', battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colours' };
+const TITLES = { today: 'Today', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings', battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colors' };
 let current = null;
 let currentName = null;
 let first = true;

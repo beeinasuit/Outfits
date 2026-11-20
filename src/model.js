@@ -145,15 +145,15 @@ export function needsWash(item) {
 }
 
 /**
- * Personal colouring profile (optional). Stored in settings.profile.
- * Drives the complexion rules: colours worn near the face (top, layer, neckwear, headwear) are
+ * Personal coloring profile (optional). Stored in settings.profile.
+ * Drives the complexion rules: colors worn near the face (top, layer, neckwear, headwear) are
  * checked against undertone / depth / contrast. Treated as a nudge, never a veto.
  * @typedef {Object} Profile
  * @property {boolean} enabled
  * @property {'warm'|'cool'|'neutral'|null} undertone
  * @property {'light'|'medium'|'deep'|null}  depth     skin depth
  * @property {'low'|'medium'|'high'|null}    contrast  difference between hair/skin/eyes
- * @property {string|null} skinHex   sampled skin colour (white-balance corrected), informational
+ * @property {string|null} skinHex   sampled skin color (white-balance corrected), informational
  * @property {string|null} selfieId  photo store key of the selfie
  * @property {string|null} cutoutId  photo store key of the head-and-shoulders cutout
  * @property {boolean} includeSelfieInBackup  default false
@@ -161,7 +161,7 @@ export function needsWash(item) {
 export const UNDERTONES = ['warm', 'cool', 'neutral'];
 export const DEPTHS = ['light', 'medium', 'deep'];
 export const CONTRASTS = ['low', 'medium', 'high'];
-/** Slots whose colour sits next to the face, with how much they count for complexion. */
+/** Slots whose color sits next to the face, with how much they count for complexion. */
 export const NEAR_FACE = { top: 1, layer: 0.8, neckwear: 0.7, headwear: 0.9 };
 
 export function makeProfile(p = {}) {
@@ -183,9 +183,9 @@ export const FORMALITY = { 1: 'Lounge', 2: 'Casual', 3: 'Smart casual', 4: 'Busi
 /**
  * Occasions: what the user is dressing for. Data-driven so the engine applies them generically.
  * min/max: acceptable formality window. Optional:
- *  preferFamilies / avoidFamilies: colour families nudged up / down (any slot, primary colour)
+ *  preferFamilies / avoidFamilies: color families nudged up / down (any slot, primary color)
  *  wantKinds: kinds that fit the occasion (+); avoidKinds: kinds that are wrong for it (−−)
- *  wantLayer: a layer (blazer/jacket) is expected; muted: loud colours & busy patterns penalised
+ *  wantLayer: a layer (blazer/jacket) is expected; muted: loud colors & busy patterns penalized
  *  noHeadwear: hats are out (indoors / ceremony)
  */
 export const OCCASIONS = {
@@ -206,26 +206,27 @@ export const OCCASIONS = {
   work:      { label: 'Work', emoji: '💼', min: 3, max: 4,
                avoidKinds: ['graphic tee', 'tank top', 'hoodie', 'sweatpants', 'joggers', 'athletic shorts', 'running shoes', 'sandals'] },
   interview: { label: 'Job interview', emoji: '🤝', min: 4, max: 5, muted: true, wantLayer: true, noHeadwear: true,
-               preferFamilies: ['navy', 'charcoal', 'grey', 'white', 'light-blue'] },
+               preferFamilies: ['navy', 'charcoal', 'gray', 'white', 'light-blue'] },
   church:    { label: 'Church', emoji: '⛪', min: 3, max: 5, muted: true, noHeadwear: true,
                avoidKinds: ['graphic tee', 'tank top', 'shorts', 'athletic shorts', 'hoodie', 'sweatpants', 'joggers', 'running shoes', 'sandals'] },
   wedding:   { label: 'Wedding guest', emoji: '💒', min: 4, max: 5, wantLayer: true, noHeadwear: true,
                avoidFamilies: ['white', 'cream'], avoidKinds: ['jeans', 'sneakers', 'running shoes', 'graphic tee'] },
   funeral:   { label: 'Funeral', emoji: '🕊️', min: 4, max: 5, muted: true, wantLayer: true, noHeadwear: true,
-               preferFamilies: ['black', 'charcoal', 'navy', 'grey'],
+               preferFamilies: ['black', 'charcoal', 'navy', 'gray'],
                avoidFamilies: ['red', 'orange', 'yellow', 'pink', 'purple', 'lavender', 'light-blue', 'mustard', 'green', 'teal'] },
   formal:    { label: 'Formal / black tie', emoji: '🎩', min: 5, max: 5, muted: true, wantLayer: true, noHeadwear: true,
                preferFamilies: ['black', 'navy', 'charcoal', 'white'] },
 };
 
-/** Normalise a user-defined occasion into the OCCASIONS shape. */
+/** Normalize a user-defined occasion into the OCCASIONS shape. */
 export function makeOccasion(o = {}) {
   const clamp = (v, d) => (Number.isFinite(v) ? Math.min(5, Math.max(1, Math.round(v))) : d);
   const min = clamp(o.min, 1), max = Math.max(min, clamp(o.max, 5));
   const list = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string') : undefined);
+  const fams = (v) => list(v)?.map(canonFamily);
   return {
     label: String(o.label || 'My occasion').slice(0, 40), emoji: String(o.emoji || '📍').slice(0, 4), min, max,
-    preferFamilies: list(o.preferFamilies), avoidFamilies: list(o.avoidFamilies),
+    preferFamilies: fams(o.preferFamilies), avoidFamilies: fams(o.avoidFamilies),
     wantKinds: list(o.wantKinds), avoidKinds: list(o.avoidKinds),
     wantLayer: !!o.wantLayer, muted: !!o.muted, noHeadwear: !!o.noHeadwear, custom: true,
   };
@@ -240,18 +241,18 @@ export const WEATHER = {
   freezing: { label: 'Freezing', minWarmth: 3, maxWarmth: 5 },
 };
 
-/** Leather colours. Belt and shoe leather should match when both are leather. */
+/** Leather colors. Belt and shoe leather should match when both are leather. */
 export const LEATHER_TONES = ['black', 'dark-brown', 'brown', 'tan', 'burgundy', 'white', 'other'];
 export const MATERIALS = ['leather', 'suede', 'canvas', 'fabric', 'synthetic', 'knit', 'denim', 'other'];
 
 /**
- * Colour families. Vision maps any RGB to one of these; scoring reasons about families.
+ * Color families. Vision maps any RGB to one of these; scoring reasons about families.
  * `neutral: true` families go with almost anything.
  */
 export const COLOR_FAMILIES = {
   black:      { neutral: true,  hex: '#1c1c1e' },
   charcoal:   { neutral: true,  hex: '#3a3d42' },
-  grey:       { neutral: true,  hex: '#8e9196' },
+  gray:       { neutral: true,  hex: '#8e9196' },
   white:      { neutral: true,  hex: '#f5f5f2' },
   cream:      { neutral: true,  hex: '#efe6d2' },
   beige:      { neutral: true,  hex: '#d8c3a0' }, // khaki / stone / tan cloth
@@ -279,7 +280,7 @@ export const COLOR_FAMILIES = {
  * @typedef {Object} Color
  * @property {string} hex     '#rrggbb' lowercase
  * @property {string} family  key of COLOR_FAMILIES
- * @property {number} weight  0..1 share of the item's pixels (colours of one item sum to ~1)
+ * @property {number} weight  0..1 share of the item's pixels (colors of one item sum to ~1)
  */
 
 /**
@@ -338,6 +339,9 @@ export function todayISO(d = new Date()) {
  * Build a fully-populated Item from a partial one, applying KINDS defaults.
  * Unknown/missing fields get safe defaults. Never throws on odd input; clamps numbers.
  */
+/** Older saves used the British key 'grey'; map it to the current 'gray'. */
+export const canonFamily = (f) => (f === 'grey' ? 'gray' : f);
+
 export function makeItem(partial = {}) {
   if (!partial || typeof partial !== 'object') partial = {};
   const slot = SLOTS.includes(partial.slot) ? partial.slot : 'top';
@@ -349,7 +353,9 @@ export function makeItem(partial = {}) {
   const isLeather = material === 'leather' || material === 'suede';
   const colors = Array.isArray(partial.colors) && partial.colors.length
     ? partial.colors
-        .filter((c) => c && typeof c === 'object' && Object.hasOwn(COLOR_FAMILIES, c.family))
+        .filter((c) => c && typeof c === 'object')
+        .map((c) => ({ ...c, family: canonFamily(c.family) }))
+        .filter((c) => Object.hasOwn(COLOR_FAMILIES, c.family))
         .map((c) => ({
           hex: /^#[0-9a-f]{6}$/i.test(c.hex) ? c.hex.toLowerCase() : COLOR_FAMILIES[c.family].hex,
           family: c.family,
@@ -363,7 +369,7 @@ export function makeItem(partial = {}) {
     kind,
     name: (typeof partial.name === 'string' || typeof partial.name === 'number' ? String(partial.name) : '')
       .replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 80) || defaultName(kind, colors),
-    colors: colors.length ? colors : [{ hex: COLOR_FAMILIES.grey.hex, family: 'grey', weight: 1 }],
+    colors: colors.length ? colors : [{ hex: COLOR_FAMILIES.gray.hex, family: 'gray', weight: 1 }],
     pattern: PATTERNS.includes(partial.pattern) ? partial.pattern : 'solid',
     formality: clamp(partial.formality, 1, 5, d.formality ?? 2),
     warmth: clamp(partial.warmth, 0, 3, d.warmth ?? 0),
@@ -390,7 +396,7 @@ function defaultName(kind, colors) {
 }
 
 export function primaryFamily(item) {
-  return item?.colors?.[0]?.family || 'grey';
+  return item?.colors?.[0]?.family || 'gray';
 }
 
 export function isNeutralFamily(family) {

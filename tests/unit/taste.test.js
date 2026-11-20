@@ -75,7 +75,7 @@ test('like / dislike / wear weights and shrinkage', () => {
   assert.ok(dis.features['face:olive'].w < 0);
 });
 
-test('describeTaste lists the learned favourite', () => {
+test('describeTaste lists the learned favorite', () => {
   const d = describeTaste(learnTaste(battles(16), { now: NOW }));
   assert.ok(d.likes.length <= 5 && d.dislikes.length <= 5);
   assert.ok(d.likes.some((l) => /Olive near your face/.test(l.label)), JSON.stringify(d.likes));

@@ -1,4 +1,4 @@
-// E2E for the "rest" screens: laundry, snap cutouts, Your colours, complexion ranking, plan, settings taste, backup.
+// E2E for the "rest" screens: laundry, snap cutouts, Your colors, complexion ranking, plan, settings taste, backup.
 // Usage: node tests/e2e/rest.mjs [baseURL]   (serve the repo first: python3 -m http.server 8765)
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -83,7 +83,7 @@ try {
   await page.waitForSelector('.laundry-bar');
   const cnt = await page.locator('.hamper-count').textContent();
   check('closet shows hamper counter', /1 in the hamper/.test(cnt), cnt);
-  check('hampered item is greyed with bubbles badge and worn info', await page.locator('.hang.washing .bubbles').count() >= 1 && /worn 1×/.test(await page.locator('.hang.washing .worn-info').first().textContent()));
+  check('hampered item is grayed with bubbles badge and worn info', await page.locator('.hang.washing .bubbles').count() >= 1 && /worn 1×/.test(await page.locator('.hang.washing .worn-info').first().textContent()));
   await page.screenshot({ path: `${shots}/01-closet-hamper.png` });
   await page.locator('.chip', { hasText: 'Hamper' }).click();
   check('hamper filter chip lists only hampered items', await page.locator('.hang').count() === 1);
@@ -173,7 +173,7 @@ try {
   // ---- profile + selfie
   await go(page, 'profile', 700);
   await page.waitForSelector('.profile');
-  check('profile explains privacy', /never leaves this phone/i.test(await page.locator('.colours-intro').textContent()));
+  check('profile explains privacy', /never leaves this phone/i.test(await page.locator('.colors-intro').textContent()));
   await page.screenshot({ path: `${shots}/07-profile-empty.png`, fullPage: true });
   const selfie = await makeSelfie(page);
   await page.locator('input[type=file]:not([capture])').setInputFiles({ name: 'selfie.png', mimeType: 'image/png', buffer: selfie });
@@ -183,7 +183,7 @@ try {
   const ob = await page.locator('.oval-guide').boundingBox();
   await page.mouse.move(ob.x + ob.width / 2, ob.y + ob.height / 2); await page.mouse.down(); await page.mouse.move(ob.x + ob.width / 2 + 2, ob.y + ob.height / 2 + 1, { steps: 3 }); await page.mouse.up();
   await page.screenshot({ path: `${shots}/08-selfie-fit.png` });
-  await page.locator('.analyse-btn').click();
+  await page.locator('.analyze-btn').click();
   await page.waitForSelector('.selfie-view.has', { timeout: 30000 });
   await page.waitForTimeout(500);
   const pf1 = await D(page, `return m.data.settings.profile`);
@@ -300,7 +300,7 @@ try {
   check('use-taste toggle writes setting', (await D(page, `return m.data.settings.useTaste`)) === false);
   check('taste is not passed to the engine when off', (await D(page, `return (await m.getContext()).taste === null`)) === true);
   await page.locator('.toggle-row[data-key="useTaste"]').click(); await page.waitForTimeout(300);
-  check('settings links to Your colours', await page.locator('a[data-goto="profile"]').count() === 1);
+  check('settings links to Your colors', await page.locator('a[data-goto="profile"]').count() === 1);
 
   // ---- backup round-trip
   const bk = await page.evaluate(async () => {
@@ -321,7 +321,7 @@ try {
   await page.locator('dialog.sheet').getByRole('button', { name: 'Delete selfie' }).click();
   await page.waitForTimeout(500);
   const pf3 = await D(page, `return m.data.settings.profile`);
-  check('delete selfie clears ids but keeps colours', !pf3.selfieId && !pf3.cutoutId && !!pf3.undertone);
+  check('delete selfie clears ids but keeps colors', !pf3.selfieId && !pf3.cutoutId && !!pf3.undertone);
 
   // ---- no-selfie drape test works with silhouette
   await page.locator('.drape-start').click();
@@ -377,13 +377,13 @@ try {
   await page.waitForSelector('.onboard');
   for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next' }).click();
   await page.waitForTimeout(500);
-  check('onboarding has an optional colours step', await page.getByRole('button', { name: 'Find my colours now' }).count() === 1);
-  await page.screenshot({ path: `${shots}/23-onboarding-colours-320.png` });
+  check('onboarding has an optional colors step', await page.getByRole('button', { name: 'Find my colors now' }).count() === 1);
+  await page.screenshot({ path: `${shots}/23-onboarding-colors-320.png` });
   o = await overflow(page);
   check('no horizontal overflow @320 (onboarding)', o.sw <= o.cw, JSON.stringify(o));
-  await page.getByRole('button', { name: 'Find my colours now' }).click();
+  await page.getByRole('button', { name: 'Find my colors now' }).click();
   await page.waitForSelector('.profile');
-  check('onboarding colours step opens Your colours', (await page.evaluate(() => location.hash)) === '#/profile');
+  check('onboarding colors step opens Your colors', (await page.evaluate(() => location.hash)) === '#/profile');
   await ctx.close();
 
   // ======================= dark 390 =======================

@@ -36,7 +36,7 @@ test('a belt is ALWAYS present with belt-loop bottoms when a belt is owned, neve
     if (o.items.bottom.beltLoops) { loops++; assert.ok(o.items.belt, `no belt for ${ids(o)}`); } else { loopless++; assert.equal(o.items.belt, undefined); }
   }
   assert.ok(loops > 0);
-  const joggers = buildOutfits(wardrobe(), { today: TODAY, locks: { bottom: 'grey-joggers' }, limit: 10 });
+  const joggers = buildOutfits(wardrobe(), { today: TODAY, locks: { bottom: 'gray-joggers' }, limit: 10 });
   assert.ok(joggers.length > 3 && loopless >= 0);
   for (const o of joggers) assert.equal(o.items.belt, undefined);
 });
@@ -44,11 +44,11 @@ test('a belt is ALWAYS present with belt-loop bottoms when a belt is owned, neve
 test('belt matches shoe leather when it can', () => {
   const out = buildOutfits(wardrobe(), { today: TODAY, locks: { shoes: 'brown-boots', bottom: 'dark-jeans' }, limit: 5 });
   for (const o of out) assert.equal(o.items.belt.id, 'brown-belt');
-  const out2 = buildOutfits(wardrobe(), { today: TODAY, locks: { shoes: 'black-oxfords', bottom: 'grey-dress-pants' }, limit: 5 });
+  const out2 = buildOutfits(wardrobe(), { today: TODAY, locks: { shoes: 'black-oxfords', bottom: 'gray-dress-pants' }, limit: 5 });
   for (const o of out2) assert.equal(o.items.belt.id, 'black-belt');
 });
 
-test('no belts owned: outfits are built without one and are not penalised', () => {
+test('no belts owned: outfits are built without one and are not penalized', () => {
   const items = wardrobe().filter((i) => i.slot !== 'belt');
   const out = buildOutfits(items, { today: TODAY, limit: 20 });
   assert.ok(out.length);
@@ -64,17 +64,17 @@ test('locked belt only considers bottoms with loops', () => {
   const out = buildOutfits(wardrobe(), { today: TODAY, locks: { belt: 'black-belt' }, limit: 30 });
   assert.ok(out.length);
   for (const o of out) { assert.equal(o.items.belt.id, 'black-belt'); assert.equal(o.items.bottom.beltLoops, true); }
-  assert.deepEqual(buildOutfits(wardrobe(), { today: TODAY, locks: { belt: 'black-belt', bottom: 'grey-joggers' } }), []);
+  assert.deepEqual(buildOutfits(wardrobe(), { today: TODAY, locks: { belt: 'black-belt', bottom: 'gray-joggers' } }), []);
 });
 
-test('locks are honoured, even for slots outside the search', () => {
-  const out = buildOutfits(wardrobe(), { today: TODAY, locks: { top: 'grey-hoodie', layer: 'navy-blazer', headwear: 'navy-cap', neckwear: 'grey-scarf' }, limit: 10 });
+test('locks are honored, even for slots outside the search', () => {
+  const out = buildOutfits(wardrobe(), { today: TODAY, locks: { top: 'gray-hoodie', layer: 'navy-blazer', headwear: 'navy-cap', neckwear: 'gray-scarf' }, limit: 10 });
   assert.ok(out.length);
   for (const o of out) {
-    assert.equal(o.items.top.id, 'grey-hoodie');
+    assert.equal(o.items.top.id, 'gray-hoodie');
     assert.equal(o.items.layer.id, 'navy-blazer');
     assert.equal(o.items.headwear.id, 'navy-cap');
-    assert.equal(o.items.neckwear.id, 'grey-scarf');
+    assert.equal(o.items.neckwear.id, 'gray-scarf');
   }
 });
 
@@ -111,10 +111,10 @@ test('empty, tops-only, bottoms-only and all-unavailable wardrobes return []', (
 });
 
 test('one top and one bottom: a single outfit, no shoes needed', () => {
-  const out = buildOutfits([W['grey-tee'], W['grey-joggers']], { today: TODAY });
+  const out = buildOutfits([W['gray-tee'], W['gray-joggers']], { today: TODAY });
   assert.equal(out.length, 1);
   assert.deepEqual(Object.keys(out[0].items).sort(), ['bottom', 'top']);
-  const loops = buildOutfits([W['grey-tee'], W['dark-jeans'], W['brown-belt']], { today: TODAY });
+  const loops = buildOutfits([W['gray-tee'], W['dark-jeans'], W['brown-belt']], { today: TODAY });
   assert.equal(loops.length, 1);
   assert.equal(loops[0].items.belt.id, 'brown-belt');
 });
@@ -125,7 +125,7 @@ test('duplicate ids do not produce duplicate outfits', () => {
   assert.equal(new Set(out.map((o) => o.key)).size, out.length);
 });
 
-test('recently worn items are penalised', () => {
+test('recently worn items are penalized', () => {
   const items = wardrobe();
   const [fresh] = buildOutfits(items, { today: TODAY, limit: 1, diversity: false });
   const worn = items.map((i) => (ids(fresh).includes(i.id) && ['top', 'bottom', 'shoes', 'layer'].includes(i.slot) ? { ...i, worn: ['2026-11-19'] } : i));
@@ -137,8 +137,8 @@ test('recently worn items are penalised', () => {
   assert.equal(noPenalty[0].key, fresh.key);
   const old = items.map((i) => ({ ...i, worn: ['2026-11-01'] }));
   assert.equal(buildOutfits(old, { today: TODAY, limit: 1, diversity: false })[0].key, fresh.key);
-  const penalised = again.find((o) => o.reasons.some((r) => r.tag === 'recently-worn'));
-  assert.ok(penalised || again.length);
+  const penalized = again.find((o) => o.reasons.some((r) => r.tag === 'recently-worn'));
+  assert.ok(penalized || again.length);
 });
 
 test('diversity: top 10 never repeat a top+bottom pair more than twice, and items stay spread', () => {
@@ -159,7 +159,7 @@ test('diversity: top 10 never repeat a top+bottom pair more than twice, and item
 });
 
 test('diversity does not hide outfits when the wardrobe is tiny', () => {
-  const items = [W['grey-tee'], W['dark-jeans'], W['white-sneakers'], W['brown-boots'], W['black-oxfords'], W['brown-belt']];
+  const items = [W['gray-tee'], W['dark-jeans'], W['white-sneakers'], W['brown-boots'], W['black-oxfords'], W['brown-belt']];
   assert.ok(buildOutfits(items, { today: TODAY, limit: 3 }).length >= 3);
 });
 
@@ -279,18 +279,18 @@ test('rankForSlot: optional slots offer a null "none" option; required slots do 
 
 test('rankForSlot: swapping the bottom to joggers removes the belt; swapping back adds one', () => {
   const w = wardrobe();
-  const base = { top: W['grey-tee'], bottom: W['dark-jeans'], shoes: W['white-sneakers'], belt: W['brown-belt'] };
+  const base = { top: W['gray-tee'], bottom: W['dark-jeans'], shoes: W['white-sneakers'], belt: W['brown-belt'] };
   const r = rankForSlot(w, base, 'bottom', {});
-  const jog = r.find((x) => x.item && x.item.id === 'grey-joggers');
+  const jog = r.find((x) => x.item && x.item.id === 'gray-joggers');
   assert.equal(jog.items.belt, undefined);
-  const noBelt = { top: W['grey-tee'], bottom: W['grey-joggers'], shoes: W['white-sneakers'] };
+  const noBelt = { top: W['gray-tee'], bottom: W['gray-joggers'], shoes: W['white-sneakers'] };
   const back = rankForSlot(w, noBelt, 'bottom', {}).find((x) => x.item && x.item.id === 'dark-jeans');
   assert.ok(back.items.belt, 'a bottom with loops gets the best belt');
 });
 
 test('rankForSlot: unavailable items are excluded; garbage input is safe', () => {
   const w = wardrobe().map((i) => (i.id === 'white-sneakers' ? { ...i, available: false } : i));
-  const base = { top: W['grey-tee'], bottom: W['dark-jeans'], shoes: W['brown-boots'] };
+  const base = { top: W['gray-tee'], bottom: W['dark-jeans'], shoes: W['brown-boots'] };
   assert.ok(!rankForSlot(w, base, 'shoes', {}).some((x) => x.item && x.item.id === 'white-sneakers'));
   assert.deepEqual(rankForSlot(null, null, 'nope'), []);
   assert.doesNotThrow(() => rankForSlot([], {}, 'top', null));
@@ -298,7 +298,7 @@ test('rankForSlot: unavailable items are excluded; garbage input is safe', () =>
 
 test('rankForSlot: respects context (rain prefers the rain jacket) and passes it through', () => {
   const w = wardrobe();
-  const base = { top: W['grey-tee'], bottom: W['dark-jeans'], shoes: W['brown-boots'], belt: W['brown-belt'], layer: W['denim-jacket'] };
+  const base = { top: W['gray-tee'], bottom: W['dark-jeans'], shoes: W['brown-boots'], belt: W['brown-belt'], layer: W['denim-jacket'] };
   const r = rankForSlot(w, base, 'layer', { rain: true, weather: 'mild' });
   assert.equal(r[0].item.id, 'rain-jacket');
 });

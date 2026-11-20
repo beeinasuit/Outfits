@@ -244,7 +244,7 @@ try {
     await page.evaluate(() => { location.hash = '#/closet'; });
     await page.waitForTimeout(800);
     const ov = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
-    check('C2.big3', 'import with a 2,000,000-char item name: app still responsive and name is capped/ellipsised (form caps at 40)', rb3.phase === 'accepted' ? false : rb3.phase !== 'none', `phase=${rb3.phase} (accepted means no length cap on import; form maxlength is 40)`);
+    check('C2.big3', 'import with a 2,000,000-char item name: app still responsive and name is capped/ellipsized (form caps at 40)', rb3.phase === 'accepted' ? false : rb3.phase !== 'none', `phase=${rb3.phase} (accepted means no length cap on import; form maxlength is 40)`);
     await ctx.close();
   }
 
@@ -331,7 +331,7 @@ try {
     const log = log0.concat(await sweep(page, 'form'));
     const nonLiteral = await literalCheck(page, [P1, P3, P2, P4]);
     await shot(page, 'c3-form-closet');
-    check('C3a', 'XSS via the Add-by-colour form: window.__pwned never set; no injected [onerror]/[onload] nodes (closet, spin, pick sheet, looks, detail, edit sheet, toasts, undo toast)', log.length === 0, log.slice(0, 6).join(' | '), 'tests/e2e/adv-screenshots/c3-form-closet.png');
+    check('C3a', 'XSS via the Add-by-color form: window.__pwned never set; no injected [onerror]/[onload] nodes (closet, spin, pick sheet, looks, detail, edit sheet, toasts, undo toast)', log.length === 0, log.slice(0, 6).join(' | '), 'tests/e2e/adv-screenshots/c3-form-closet.png');
     check('C3a2', 'form-entered hostile names appear in the closet literally, as text', nonLiteral.length === 0, `not literal: ${JSON.stringify(nonLiteral)}`);
     // stickers/reasons: any sticker text containing a payload must be text
     await page.evaluate(() => { location.hash = '#/spin'; }); await page.waitForTimeout(1500);
@@ -366,11 +366,11 @@ try {
     // also the review sheet text: confirm sheet lists counts only
     const nonLiteral = await literalCheck(page, [P1, P2, P3]);
     await shot(page, 'c3-import-closet');
-    check('C3b', 'XSS via import (names, colour hex, leather, pattern, photoId, worn, kind, feedback keys, settings): __pwned never set, nothing injected', log.length === 0, log.slice(0, 8).join(' | '), 'tests/e2e/adv-screenshots/c3-import-closet.png');
+    check('C3b', 'XSS via import (names, color hex, leather, pattern, photoId, worn, kind, feedback keys, settings): __pwned never set, nothing injected', log.length === 0, log.slice(0, 8).join(' | '), 'tests/e2e/adv-screenshots/c3-import-closet.png');
     check('C3b2', 'imported hostile names render literally in the closet', nonLiteral.length === 0, `not literal: ${JSON.stringify(nonLiteral)}`);
     // hex injection specifically: closet svg
     const injected = await page.evaluate(() => document.querySelectorAll('.hang img[src="x"], .art img[src="x"]').length);
-    check('C3b3', 'colour hex from a backup is validated before being put into SVG markup', injected === 0 && !(await page.evaluate(() => window.__pwned)), `injected imgs=${injected}`);
+    check('C3b3', 'color hex from a backup is validated before being put into SVG markup', injected === 0 && !(await page.evaluate(() => window.__pwned)), `injected imgs=${injected}`);
     await ctx.close();
   }
 

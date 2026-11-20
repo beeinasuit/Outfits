@@ -8,8 +8,8 @@
 //                  `items` is the full resulting outfit (belt rules applied by rankForSlot), `via` is 'suggest' | 'pick'
 //
 // Two tabs:
-//   Suggest   rankForSlot results with score, coloured delta and the top reason. Hamper items are hidden.
-//   I'll pick the closet's items for the slot with no scores or hints; hamper items are greyed and not selectable.
+//   Suggest   rankForSlot results with score, colored delta and the top reason. Hamper items are hidden.
+//   I'll pick the closet's items for the slot with no scores or hints; hamper items are grayed and not selectable.
 //             The caller shows the resulting score change ("you would then score").
 import { SLOT_LABELS } from '../model.js';
 import { rankForSlot } from '../engine/build.js';

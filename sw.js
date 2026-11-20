@@ -1,6 +1,6 @@
 // Fit Machine service worker: precache the shell, network-first with cache fallback, offline after first load.
 // Bump CACHE_VERSION whenever shell files change.
-const CACHE_VERSION = 'fit-machine-v3';
+const CACHE_VERSION = 'fit-machine-v4';
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'styles/app.css', 'styles/today.css', 'styles/extra.css',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',

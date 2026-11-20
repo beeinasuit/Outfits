@@ -66,7 +66,7 @@ export const WEATHERS = [null, 'hot', 'warm', 'mild', 'cold', 'freezing'];
 const m = (id, slot, kind, fam, extra) => mk(id, slot, kind, fam, extra);
 export function realisticWardrobes() {
   const caps = [
-    m('c-white-tee', 'top', 't-shirt', 'white'), m('c-grey-tee', 'top', 't-shirt', 'grey'), m('c-navy-polo', 'top', 'polo', 'navy'),
+    m('c-white-tee', 'top', 't-shirt', 'white'), m('c-gray-tee', 'top', 't-shirt', 'gray'), m('c-navy-polo', 'top', 'polo', 'navy'),
     m('c-lb-shirt', 'top', 'button-down', 'light-blue'),
     m('c-jeans', 'bottom', 'jeans', 'denim'), m('c-chinos', 'bottom', 'chinos', 'beige'),
     m('c-sneak', 'shoes', 'sneakers', 'white'), m('c-boots', 'shoes', 'boots', 'brown', { leather: 'brown' }),
@@ -75,20 +75,20 @@ export function realisticWardrobes() {
   ];
   const work = [
     m('w-wo', 'top', 'oxford', 'white'), m('w-lb', 'top', 'button-down', 'light-blue'), m('w-ds', 'top', 'dress shirt', 'white'),
-    m('w-pink', 'top', 'button-down', 'pink'), m('w-sw', 'top', 'sweater', 'navy'), m('w-polo', 'top', 'polo', 'grey'),
-    m('w-ch', 'bottom', 'dress pants', 'charcoal'), m('w-gr', 'bottom', 'dress pants', 'grey'), m('w-nc', 'bottom', 'chinos', 'navy'), m('w-bc', 'bottom', 'chinos', 'beige'),
+    m('w-pink', 'top', 'button-down', 'pink'), m('w-sw', 'top', 'sweater', 'navy'), m('w-polo', 'top', 'polo', 'gray'),
+    m('w-ch', 'bottom', 'dress pants', 'charcoal'), m('w-gr', 'bottom', 'dress pants', 'gray'), m('w-nc', 'bottom', 'chinos', 'navy'), m('w-bc', 'bottom', 'chinos', 'beige'),
     m('w-ox', 'shoes', 'oxfords', 'black', { leather: 'black' }), m('w-lo', 'shoes', 'loafers', 'brown', { leather: 'brown' }), m('w-de', 'shoes', 'derbies', 'brown', { leather: 'dark-brown' }),
     m('w-bb', 'belt', 'dress belt', 'black', { leather: 'black' }), m('w-bbr', 'belt', 'leather belt', 'brown', { leather: 'brown' }),
     m('w-bl', 'layer', 'blazer', 'navy'), m('w-bl2', 'layer', 'blazer', 'charcoal'), m('w-oc', 'layer', 'overcoat', 'charcoal'),
-    m('w-t1', 'neckwear', 'tie', 'burgundy'), m('w-t2', 'neckwear', 'tie', 'navy'), m('w-sc', 'neckwear', 'scarf', 'grey'),
+    m('w-t1', 'neckwear', 'tie', 'burgundy'), m('w-t2', 'neckwear', 'tie', 'navy'), m('w-sc', 'neckwear', 'scarf', 'gray'),
   ];
   const street = [
     m('s-blk', 'top', 't-shirt', 'black'), m('s-wh', 'top', 't-shirt', 'white'), m('s-g', 'top', 'graphic tee', 'black', { pattern: 'graphic' }),
-    m('s-hd', 'top', 'hoodie', 'grey'), m('s-hd2', 'top', 'hoodie', 'black'), m('s-red', 'top', 't-shirt', 'red'), m('s-sw', 'top', 'sweatshirt', 'olive'),
-    m('s-bj', 'bottom', 'jeans', 'black'), m('s-jg', 'bottom', 'joggers', 'grey'), m('s-jg2', 'bottom', 'joggers', 'black'), m('s-cg', 'bottom', 'cargo pants', 'olive'), m('s-sh', 'bottom', 'shorts', 'beige'),
-    m('s-sn', 'shoes', 'sneakers', 'white'), m('s-sn2', 'shoes', 'sneakers', 'black'), m('s-rs', 'shoes', 'running shoes', 'grey'),
+    m('s-hd', 'top', 'hoodie', 'gray'), m('s-hd2', 'top', 'hoodie', 'black'), m('s-red', 'top', 't-shirt', 'red'), m('s-sw', 'top', 'sweatshirt', 'olive'),
+    m('s-bj', 'bottom', 'jeans', 'black'), m('s-jg', 'bottom', 'joggers', 'gray'), m('s-jg2', 'bottom', 'joggers', 'black'), m('s-cg', 'bottom', 'cargo pants', 'olive'), m('s-sh', 'bottom', 'shorts', 'beige'),
+    m('s-sn', 'shoes', 'sneakers', 'white'), m('s-sn2', 'shoes', 'sneakers', 'black'), m('s-rs', 'shoes', 'running shoes', 'gray'),
     m('s-bo', 'layer', 'bomber', 'black'), m('s-pf', 'layer', 'puffer', 'black'),
-    m('s-cap', 'headwear', 'baseball cap', 'black'), m('s-bn', 'headwear', 'beanie', 'grey'),
+    m('s-cap', 'headwear', 'baseball cap', 'black'), m('s-bn', 'headwear', 'beanie', 'gray'),
   ];
   const bright = [
     m('b-yl', 'top', 't-shirt', 'yellow'), m('b-gr', 'top', 't-shirt', 'green'), m('b-pk', 'top', 'polo', 'pink'), m('b-or', 'top', 't-shirt', 'orange'),
