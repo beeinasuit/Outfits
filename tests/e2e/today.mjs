@@ -90,6 +90,17 @@ try {
   let sl = await slots(page);
   check('Today shows a board with >= 4 pieces', Object.keys(sl).length >= 4, JSON.stringify(Object.keys(sl)));
   check('board is a flat-lay (no reels)', (await page.locator('.reel').count()) === 0 && (await page.locator('.fm-board').count()) === 1);
+  const fitRes = await page.evaluate(() => {
+    const vh = innerHeight; const dock = document.querySelector('.t-dock').getBoundingClientRect();
+    const out = [];
+    for (const p of document.querySelectorAll('.fm-board .fm-piece[data-item]')) {
+      const r = p.getBoundingClientRect(); const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const top = document.elementFromPoint(cx, cy);
+      out.push({ slot: p.dataset.slot, inView: r.top >= 0 && r.bottom <= vh && r.left >= -1 && r.right <= innerWidth + 1, clearOfDock: r.bottom <= dock.top + 1, hit: !!(top && top.closest('.fm-board')), vis: getComputedStyle(p).opacity === '1' });
+    }
+    return out;
+  });
+  check('every piece (incl. shoes) is in the viewport, clear of the dock and not covered @390x844', fitRes.length >= 4 && fitRes.every((x) => x.inView && x.clearOfDock && x.hit && x.vis) && fitRes.some((x) => x.slot === 'shoes'), JSON.stringify(fitRes.filter((x) => !(x.inView && x.clearOfDock && x.hit && x.vis))));
   const stampBox = await page.locator('.t-stamp').boundingBox();
   const sy = await page.evaluate(() => window.scrollY);
   check('stamp + meter visible without scrolling @390x844', stampBox && stampBox.y >= 0 && stampBox.y + stampBox.height <= 844 && sy === 0, JSON.stringify(stampBox));
@@ -112,6 +123,7 @@ try {
     changed = JSON.stringify(now) !== JSON.stringify(before);
   }
   check('shuffle gives a different outfit', changed);
+  check('all pieces fully visible after shuffle (none left faded out)', await page.evaluate(() => [...document.querySelectorAll('.fm-board .fm-piece')].every((p) => getComputedStyle(p).opacity === '1')));
   await page.screenshot({ path: `${shots}/02-after-shuffle.png` });
   check('stamp shows after shuffle', await page.locator('.t-stamp.slam, .t-stamp.shown').count() === 1 && (await page.locator('.t-stamp').textContent()).length > 2);
 
@@ -130,7 +142,9 @@ try {
   const scoreBefore = await score(page);
   await page.locator('.fm-ctl[data-slot="shoes"] .fm-swap').click();
   await page.waitForSelector('dialog.sheet .sw-row');
+  await page.waitForTimeout(700);
   await page.screenshot({ path: `${shots}/04-swap-suggest.png` });
+  check('swap sheet is the topmost thing at its centre and cards are laid out', await page.evaluate(() => { const d = document.querySelector('dialog.sheet'); const r = d.getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); const row = document.querySelector('.sw-row'); const rr = row.getBoundingClientRect(); const nm = row.querySelector('b').getBoundingClientRect(); return d.contains(el) && rr.width > 250 && nm.width > 80; }));
   const hasDeltaBadges = await page.locator('.sw-delta').count();
   check('Suggest lists candidates with delta badges and a current marker', (await page.locator('.sw-row').count()) >= 2 && hasDeltaBadges >= 1 && (await page.locator('.sw-row.is-current .sw-tag').count()) === 1);
   const pickIdx = await page.evaluate(() => { const rows = [...document.querySelectorAll('.sw-row')]; return rows.findIndex((r) => !r.classList.contains('is-current') && !r.querySelector('.sw-delta.flat')); });
@@ -205,7 +219,7 @@ try {
   await page.waitForTimeout(1000);
   await page.screenshot({ path: `${shots}/09-glowup.png` });
   if (gu) {
-    check('glow-up shows before/after boards and a reason', (await page.locator('.gu-compare .fm-board').count()) === 2 && /\+\d+/.test(await page.locator('.gu-why p').textContent()));
+    check('glow-up shows before/after boards and a reason', (await page.locator('.gu-compare .fm-board').count()) === 2 && (await page.locator('.gu-notes li').count()) >= 1 && /\+\d+/.test(await page.locator('.gu-scores em').textContent()));
     const slider = page.locator('.gu-compare');
     await slider.focus();
     const v0 = await slider.getAttribute('aria-valuenow');
@@ -243,6 +257,8 @@ try {
   await page.screenshot({ path: `${shots}/11-worn.png` });
 
   // custom occasion
+  await page.locator('.t-occ-pill').click();
+  await page.waitForSelector('dialog.sheet .occ-add');
   await page.locator('.occ-add').click();
   await page.waitForSelector('dialog.sheet .occ-editor');
   await page.locator('.occ-editor input[aria-label="Occasion name"]').fill('Gallery opening');
@@ -255,9 +271,16 @@ try {
   await settle(page);
   const occ = await D(page, (d) => ({ k: d.data.settings.occasion, c: d.data.settings.customOccasions }));
   check('custom occasion saved and selected', occ.k && occ.c && occ.c[occ.k] && occ.c[occ.k].label === 'Gallery opening' && occ.c[occ.k].min === 3 && occ.c[occ.k].max === 4, JSON.stringify(occ));
+  check('occasion pill shows the custom occasion', /Gallery opening/.test(await page.locator('.t-occ-pill').textContent()));
+  await page.locator('.t-occ-pill').click();
+  await page.waitForSelector('dialog.sheet .occ-chip');
   check('custom chip is pressed in the picker', (await page.locator(`.occ-chip[data-key="${occ.k}"]`).getAttribute('aria-pressed')) === 'true');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(() => !document.querySelector('dialog.sheet'));
   await page.screenshot({ path: `${shots}/13-custom-selected.png` });
   // edit via the Edit chip, delete
+  await page.locator('.t-occ-pill').click();
+  await page.waitForSelector('dialog.sheet .occ-edit');
   await page.locator('.occ-edit').click();
   await page.waitForSelector('dialog.sheet .sheet-actions');
   await page.getByRole('button', { name: 'Delete' }).click();
@@ -302,6 +325,8 @@ try {
   await settle(page);
   await page.waitForTimeout(500);
   check('board shows the user\'s face cutout when a profile is set', (await page.locator('.fm-face img').count()) === 1);
+  const fit2 = await page.evaluate(() => { const dock = document.querySelector('.t-dock').getBoundingClientRect(); return [...document.querySelectorAll('.fm-board .fm-piece')].every((p) => { const r = p.getBoundingClientRect(); return r.top >= 0 && r.bottom <= dock.top + 1; }); });
+  check('face-to-shoes all visible above the dock with a face cutout @390x844', fit2);
   check('pieces upgrade to cutouts', (await page.locator('.fm-piece.is-cutout').count()) >= 3);
   await page.screenshot({ path: `${shots}/16-cutouts-face-light.png` });
   await page.screenshot({ path: `${shots}/16b-cutouts-face-light-full.png`, fullPage: true });
@@ -322,6 +347,7 @@ try {
   o = await overflow(page);
   check('no horizontal overflow @320 (today)', o.sw <= o.cw && o.bw <= o.cw, JSON.stringify(o));
   const st320 = await page.locator('.t-stamp').boundingBox();
+  check('top-to-shoes visible @320x640', await page.evaluate(() => { const dock = document.querySelector('.t-dock').getBoundingClientRect(); const ps = [...document.querySelectorAll('.fm-board .fm-piece[data-item]')]; return ps.some((p) => p.dataset.slot === 'shoes') && ps.every((p) => { const r = p.getBoundingClientRect(); return r.top >= 0 && r.bottom <= dock.top + 1; }); }));
   check('stamp visible @320x640 without scrolling', st320 && st320.y + st320.height <= 640 && st320.x >= 0 && st320.x + st320.width <= 320, JSON.stringify(st320));
   const sh320 = await page.locator('.t-shuffle').boundingBox();
   check('SHUFFLE visible @320x640', sh320 && sh320.y + sh320.height <= 640 && sh320.y > 0, JSON.stringify(sh320));

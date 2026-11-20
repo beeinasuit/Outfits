@@ -107,7 +107,7 @@ export function openSwap(slot, outfitItems, ctx, onApply) {
   });
 
   const intro = h('p', { class: 'sw-intro' }, cur ? h('span', {}, 'Now: ', h('b', {}, cur.name)) : `Nothing on as a ${label} yet.`);
-  s = sheet({ title: `${cur ? 'Change' : 'Add'} ${label}`, content: h('div', { class: 'sw' }, intro, tabs, panel) });
+  s = sheet({ title: `${cur ? 'Change' : 'Add'} ${label}`, content: h('div', { class: 'swap-root' }, intro, tabs, panel) });
   paint();
   return s;
 }

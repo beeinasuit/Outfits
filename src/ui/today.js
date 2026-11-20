@@ -6,8 +6,8 @@ import { h, clear } from './dom.js';
 import { icon } from './icons.js';
 import { mascot } from './illustrations.js';
 import { buzz, confetti, countUp, reduced, verdict, startShake, shakeSupported, requestShakePermission } from './fx.js';
-import { toast, announce } from './overlay.js';
-import { data, getContext, setFeedback, logWorn, wornToday, setSetting, demoCount, removeDemo, loadDemo, laundryDay } from './data.js';
+import { toast, announce, sheet } from './overlay.js';
+import { data, getContext, setFeedback, logWorn, wornToday, setSetting, allOccasions, demoCount, removeDemo, loadDemo, laundryDay } from './data.js';
 import { renderBoard, ADDABLE } from './board.js';
 import { openSwap } from './swap.js';
 import { openGlowUp } from './glowup.js';
@@ -115,6 +115,7 @@ export function mount(root, { navigate }) {
     const ctx = await getContext();
     S.ctx = ctx;
     els.note.textContent = ctx.note || '';
+    paintPills();
     const sig = JSON.stringify([S.locks, ctx.occasion, ctx.weather, ctx.rain, data.items.map((i) => i.id + (i.available ? 1 : 0)).join()]);
     if (sig !== S.sig) {
       if (S.current) S.seen.add(S.current.key);
@@ -148,6 +149,7 @@ export function mount(root, { navigate }) {
       S.current = next;
       board.setOptions({ locks: S.locks, addable: addableNow(), profile: S.ctx.profile });
       board.update(next.items, { animate: true });
+      fit();
       els.stage.classList.remove('shuffling');
       paintResult(next, { from });
     } finally {
@@ -167,6 +169,7 @@ export function mount(root, { navigate }) {
     S.seen.add(S.current.key);
     board.setOptions({ locks: S.locks, addable: addableNow() });
     board.update(items, { animate: true });
+    fit();
     buzz([12, 24, 12]);
     paintResult(S.current, { from: old, delta: res.score - old });
   }
@@ -242,11 +245,9 @@ export function mount(root, { navigate }) {
     root.append(h('h1', { class: 'sr-only', tabindex: '-1', id: 'screen-title' }, 'Today’s outfit'), demoBanner());
     if (kind !== 'ok') { root.append(emptyState(kind)); return; }
 
-    picker = occasionPicker({ value: data.settings.occasion || 'any', onChange: (k) => { setSetting({ occasion: k }); shuffle(); } });
-    const wxChips = h('div', { class: 'chips scroll t-wx', role: 'group', 'aria-label': 'Weather' },
-      WX.map(([k, e, l]) => h('button', { class: 'chip t-wx-chip', type: 'button', 'data-wx': k, 'aria-pressed': String((data.settings.weather || 'none') === k), 'aria-label': l, title: l,
-        onclick: () => { setSetting({ weather: k }); paintWx(); shuffle(); } }, h('span', { 'aria-hidden': 'true' }, e), k === 'none' ? h('span', {}, 'Any') : k === 'auto' ? h('span', {}, 'Auto') : h('span', {}, l))));
-    const note = h('span', { class: 't-note', 'aria-live': 'polite' });
+    const occPill = h('button', { class: 't-pill t-occ-pill', type: 'button', 'aria-haspopup': 'dialog', onclick: openOccasion });
+    const wxPill = h('button', { class: 't-pill t-wx-pill', type: 'button', 'aria-haspopup': 'dialog', onclick: openWeather });
+    const wxChips = null;
 
     const num = h('b', { class: 't-num' }, '0');
     const fill = h('span', { class: 't-fill' });
@@ -260,10 +261,12 @@ export function mount(root, { navigate }) {
       profile: S.ctx && S.ctx.profile, interactive: true, size: 'full', locks: S.locks, animate: !S.current,
       onSwap: swapSlot, onRemove: removeSlot, onAdd: swapSlot, onLock: toggleLock, addable: addableNow(),
     });
+    const note = h('span', { class: 't-note', 'aria-live': 'polite' });
     const stage = h('div', { class: 't-stage' }, board);
     swipeCard(stage, { right: () => like('like'), left: () => like('dislike') });
 
     const shuffleBtn = h('button', { class: 'btn btn-big btn-sun t-shuffle', type: 'button', onclick: () => shuffle() }, h('span', { class: 't-shuffle-ico', html: icon('spin', { size: 26, sw: 3 }) }), 'SHUFFLE');
+    const dock = h('div', { class: 't-dock' }, shuffleBtn);
     const dislike = h('button', { class: 'round-btn', type: 'button', 'aria-label': 'Thumbs down: not for me', 'aria-pressed': 'false', html: icon('down', { size: 26 }), onclick: () => like('dislike') });
     const likeB = h('button', { class: 'round-btn up', type: 'button', 'aria-label': 'Thumbs up: love it', 'aria-pressed': 'false', html: icon('up', { size: 26 }), onclick: () => like('like') });
     const wear_ = h('button', { class: 'btn btn-mint t-wear', type: 'button', onclick: wear });
@@ -275,31 +278,72 @@ export function mount(root, { navigate }) {
       ? h('button', { class: 'chip shake-chip', type: 'button', 'aria-pressed': String(!!data.settings.shake), onclick: toggleShake }, h('span', { html: icon('vibrate', { size: 16 }) }), 'Shake to shuffle') : null;
 
     root.append(
-      h('div', { class: 't-ctx' }, picker, wxChips, note),
+      h('div', { class: 't-ctx' }, occPill, wxPill),
       score, stage,
-      h('div', { class: 't-dock' }, shuffleBtn),
+      dock,
       h('div', { class: 't-actions' }, h('div', { class: 'feel-row t-feel' }, dislike, wear_, likeB), h('div', { class: 't-extra' }, improveBtn, battle)),
       h('div', { class: 't-links' },
         !(data.settings.profile && data.settings.profile.cutoutId) ? h('a', { class: 'btn btn-ghost btn-small', href: '#/profile' }, '🎨 Find your colours') : null,
         h('a', { class: 'btn btn-ghost btn-small', href: '#/plan' }, '🗓️ Plan the week')),
       lockHint, h('h2', { class: 't-why-title' }, 'Why it works'), stickers,
       shakeChip ? h('div', { class: 'center' }, shakeChip) : null);
-    els = { score, meter, num, fill, stamp, stickers, stage, shuffle: shuffleBtn, like: likeB, dislike, wear: wear_, improve: improveBtn, battle, note, lockHint, wx: wxChips };
+    els = { score, meter, num, fill, stamp, stickers, stage, shuffle: shuffleBtn, like: likeB, dislike, wear: wear_, improve: improveBtn, battle, note, lockHint, occPill, wxPill, dock };
 
+    paintPills();
+    fit();
     if (S.current && currentValid()) {
       // coming back to a screen: show the saved outfit instantly
       board.setOptions({ locks: S.locks, addable: addableNow() });
+      fit();
       paintResult(S.current, { instant: true });
-      getContext().then((c) => { if (alive) { S.ctx = c; els.note.textContent = c.note || ''; board.setOptions({ profile: c.profile }); } });
+      getContext().then((c) => { if (alive) { S.ctx = c; els.note.textContent = c.note || ''; paintPills(); board.setOptions({ profile: c.profile }); fit(); } });
     } else {
       S.current = null;
       setTimeout(() => alive && shuffle(), 120);
     }
   }
 
-  function paintWx() {
-    if (!els.wx) return;
-    for (const c of els.wx.children) c.setAttribute('aria-pressed', String(c.dataset.wx === (data.settings.weather || 'none')));
+  function paintPills() {
+    if (!els.occPill) return;
+    const occs = allOccasions();
+    const key = occs[data.settings.occasion] ? data.settings.occasion : 'any';
+    const o = occs[key];
+    els.occPill.replaceChildren(h('span', { class: 't-pill-ico', 'aria-hidden': 'true' }, o.emoji), h('span', { class: 't-pill-txt' }, o.label), h('span', { class: 't-pill-caret', 'aria-hidden': 'true' }, '▾'));
+    els.occPill.setAttribute('aria-label', `Occasion: ${o.label}. Change`);
+    const wk = data.settings.weather || 'none';
+    const w = WX.find((x) => x[0] === wk) || WX[0];
+    const note = wk === 'auto' && els.note.textContent ? ` · ${els.note.textContent}` : '';
+    els.wxPill.replaceChildren(h('span', { class: 't-pill-ico', 'aria-hidden': 'true' }, w[1]), h('span', { class: 't-pill-txt' }, `${w[2]}${note}`), h('span', { class: 't-pill-caret', 'aria-hidden': 'true' }, '▾'));
+    els.wxPill.setAttribute('aria-label', `Weather: ${w[2]}${note}. Change`);
+  }
+
+  function openOccasion() {
+    const sh = { s: null };
+    const pk = occasionPicker({ value: data.settings.occasion || 'any', onChange: (k) => { sh.s.close(); setSetting({ occasion: k }); shuffle(); } });
+    picker = pk;
+    sh.s = sheet({ title: 'What are you dressing for?', content: h('div', { class: 'occ-sheet' }, pk), onClose: () => { if (picker === pk) picker = null; } });
+  }
+  function openWeather() {
+    const s_ = sheet({ title: 'Weather', content: h('div', { class: 'chips t-wx', role: 'group', 'aria-label': 'Weather' },
+      WX.map(([k, e, l]) => h('button', { class: 'chip t-wx-chip', type: 'button', 'data-wx': k, 'aria-pressed': String((data.settings.weather || 'none') === k),
+        onclick: () => { s_.close(); setSetting({ weather: k }); shuffle(); } }, h('span', { 'aria-hidden': 'true' }, e), l))) });
+  }
+
+  /** Size the board so the whole outfit (face/hat to shoes + ghost chips) fits between the controls and the shuffle dock. */
+  function fit() {
+    if (!board || !els.dock || !alive) return;
+    const vv = window.innerHeight;
+    const top = board.getBoundingClientRect().top + window.scrollY;
+    const tab = document.querySelector('.tabbar');
+    const tabH = tab ? tab.getBoundingClientRect().height : 62;
+    const dockH = els.dock.offsetHeight + 8;
+    const ghosts = board.querySelector('.fm-ghosts');
+    const ghostH = ghosts && !ghosts.hidden ? ghosts.offsetHeight : 0;
+    const avail = vv - top - tabH - dockH - 6 - ghostH - 24;
+    const ar = board.aspect || 0.8;
+    const w = Math.max(190, Math.min(560, avail * ar + 24));
+    board.style.maxWidth = `${Math.round(w)}px`;
+    board.style.marginInline = 'auto';
   }
 
   function demoBanner() {
@@ -345,6 +389,8 @@ export function mount(root, { navigate }) {
     if (data.settings.shake && shakeSupported()) S.stopShake = startShake(() => { if (alive && (location.hash.startsWith('#/today') || location.hash.startsWith('#/spin') || location.hash === '')) shuffle(); });
   }
 
+  const onResize = () => fit();
+  window.addEventListener('resize', onResize);
   render();
   startStopShake();
 
@@ -363,13 +409,14 @@ export function mount(root, { navigate }) {
       S.current.items = fresh;
       board.setOptions({ addable: addableNow() });
       board.update(fresh, { animate: false });
+      fit();
       syncActions();
     } else if (what === 'settings') {
       if (picker) picker.refresh();
-      paintWx();
+      paintPills();
     } else if (what === 'worn' || what === 'feedback') syncActions();
   };
-  api.destroy = () => { alive = false; if (S.stopShake) { S.stopShake(); S.stopShake = null; } };
+  api.destroy = () => { alive = false; window.removeEventListener('resize', onResize); if (S.stopShake) { S.stopShake(); S.stopShake = null; } };
   return api;
 }
 

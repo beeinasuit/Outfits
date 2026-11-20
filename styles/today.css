@@ -308,3 +308,26 @@
 .t-links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 14px; }
 .t-links .btn { text-decoration: none; color: var(--text); }
 .sw-row, .sw-text, .bt-why li, .bt-card { min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- compact context row + slimmer header (whole outfit must fit on screen) ---------- */
+.t-ctx { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 8px; }
+.t-pill { min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border: 2px solid var(--line); border-radius: 999px; background: var(--card); color: var(--text); box-shadow: var(--sh-sm); font: 800 14px/1 var(--font-display); text-align: left; }
+.t-pill:active { transform: translate(2px, 2px); box-shadow: none; }
+.t-pill-ico { font-size: 18px; flex: none; }
+.t-pill-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.t-pill-caret { flex: none; font-size: 11px; opacity: .7; }
+.t-note { display: none; }
+.occ-sheet .chips.scroll, .t-wx { flex-wrap: wrap; overflow: visible; margin: 0; padding: 4px 0 8px; }
+.t-wx { display: flex; gap: 8px; padding-bottom: 12px; }
+.t-score { padding: 5px 12px 6px; margin-bottom: 8px; gap: 10px; }
+.t-num { font-size: 26px; }
+.t-track { height: 12px; }
+.t-stamp { font-size: 13px; padding: 4px 8px 3px; min-width: 6.4em; }
+.t-dock { margin-top: 8px; padding: 0 0 2px; background: none; }
+.t-dock .btn-big { min-height: 54px; font-size: 22px; }
+.fm-board { margin-inline: auto; }
+.swap-root { min-width: 0; }
+.gu-notes { display: grid; gap: 6px; font-weight: 700; font-size: 14px; }
+.gu-notes li { padding: 6px 10px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); }
+.gu-notes b { background: var(--mint); color: var(--on-accent); border-radius: 999px; padding: 1px 7px; margin-right: 2px; font-weight: 900; }
+.gu-headline { overflow-wrap: anywhere; }

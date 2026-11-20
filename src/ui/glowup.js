@@ -48,11 +48,26 @@ function describe(best, outfitItems) {
   return `Swap ${old.name.toLowerCase()} for ${best.item.name.toLowerCase()}`;
 }
 
-function whyText(best, beforeReasons) {
-  const had = new Set((beforeReasons || []).map((r) => r.text));
-  const fresh = (best.reasons || []).filter((r) => r.delta > 0 && !had.has(r.text)).sort((a, b) => b.delta - a.delta)[0]
-    || (best.reasons || []).filter((r) => r.delta > 0).sort((a, b) => b.delta - a.delta)[0];
-  return `${fresh ? fresh.text.replace(/[.!]$/, '') : 'A better match overall'}: +${best.delta}`;
+/** What the swap itself changes: reasons gained/lost (diffed against the "before" reasons) plus belt-rule side effects. */
+function changeNotes(best, outfitItems, beforeReasons) {
+  const had = new Map((beforeReasons || []).map((r) => [r.text, r]));
+  const now = new Map((best.reasons || []).map((r) => [r.text, r]));
+  const notes = [];
+  const oldBelt = outfitItems.belt, newBelt = best.items.belt;
+  if (best.slot === 'bottom' && best.item) {
+    if (!oldBelt && newBelt) notes.push({ text: `${best.item.name} has belt loops, so your ${newBelt.name.toLowerCase()} joins in`, delta: 0 });
+    else if (oldBelt && !newBelt) notes.push({ text: `${best.item.name} has no belt loops, so the belt comes off`, delta: 0 });
+    else if (oldBelt && newBelt && oldBelt.id !== newBelt.id) notes.push({ text: `The belt switches to ${newBelt.name.toLowerCase()}`, delta: 0 });
+  }
+  const gained = [...now.values()].filter((r) => !had.has(r.text) && r.delta > 0).sort((a, b) => b.delta - a.delta).slice(0, 2);
+  const lost = [...had.values()].filter((r) => !now.has(r.text) && r.delta < 0).sort((a, b) => a.delta - b.delta).slice(0, 1);
+  for (const r of gained) notes.push({ text: r.text.replace(/[.!]$/, ''), delta: Math.round(r.delta) });
+  for (const r of lost) notes.push({ text: `Fixes: ${r.text.replace(/[.!]$/, '')}`, delta: Math.round(-r.delta) });
+  if (!gained.length && !lost.length) {
+    const top = [...now.values()].filter((r) => r.delta > 0).sort((a, b) => b.delta - a.delta)[0];
+    if (top) notes.push({ text: top.text.replace(/[.!]$/, ''), delta: Math.round(top.delta) });
+  }
+  return notes;
 }
 
 export function openGlowUp(outfitItems, ctx, onApply) {
@@ -117,7 +132,7 @@ export function openGlowUp(outfitItems, ctx, onApply) {
     frame,
     h('div', { class: 'gu-why' },
       h('span', { class: 'gu-scores', 'aria-label': `Score goes from ${beforeScore} to ${best.score}` }, h('s', {}, String(beforeScore)), h('span', { 'aria-hidden': 'true' }, '→'), h('b', {}, String(best.score)), h('em', {}, `+${best.delta}`)),
-      h('p', {}, whyText(best, scoreOutfit(outfitItems, ctx).reasons))),
+      h('ul', { class: 'gu-notes' }, changeNotes(best, outfitItems, scoreOutfit(outfitItems, ctx).reasons).map((n) => h('li', {}, n.delta ? h('b', {}, `+${n.delta}`) : null, n.delta ? ' ' : '', n.text)))),
     h('div', { class: 'gu-actions' },
       h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => s.close() }, 'Keep mine'),
       h('button', { class: 'btn btn-mint', type: 'button', 'data-act': 'apply', onclick: () => {

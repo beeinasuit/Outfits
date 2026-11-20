@@ -193,6 +193,7 @@ export function renderBoard(items, opts = {}) {
     const lay = layout(cur, hasFace());
     el.style.setProperty('--ar', `${100} / ${lay.H}`);
     stage.style.aspectRatio = `100 / ${lay.H}`;
+    el.aspect = 100 / lay.H;
     // face
     if (hasFace()) {
       let f = pieces.get('face');
@@ -217,14 +218,14 @@ export function renderBoard(items, opts = {}) {
       if (!item) return;
       const box = lay.boxes[slot];
       let rec = pieces.get(slot);
-      if (rec && visKey(rec.item) === visKey(item)) {
+      if (rec && !rec.el.dataset.flown && visKey(rec.item) === visKey(item)) {
         rec.item = item;
         stylePiece(rec.el, box, lay.H);
         // refresh control state (locks) in place
         if (rec.el.__ctl) { rec.el.__ctl.replaceChildren(); controls(slot, item, rec.el); }
         return;
       }
-      const sameItem = !!rec && rec.item.id === item.id;
+      const sameItem = !!rec && rec.item.id === item.id && !rec.el.dataset.flown;
       if (rec) leave(rec.el, animate && !sameItem);
       const pe = makePiece(slot, item);
       const doAnim = animate && !sameItem;
