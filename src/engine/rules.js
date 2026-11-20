@@ -314,7 +314,6 @@ export function occasionRules(P) {
       allIn = false;
       const delta = Wo.avoidKind;
       if (total + delta >= Wo.cap) { total += delta; out.push(R(`${cap(nm(i))} is not right for ${phrase}.`, delta, 'occasion-avoid')); }
-      continue;
     }
     if (d > 0) {
       allIn = false;

@@ -245,3 +245,69 @@ test('big wardrobe results keep the belt rule', () => {
   assert.ok(hasBelts);
   for (const o of out) assert.equal(!!o.items.belt, o.items.bottom.beltLoops === true);
 });
+
+// ---------------------------------------------------------------------------
+// rankForSlot (swap one item)
+// ---------------------------------------------------------------------------
+import { rankForSlot } from '../../src/engine/build.js';
+
+test('rankForSlot: sorted best first, current item has delta 0, items form full outfits', () => {
+  const w = wardrobe();
+  const o = buildOutfits(w, { today: TODAY })[0];
+  for (const slot of ['top', 'bottom', 'shoes', 'layer']) {
+    const r = rankForSlot(w, o.items, slot, { today: TODAY });
+    assert.ok(r.length > 0, slot);
+    for (let i = 1; i < r.length; i++) assert.ok(r[i - 1].score >= r[i].score, `${slot} sorted`);
+    const cur = o.items[slot];
+    if (cur) assert.equal(r.find((x) => x.item && x.item.id === cur.id).delta, 0);
+    for (const x of r) {
+      assert.ok(x.items.top && x.items.bottom);
+      assert.equal(x.delta, x.score - scoreOutfit(o.items, { beltAvailable: true }).score);
+      assert.ok(Array.isArray(x.reasons));
+      if (x.item) assert.equal(x.items[slot].id, x.item.id); else assert.equal(x.items[slot], undefined);
+    }
+  }
+});
+
+test('rankForSlot: optional slots offer a null "none" option; required slots do not', () => {
+  const w = wardrobe();
+  const o = buildOutfits(w, { today: TODAY, weather: 'cold' })[0];
+  assert.ok(rankForSlot(w, o.items, 'layer', {}).some((x) => x.item === null));
+  assert.ok(rankForSlot(w, o.items, 'headwear', {}).some((x) => x.item === null));
+  assert.ok(!rankForSlot(w, o.items, 'top', {}).some((x) => x.item === null));
+});
+
+test('rankForSlot: swapping the bottom to joggers removes the belt; swapping back adds one', () => {
+  const w = wardrobe();
+  const base = { top: W['grey-tee'], bottom: W['dark-jeans'], shoes: W['white-sneakers'], belt: W['brown-belt'] };
+  const r = rankForSlot(w, base, 'bottom', {});
+  const jog = r.find((x) => x.item && x.item.id === 'grey-joggers');
+  assert.equal(jog.items.belt, undefined);
+  const noBelt = { top: W['grey-tee'], bottom: W['grey-joggers'], shoes: W['white-sneakers'] };
+  const back = rankForSlot(w, noBelt, 'bottom', {}).find((x) => x.item && x.item.id === 'dark-jeans');
+  assert.ok(back.items.belt, 'a bottom with loops gets the best belt');
+});
+
+test('rankForSlot: unavailable items are excluded; garbage input is safe', () => {
+  const w = wardrobe().map((i) => (i.id === 'white-sneakers' ? { ...i, available: false } : i));
+  const base = { top: W['grey-tee'], bottom: W['dark-jeans'], shoes: W['brown-boots'] };
+  assert.ok(!rankForSlot(w, base, 'shoes', {}).some((x) => x.item && x.item.id === 'white-sneakers'));
+  assert.deepEqual(rankForSlot(null, null, 'nope'), []);
+  assert.doesNotThrow(() => rankForSlot([], {}, 'top', null));
+});
+
+test('rankForSlot: respects context (rain prefers the rain jacket) and passes it through', () => {
+  const w = wardrobe();
+  const base = { top: W['grey-tee'], bottom: W['dark-jeans'], shoes: W['brown-boots'], belt: W['brown-belt'], layer: W['denim-jacket'] };
+  const r = rankForSlot(w, base, 'layer', { rain: true, weather: 'mild' });
+  assert.equal(r[0].item.id, 'rain-jacket');
+});
+
+test('rankForSlot: fast with 300 items', () => {
+  const items = bigWardrobe(300);
+  const o = buildOutfits(items, { today: TODAY })[0];
+  rankForSlot(items, o.items, 'top', {});
+  const t = performance.now();
+  for (const slot of ['top', 'bottom', 'shoes', 'layer']) rankForSlot(items, o.items, slot, { today: TODAY });
+  assert.ok(performance.now() - t < 300, `${(performance.now() - t).toFixed(0)}ms`);
+});

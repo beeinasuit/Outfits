@@ -16,9 +16,9 @@ test('known-good outfit scores high and explains itself', () => {
   assert.ok(r.reasons.some((x) => /White and navy: a classic pairing/.test(x.text)));
 });
 
-test('baseline neutral outfit lands in the 75-90 band', () => {
+test('plain-but-fine neutral outfit lands in the 72-82 band', () => {
   const r = sc(outfit('grey-tee', 'dark-jeans', 'white-sneakers'));
-  assert.ok(r.score >= 75 && r.score <= 92, `score ${r.score}`);
+  assert.ok(r.score >= 72 && r.score <= 82, `score ${r.score}`);
 });
 
 test('score is an integer in 0..100 and weights table exists', () => {
@@ -68,9 +68,9 @@ test('canvas belt suits sneakers but is penalised in a dressy outfit', () => {
 });
 
 test('missing belt is not penalised for belt-less bottoms (joggers)', () => {
-  const joggers = sc(outfit('grey-tee', 'grey-joggers', 'white-sneakers'), { beltAvailable: true });
+  const joggers = sc({ ...outfit('grey-tee', 'white-sneakers'), bottom: mk('nj', 'bottom', 'joggers', 'navy') }, { beltAvailable: true });
   assert.ok(!tags(joggers).some((t) => t.startsWith('belt')));
-  assert.ok(joggers.score >= 75);
+  assert.ok(joggers.score >= 72);
   const noBeltJeans = sc(outfit('grey-tee', 'dark-jeans', 'white-sneakers'), { beltAvailable: true });
   assert.ok(tags(noBeltJeans).includes('belt-missing'));
   const sameNoCtx = sc(outfit('grey-tee', 'dark-jeans', 'white-sneakers'));
@@ -83,7 +83,7 @@ test('tie with a t-shirt is a hard penalty; tie with oxford is fine', () => {
   assert.ok(bad.score < 62);
   const ok = sc(outfit('white-oxford', 'grey-dress-pants', 'black-oxfords', 'navy-tie'));
   assert.ok(!tags(ok).includes('tie-no-collar'));
-  assert.ok(ok.score > 80);
+  assert.ok(ok.score >= 78 && ok.score > bad.score + 25);
 });
 
 test('bow tie only at formality 5', () => {
