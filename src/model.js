@@ -180,15 +180,56 @@ export function makeProfile(p = {}) {
 /** Dress level scale used everywhere. */
 export const FORMALITY = { 1: 'Lounge', 2: 'Casual', 3: 'Smart casual', 4: 'Business', 5: 'Formal' };
 
-/** Occasions map to an acceptable formality window. */
+/**
+ * Occasions: what the user is dressing for. Data-driven so the engine applies them generically.
+ * min/max: acceptable formality window. Optional:
+ *  preferFamilies / avoidFamilies: colour families nudged up / down (any slot, primary colour)
+ *  wantKinds: kinds that fit the occasion (+); avoidKinds: kinds that are wrong for it (−−)
+ *  wantLayer: a layer (blazer/jacket) is expected; muted: loud colours & busy patterns penalised
+ *  noHeadwear: hats are out (indoors / ceremony)
+ */
 export const OCCASIONS = {
-  any:     { label: 'Anything', min: 1, max: 5 },
-  lounge:  { label: 'Lounging', min: 1, max: 2 },
-  weekend: { label: 'Weekend', min: 1, max: 3 },
-  date:    { label: 'Date night', min: 3, max: 4 },
-  work:    { label: 'Work', min: 3, max: 4 },
-  formal:  { label: 'Formal', min: 4, max: 5 },
+  any:       { label: 'Anything', emoji: '✨', min: 1, max: 5 },
+  lounge:    { label: 'Lounging', emoji: '🛋️', min: 1, max: 2 },
+  casual:    { label: 'Casual', emoji: '😎', min: 1, max: 3 },
+  weekend:   { label: 'Weekend', emoji: '☀️', min: 1, max: 3 },
+  errands:   { label: 'Errands', emoji: '🛒', min: 1, max: 3 },
+  outdoors:  { label: 'Outdoors', emoji: '🌲', min: 1, max: 3,
+               wantKinds: ['boots', 'flannel', 'overshirt', 'rain jacket', 'jeans', 'cargo pants', 'beanie', 'baseball cap'],
+               avoidKinds: ['loafers', 'oxfords', 'derbies', 'dress pants', 'suit trousers', 'dress shirt', 'blazer', 'suit jacket'] },
+  travel:    { label: 'Travel day', emoji: '✈️', min: 1, max: 3,
+               avoidKinds: ['suit trousers', 'oxfords', 'dress shirt'] },
+  party:     { label: 'Party / night out', emoji: '🎉', min: 2, max: 4,
+               preferFamilies: ['black', 'burgundy', 'navy', 'forest', 'rust'], avoidKinds: ['running shoes', 'sweatpants', 'hoodie'] },
+  date:      { label: 'Date night', emoji: '🌹', min: 3, max: 4,
+               avoidKinds: ['graphic tee', 'hoodie', 'sweatpants', 'joggers', 'running shoes', 'baseball cap', 'cargo pants'] },
+  work:      { label: 'Work', emoji: '💼', min: 3, max: 4,
+               avoidKinds: ['graphic tee', 'tank top', 'hoodie', 'sweatpants', 'joggers', 'athletic shorts', 'running shoes', 'sandals'] },
+  interview: { label: 'Job interview', emoji: '🤝', min: 4, max: 5, muted: true, wantLayer: true, noHeadwear: true,
+               preferFamilies: ['navy', 'charcoal', 'grey', 'white', 'light-blue'] },
+  church:    { label: 'Church', emoji: '⛪', min: 3, max: 5, muted: true, noHeadwear: true,
+               avoidKinds: ['graphic tee', 'tank top', 'shorts', 'athletic shorts', 'hoodie', 'sweatpants', 'joggers', 'running shoes', 'sandals'] },
+  wedding:   { label: 'Wedding guest', emoji: '💒', min: 4, max: 5, wantLayer: true, noHeadwear: true,
+               avoidFamilies: ['white', 'cream'], avoidKinds: ['jeans', 'sneakers', 'running shoes', 'graphic tee'] },
+  funeral:   { label: 'Funeral', emoji: '🕊️', min: 4, max: 5, muted: true, wantLayer: true, noHeadwear: true,
+               preferFamilies: ['black', 'charcoal', 'navy', 'grey'],
+               avoidFamilies: ['red', 'orange', 'yellow', 'pink', 'purple', 'lavender', 'light-blue', 'mustard', 'green', 'teal'] },
+  formal:    { label: 'Formal / black tie', emoji: '🎩', min: 5, max: 5, muted: true, wantLayer: true, noHeadwear: true,
+               preferFamilies: ['black', 'navy', 'charcoal', 'white'] },
 };
+
+/** Normalise a user-defined occasion into the OCCASIONS shape. */
+export function makeOccasion(o = {}) {
+  const clamp = (v, d) => (Number.isFinite(v) ? Math.min(5, Math.max(1, Math.round(v))) : d);
+  const min = clamp(o.min, 1), max = Math.max(min, clamp(o.max, 5));
+  const list = (v) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string') : undefined);
+  return {
+    label: String(o.label || 'My occasion').slice(0, 40), emoji: String(o.emoji || '📍').slice(0, 4), min, max,
+    preferFamilies: list(o.preferFamilies), avoidFamilies: list(o.avoidFamilies),
+    wantKinds: list(o.wantKinds), avoidKinds: list(o.avoidKinds),
+    wantLayer: !!o.wantLayer, muted: !!o.muted, noHeadwear: !!o.noHeadwear, custom: true,
+  };
+}
 
 /** Weather buckets. 'auto' is resolved by the UI into one of the others. */
 export const WEATHER = {

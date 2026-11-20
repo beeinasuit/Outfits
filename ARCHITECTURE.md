@@ -234,19 +234,12 @@ High contrast handles black/white and bold pairings (+); low contrast is flatter
 stark black-and-white (−). Very light depth: pale beige/cream/pastel yellow near the face can wash out (mild −) unless
 contrast is high. Deep depth: rich saturated colours and crisp white (+).
 
-## Feature parity additions (from a comparison with similar apps)
+## Occasions
 
-Built in v1 (local, no AI needed):
-- **Improve this look** — on the board, one tap finds the single best swap across all slots (loop `rankForSlot` over each
-  slot, pick the max positive delta) and shows a before/after with a drag slider; "Apply" swaps it in.
-- **Outfit battle** — two outfits side by side (two top suggestions, or one the user built vs the app's pick, or two
-  liked looks). The user votes; the winner gets 'like' feedback, the loser a mild pair-level dislike. Shows both scores
-  and the deciding reasons after the vote.
-- **Streaks** — consecutive days with "Wearing it!" logged; shown with a little flame on the Today screen, milestone
-  stamps at 3/7/30 days. Stored in settings (`streak: { current, best, lastDay }`), derived from item worn dates.
-- **Plan the week** — assign outfits to the next 7 days (each with its own occasion); the builder avoids repeating items
-  across the planned days and respects the hamper (planned items count as worn on their day). Stored in settings.plan.
+The occasion picker is how the user asks "what do I wear to X?". Each occasion in `OCCASIONS` (model.js) is data:
+a formality window plus optional colour/kind preferences that the engine applies generically
+(`preferFamilies` +, `avoidFamilies` −, `avoidKinds` −−, `wantKinds` +, `wantLayer`, `muted` = penalise loud colours and
+busy patterns, `noHeadwear`). Users can add their own occasions (label, emoji, formality range) — stored in
+`settings.customOccasions`, same shape, passed to the engine via `ctx.occasionDef`.
 
-v2 (needs the AI proxy + Claude Haiku 5.5):
-- Auto-describe items from photos; **Rate my look** from a mirror selfie; **chat stylist** ("what do I wear to an
-  October wedding?") answering only from the user's own closet.
+Not planned (decided with the user): outfit battles, streaks, week planner, improve-this-look, any AI/API features.
