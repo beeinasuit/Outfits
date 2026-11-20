@@ -79,6 +79,7 @@ export function mount(root, { navigate }) {
 
   // ---------- file handling ----------
   async function onFiles(list) {
+    if (!list || !list.length) { camInput.value = ''; libInput.value = ''; return; } // cancelled picker: do nothing
     const files = [...(list || [])].filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
     camInput.value = ''; libInput.value = '';
     if (!files.length) { toast('That doesn’t look like a photo.'); return; }

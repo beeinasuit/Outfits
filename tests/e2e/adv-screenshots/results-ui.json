@@ -1,269 +1,10 @@
 {
  "results": [
   {
-   "id": "D1a",
-   "name": "triple/quintuple-tap SPIN: exactly one spin runs, reels settle to one cell each, button re-enabled",
-   "ok": false,
-   "detail": "{\"spinning\":0,\"stamps\":1,\"strips\":[0,0,1,0,1,1,1],\"disabled\":false,\"ann\":3,\"stickers\":6}",
-   "shot": ""
-  },
-  {
-   "id": "D1b",
-   "name": "sticker count sane after rapid spins (<= 6)",
-   "ok": true,
-   "detail": "stickers=6",
-   "shot": ""
-  },
-  {
-   "id": "D1c",
-   "name": "tapping a reel mid-spin is ignored (not locked)",
-   "ok": true,
-   "detail": "false",
-   "shot": ""
-  },
-  {
-   "id": "D1d",
-   "name": "tapping thumbs-up while the reels are still spinning does not fire for a half-shown outfit",
-   "ok": true,
-   "detail": "aria-pressed after mid-spin like=false",
-   "shot": ""
-  },
-  {
-   "id": "D1e",
-   "name": "leaving the Spin tab mid-spin 4× never leaves the machine stuck \"spinning\"",
-   "ok": true,
-   "detail": "{\"spinning\":0,\"stamps\":1}",
-   "shot": ""
-  },
-  {
-   "id": "D1f",
-   "name": "weather=Auto with slow geolocation: three SPIN taps during the wait produce ONE spin (button should disable while resolving context)",
-   "ok": false,
-   "detail": "outfit announcements=3",
-   "shot": ""
-  },
-  {
-   "id": "D2a",
-   "name": "every filled reel can be locked",
-   "ok": true,
-   "detail": "4/4",
-   "shot": ""
-  },
-  {
-   "id": "D2b",
-   "name": "lock every reel then SPIN: no hang, outfit unchanged, result card still shows a stamp (or a clear toast)",
-   "ok": true,
-   "detail": "same=true stamps=1 toast=",
-   "shot": ""
-  },
-  {
-   "id": "D2c",
-   "name": "SPIN button usable after all-locked spin",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D2d",
-   "name": "lock an item, delete it in the closet, return to Spin: it is gone from the reels and the machine re-spins",
-   "ok": true,
-   "detail": "Blue stripe shirt -> Crisp white shirt,Brown leather belt,Navy chinos,Brown boots",
-   "shot": ""
-  },
-  {
-   "id": "D2e",
-   "name": "spinning after deleting a locked item works and stale lock is dropped",
-   "ok": true,
-   "detail": "locked=3 names=Grey crew sweater,Brown leather belt,Navy chinos,Brown boots",
-   "shot": ""
-  },
-  {
-   "id": "D2f",
-   "name": "locked item sent to the wash is never suggested",
-   "ok": true,
-   "detail": "Navy chinos / White tee,Brown leather belt,Dark denim jeans,Brown boots",
-   "shot": ""
-  },
-  {
-   "id": "D4a",
-   "name": "Spin screen switches to the empty state when the closet is emptied underneath it",
-   "ok": true,
-   "detail": "empty=1",
-   "shot": ""
-  },
-  {
-   "id": "D4.spin",
-   "name": "empty closet: spin renders something sensible, no overflow",
-   "ok": true,
-   "detail": "len=198 overflow=[]",
-   "shot": ""
-  },
-  {
-   "id": "D4.closet",
-   "name": "empty closet: closet renders something sensible, no overflow",
-   "ok": true,
-   "detail": "len=163 overflow=[]",
-   "shot": ""
-  },
-  {
-   "id": "D4.snap",
-   "name": "empty closet: snap renders something sensible, no overflow",
-   "ok": true,
-   "detail": "len=291 overflow=[]",
-   "shot": ""
-  },
-  {
-   "id": "D4.looks",
-   "name": "empty closet: looks renders something sensible, no overflow",
-   "ok": true,
-   "detail": "len=158 overflow=[]",
-   "shot": ""
-  },
-  {
-   "id": "D4.settings",
-   "name": "empty closet: settings renders something sensible, no overflow",
-   "ok": true,
-   "detail": "len=980 overflow=[]",
-   "shot": ""
-  },
-  {
-   "id": "D4b",
-   "name": "after wiping and re-loading the sample closet, the machine spins normally (no stale S.current/locks)",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D4c",
-   "name": "deleting every item one by one via the edit sheet ends on the empty closet state",
-   "ok": true,
-   "detail": "deleted=20",
-   "shot": ""
-  },
-  {
-   "id": "D5.spin",
-   "name": "only-tops closet: spin fine, no overflow",
-   "ok": true,
-   "detail": "[]",
-   "shot": ""
-  },
-  {
-   "id": "D5.closet",
-   "name": "only-tops closet: closet fine, no overflow",
-   "ok": true,
-   "detail": "[]",
-   "shot": ""
-  },
-  {
-   "id": "D5.snap",
-   "name": "only-tops closet: snap fine, no overflow",
-   "ok": true,
-   "detail": "[]",
-   "shot": ""
-  },
-  {
-   "id": "D5.looks",
-   "name": "only-tops closet: looks fine, no overflow",
-   "ok": true,
-   "detail": "[]",
-   "shot": ""
-  },
-  {
-   "id": "D5.settings",
-   "name": "only-tops closet: settings fine, no overflow",
-   "ok": true,
-   "detail": "[]",
-   "shot": ""
-  },
-  {
-   "id": "D5a",
-   "name": "Spin says what is missing (bottoms) when only tops exist",
-   "ok": true,
-   "detail": "The machine needs a top and a bottom\n\nAdd at least one clean top and one pair of bottoms, then pull the lever. Shoes and",
-   "shot": ""
-  },
-  {
-   "id": "D5b",
-   "name": "closet shows \"Add …\" ghost hangers for empty rails",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D5c",
-   "name": "Looks says there is nothing yet when only tops exist",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D5d",
-   "name": "top+bottom both in the wash: spin shows empty state (not a crash)",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D5e",
-   "name": "one top + one bottom: repeated SPIN keeps working",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D6a",
-   "name": "200-item closet renders in < 2 s",
-   "ok": true,
-   "detail": "84 ms",
-   "shot": ""
-  },
-  {
-   "id": "D6b",
-   "name": "scrolling the 200-item closet: p95 frame < 50 ms",
-   "ok": true,
-   "detail": "{\"p95\":17,\"max\":17,\"n\":63}",
-   "shot": ""
-  },
-  {
-   "id": "D6c",
-   "name": "200 items: first spin lands (stamp visible) within 4 s",
-   "ok": false,
-   "detail": "4326 ms",
-   "shot": ""
-  },
-  {
-   "id": "D6d",
-   "name": "200 items: a spin never freezes the main thread > 300 ms",
-   "ok": true,
-   "detail": "longest stall 3 ms",
-   "shot": ""
-  },
-  {
-   "id": "D6e",
-   "name": "200 items: Lookbook (12 outfits + gaps) ready in < 3 s",
-   "ok": true,
-   "detail": "241 ms",
-   "shot": ""
-  },
-  {
-   "id": "D6f",
-   "name": "1000 items: Lookbook ready in < 6 s",
-   "ok": true,
-   "detail": "26 ms",
-   "shot": ""
-  },
-  {
-   "id": "D6g",
-   "name": "1000 items: closet renders in < 4 s",
-   "ok": true,
-   "detail": "364 ms",
-   "shot": ""
-  },
-  {
    "id": "D7.spin",
    "name": "long/emoji/RTL names @320: Spin has no overflow / clipped text",
-   "ok": false,
-   "detail": "[{\"kind\":\"clipped\",\"sel\":\"b\",\"sw\":805,\"cw\":66,\"text\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},{\"kind\":\"clipped\",\"sel\":\"b\",\"sw\":218,\"cw\":66,\"text\":\"Supercalifragilisticexpialidocious-Super\"}]",
+   "ok": true,
+   "detail": "[]",
    "shot": "tests/e2e/adv-screenshots/d7-spin-320.png"
   },
   {
@@ -283,15 +24,15 @@
   {
    "id": "D7.looks",
    "name": "... Lookbook",
-   "ok": false,
-   "detail": "[{\"kind\":\"clipped\",\"sel\":\"span.look-names\",\"sw\":734,\"cw\":272,\"text\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},{\"kind\":\"clipped\",\"sel\":\"span.look-names\",\"sw\":734,\"cw\":272,\"text\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}]",
+   "ok": true,
+   "detail": "[]",
    "shot": "tests/e2e/adv-screenshots/d7-looks-320.png"
   },
   {
    "id": "D7.detail",
    "name": "... Look detail sheet",
-   "ok": false,
-   "detail": "[{\"kind\":\"clipped\",\"sel\":\"span.look-names\",\"sw\":734,\"cw\":272,\"text\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},{\"kind\":\"clipped\",\"sel\":\"span.look-names\",\"sw\":734,\"cw\":272,\"text\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"},{\"kind\":\"offscreen\",\"sel\":\"div.detail-head\",\"right\":993,\"left\":20,\"text\":\"CERTIFIED FIT99/100\"},{\"kind\":\"offscreen\",\"sel\":\"span.detail-score\",\"right\":993,\"left\":912,\"text\":\"99/1",
+   "ok": true,
+   "detail": "[]",
    "shot": "tests/e2e/adv-screenshots/d7-look-detail-320.png"
   },
   {
@@ -306,13 +47,6 @@
    "name": "name field caps at 40 chars when typing (but imports/older data can exceed it)",
    "ok": true,
    "detail": "len=40",
-   "shot": ""
-  },
-  {
-   "id": "D8",
-   "name": "routing (scenario threw)",
-   "ok": false,
-   "detail": "locator.click: Timeout 30000ms exceeded. / Call log: / \u001b[2m  - waiting for locator('.tab[data-route=\"spin\"]')\u001b[22m / ",
    "shot": ""
   },
   {
@@ -346,8 +80,8 @@
   {
    "id": "D9e",
    "name": "cancelling the picker (empty selection) shows no scolding \"That doesn’t look like a photo\" toast",
-   "ok": false,
-   "detail": "[\"That doesn’t look like a photo.\"]",
+   "ok": true,
+   "detail": "[]",
    "shot": ""
   },
   {
@@ -375,14 +109,14 @@
    "id": "D9h",
    "name": "6000x4000 JPEG: processed to boxes in < 8 s without crashing the tab",
    "ok": true,
-   "detail": "boxes=3 373ms longest main-thread task 69ms",
+   "detail": "boxes=3 331ms longest main-thread task 64ms",
    "shot": ""
   },
   {
    "id": "D9h2",
    "name": "6000x4000 JPEG: no single main-thread stall > 500 ms (UI frozen on a phone)",
    "ok": true,
-   "detail": "69ms",
+   "detail": "64ms",
    "shot": ""
   },
   {
@@ -400,393 +134,8 @@
    "shot": ""
   },
   {
-   "id": "D10a",
-   "name": "delete every box: \"Review\" is disabled (cannot proceed with nothing) and count reads 0",
-   "ok": true,
-   "detail": "disabled=true sub=\"0 items found\"",
-   "shot": "tests/e2e/adv-screenshots/d10-zero-boxes.png"
-  },
-  {
-   "id": "D10a2",
-   "name": "delete every box: hint tells the user what to do next (add a box)",
-   "ok": false,
-   "detail": "hint=\"Drag boxes to move, drag corners to resize, tap × to remove.\"",
-   "shot": ""
-  },
-  {
-   "id": "D10a3",
-   "name": "force-clicking disabled Review does nothing",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D10b",
-   "name": "tap (zero-size drag) with the Box tool does not create a degenerate box (>= 16 px each way)",
-   "ok": true,
-   "detail": "[{\"w\":106,\"h\":82}]",
-   "shot": ""
-  },
-  {
-   "id": "D10c",
-   "name": "1-px-wide drag creates a usable box (>= 16 px) or none",
-   "ok": true,
-   "detail": "[{\"w\":106,\"h\":82},{\"w\":106,\"h\":82}]",
-   "shot": ""
-  },
-  {
-   "id": "D10d",
-   "name": "dragging a box 3000 px off-screen keeps it inside the photo",
-   "ok": true,
-   "detail": "[true,true]",
-   "shot": ""
-  },
-  {
-   "id": "D10e",
-   "name": "dragging a box to negative coordinates keeps it inside the photo",
-   "ok": true,
-   "detail": "[true,true]",
-   "shot": ""
-  },
-  {
-   "id": "D10f",
-   "name": "resizing a box past its opposite corner never inverts / collapses it (>= 8 px)",
-   "ok": true,
-   "detail": "{\"w\":14,\"h\":11}",
-   "shot": ""
-  },
-  {
-   "id": "D10g",
-   "name": "review step opens for odd boxes",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D10h",
-   "name": "review: removing all colours then Save all should be blocked/prompted (not silently saved as grey)",
-   "ok": false,
-   "detail": "saved 2, silently grey=1",
-   "shot": ""
-  },
-  {
-   "id": "D10i",
-   "name": "skipping every drafted item returns to the start screen cleanly",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D10j",
-   "name": "leaving Snap mid-edit and returning restores the boxes screen (or start), not a stuck spinner",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D11.spin",
-   "name": "offline cold reload of #/spin: shell loads and data is intact",
-   "ok": false,
-   "detail": "ready=false items=-1/20",
-   "shot": ""
-  },
-  {
-   "id": "D11.closet",
-   "name": "offline cold reload of #/closet: shell loads and data is intact",
-   "ok": false,
-   "detail": "ready=false items=-1/20",
-   "shot": ""
-  },
-  {
-   "id": "D11.snap",
-   "name": "offline cold reload of #/snap: shell loads and data is intact",
-   "ok": false,
-   "detail": "ready=false items=-1/20",
-   "shot": ""
-  },
-  {
-   "id": "D11.looks",
-   "name": "offline cold reload of #/looks: shell loads and data is intact",
-   "ok": false,
-   "detail": "ready=false items=-1/20",
-   "shot": ""
-  },
-  {
-   "id": "D11.settings",
-   "name": "offline cold reload of #/settings: shell loads and data is intact",
-   "ok": false,
-   "detail": "ready=false items=-1/20",
-   "shot": ""
-  },
-  {
-   "id": "D11.snap",
-   "name": "offline: photo flow (lazy-loaded vision modules) works",
-   "ok": false,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D11.shell",
-   "name": "every src/**/*.js file is listed in sw.js SHELL (precached for offline)",
-   "ok": false,
-   "detail": "missing: src/engine/taste.js, src/vision/skin.js",
-   "shot": ""
-  },
-  {
-   "id": "D11.update",
-   "name": "after a \"deploy\" changes a module, an online reload runs the NEW code (service worker is network-first, not stale-while-revalidate)",
-   "ok": false,
-   "detail": "__v2=undefined",
-   "shot": ""
-  },
-  {
-   "id": "D12a",
-   "name": "prefers-reduced-motion: spin lands (stamp visible) within 1 s",
-   "ok": true,
-   "detail": "landed=0ms",
-   "shot": ""
-  },
-  {
-   "id": "D12b",
-   "name": "prefers-reduced-motion: no running animation longer than 150 ms or infinite during/after a spin",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D12c",
-   "name": "prefers-reduced-motion: no infinite animations while idle (marquee bulbs, etc.)",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D12d",
-   "name": "prefers-reduced-motion: no confetti",
-   "ok": true,
-   "detail": "layers=0",
-   "shot": ""
-  },
-  {
-   "id": "D12e",
-   "name": "prefers-reduced-motion: closet hangers do not sway/animate",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D13.contrast.dark",
-   "name": "dark mode: text contrast >= 4.5:1 (3:1 for large text) on all screens (230 samples)",
-   "ok": false,
-   "detail": "confirm dialog .btn \"Delete it all\" 2.29 (rgb(23, 20, 31) on rgb(255,90,60), 16px)",
-   "shot": ""
-  },
-  {
-   "id": "D13.contrast.light",
-   "name": "light mode: text contrast >= 4.5:1 (3:1 for large text) on all screens (230 samples)",
-   "ok": false,
-   "detail": "spin .stamp \"CERTIFIED FIT\" 4.2 (rgb(7, 138, 94) on rgb(255,250,240), 17px) ;; edit-sheet dialog .btn \"Delete\" 4.41 (rgb(217, 58, 28) on rgb(255,250,240), 16px) ;; look-detail dialog .stamp \"CERTIFIED FIT\" 3.85 (rgb(7, 138, 94) on rgb(247,240,225), 17px) ;; settings .btn \"Clear all data\" 4.41 (rgb(217, 58, 28) on rgb(255,250,240), 16px) ;; confirm dialog .btn \"Delete it all\" 2.29 (rgb(23, 20, 31) on rgb(255,90,60), 16px)",
-   "shot": ""
-  },
-  {
-   "id": "D13x1",
-   "name": "OS dark + Theme \"Light\": body turns light and theme-color meta follows",
-   "ok": true,
-   "detail": "bg=rgb(247, 240, 225) meta=#f7f0e1",
-   "shot": ""
-  },
-  {
-   "id": "D13x2",
-   "name": "Theme \"Auto\" follows the OS (dark) again",
-   "ok": true,
-   "detail": "rgb(23, 20, 31)",
-   "shot": ""
-  },
-  {
-   "id": "D14a",
-   "name": "Tab order reaches every primary control (skip link, nav, selects, reels, lever, spin, thumbs, wear, all 4 tabs)",
-   "ok": false,
-   "detail": "missing: tab: Spin; order: Skip to content > Fit Machine, home > Settings > Remove > Occasion > Weather > Hat: none. Tap to pick one. > Layer: none. Tap to pick one. > Top: Blue stripe shirt. Tap to lock it for the next spin. > Neckwear: none. Tap to pick one. > Belt: Brown leather belt. Tap to lock it for the next spin. > Bottom: Navy chinos. Tap to lock it for the next spin. > Shoes: Brown boots. Tap to lock it for the ne",
-   "shot": ""
-  },
-  {
-   "id": "D14b",
-   "name": "every focused control shows a visible focus indicator (outline or box-shadow)",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D14c",
-   "name": "keyboard: Space locks a reel, Enter unlocks it",
-   "ok": true,
-   "detail": "true false",
-   "shot": ""
-  },
-  {
-   "id": "D14d",
-   "name": "keyboard: Enter on SPIN spins; locked top reel is kept",
-   "ok": true,
-   "detail": "spinning=4",
-   "shot": ""
-  },
-  {
-   "id": "D14e",
-   "name": "keyboard: lever activates with Enter",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D14e2",
-   "name": "keyboard: lever activates with Space",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D14f",
-   "name": "keyboard: Enter on thumbs-up likes (aria-pressed)",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D14g",
-   "name": "keyboard: Enter on a tab navigates and moves focus to the screen heading",
-   "ok": true,
-   "detail": "focus=screen-title",
-   "shot": ""
-  },
-  {
-   "id": "D14h",
-   "name": "keyboard: focus stays inside an open sheet; Escape closes and returns focus to the item",
-   "ok": true,
-   "detail": "inside=true focus=hang-item",
-   "shot": ""
-  },
-  {
-   "id": "D14i",
-   "name": "skip link moves focus/scroll to main content",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D14j",
-   "name": "closet rails are keyboard-scrollable (tabindex 0)",
-   "ok": false,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D15a",
-   "name": "every button / link / input / select on every screen and sheet has an accessible name",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D16a",
-   "name": "60 s seeded monkey (703 actions): zero console errors / page errors / unhandled rejections",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "D16b",
-   "name": "monkey: a modal never survived Escape ×2",
-   "ok": true,
-   "detail": "stuck=0",
-   "shot": ""
-  },
-  {
-   "id": "D16c",
-   "name": "monkey: typed XSS strings never executed",
-   "ok": true,
-   "detail": "undefined",
-   "shot": ""
-  },
-  {
-   "id": "D16d",
-   "name": "monkey: app still alive at the end",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "E1a",
-   "name": "sticker reasons never name an item that is not on the reels (218 stickers over 28 spins with random locks)",
-   "ok": true,
-   "detail": "",
-   "shot": ""
-  },
-  {
-   "id": "E1b",
-   "name": "deleting an item while it is on the reels removes it from reels and reasons",
-   "ok": true,
-   "detail": "deleted \"Brown leather belt\" reels=Blue stripe shirt,Black leather belt,Navy chinos,?,White sneakers,Brown boots,White sneakers,Brown boots,White sneakers,Brown boots,White sneakers,Brown boots,White sneakers,Brown boots,Black derbies",
-   "shot": ""
-  },
-  {
-   "id": "E2.390x844",
-   "name": "right after a spin @390x844: fit meter, stamp and SPIN button are visible without scrolling (above the tab bar)",
-   "ok": false,
-   "detail": "{\"vh\":844,\"tabTop\":780,\"stamp\":{\"top\":817,\"bottom\":871,\"visible\":false},\"meter\":{\"top\":284,\"bottom\":326,\"visible\":true},\"spin\":{\"top\":718,\"bottom\":776,\"visible\":true},\"sticker\":{\"top\":889,\"bottom\":944,\"visible\":false},\"reels\":{\"top\":334,\"bottom\":710,\"visible\":true},\"card\":{\"top\":841,\"bottom\":1327,\"visible\":false}}",
-   "shot": "tests/e2e/adv-screenshots/e2-spin-390x844.png"
-  },
-  {
-   "id": "E2.320x640",
-   "name": "right after a spin @320x640: fit meter, stamp and SPIN button are visible without scrolling (above the tab bar)",
-   "ok": false,
-   "detail": "{\"vh\":640,\"tabTop\":576,\"stamp\":{\"top\":819,\"bottom\":864,\"visible\":false},\"meter\":{\"top\":284,\"bottom\":326,\"visible\":true},\"spin\":{\"top\":718,\"bottom\":776,\"visible\":false},\"sticker\":{\"top\":891,\"bottom\":941,\"visible\":false},\"reels\":{\"top\":334,\"bottom\":710,\"visible\":false},\"card\":{\"top\":841,\"bottom\":1354,\"visible\":false}}",
-   "shot": "tests/e2e/adv-screenshots/e2-spin-320x640.png"
-  },
-  {
-   "id": "E2.360x640",
-   "name": "right after a spin @360x640: fit meter, stamp and SPIN button are visible without scrolling (above the tab bar)",
-   "ok": false,
-   "detail": "{\"vh\":640,\"tabTop\":576,\"stamp\":{\"top\":817,\"bottom\":871,\"visible\":false},\"meter\":{\"top\":284,\"bottom\":326,\"visible\":true},\"spin\":{\"top\":718,\"bottom\":776,\"visible\":false},\"sticker\":{\"top\":893,\"bottom\":940,\"visible\":false},\"reels\":{\"top\":334,\"bottom\":710,\"visible\":false},\"card\":{\"top\":841,\"bottom\":1335,\"visible\":false}}",
-   "shot": "tests/e2e/adv-screenshots/e2-spin-360x640.png"
-  },
-  {
-   "id": "E2.375x667",
-   "name": "right after a spin @375x667 (iPhone SE): fit meter, stamp and SPIN button are visible without scrolling (above the tab bar)",
-   "ok": false,
-   "detail": "{\"vh\":667,\"tabTop\":603,\"stamp\":{\"top\":817,\"bottom\":871,\"visible\":false},\"meter\":{\"top\":284,\"bottom\":326,\"visible\":true},\"spin\":{\"top\":718,\"bottom\":776,\"visible\":false},\"sticker\":{\"top\":893,\"bottom\":940,\"visible\":false},\"reels\":{\"top\":334,\"bottom\":710,\"visible\":false},\"card\":{\"top\":841,\"bottom\":1335,\"visible\":false}}",
-   "shot": "tests/e2e/adv-screenshots/e2-spin-375x667.png"
-  },
-  {
-   "id": "E3a",
-   "name": "two instant taps on thumbs-up: exactly 2 feedback records (outfit + pair), no duplicates",
-   "ok": true,
-   "detail": "[\"outfit:like\",\"pair:like\"]",
-   "shot": ""
-  },
-  {
-   "id": "E3b",
-   "name": "two quick taps on thumbs-up behave like a toggle (liked then un-liked) — not \"liked, liked\"",
-   "ok": false,
-   "detail": "aria-pressed=true (toggle semantics: the 2nd tap should clear it)",
-   "shot": ""
-  },
-  {
-   "id": "E3c",
-   "name": "like + dislike in the same tick leaves one consistent record per key",
-   "ok": true,
-   "detail": "[\"demo-10|demo-12|demo-15|demo-5:dislike\",\"demo-10|demo-5:dislike\"]",
-   "shot": ""
-  },
-  {
-   "id": "E4",
-   "name": "worn twice (scenario threw)",
-   "ok": false,
-   "detail": "page.waitForSelector: Timeout 8000ms exceeded. / Call log: / \u001b[2m  - waiting for locator('.reel[data-state=\"filled\"]') to be visible\u001b[22m / ",
-   "shot": ""
-  },
-  {
-   "id": "E5",
-   "name": "modal escape hatches (scenario threw)",
+   "id": "D14",
+   "name": "keyboard (scenario threw)",
    "ok": false,
    "detail": "page.waitForSelector: Timeout 8000ms exceeded. / Call log: / \u001b[2m  - waiting for locator('.reel[data-state=\"filled\"]') to be visible\u001b[22m / ",
    "shot": ""
@@ -808,8 +157,8 @@
   {
    "id": "E6c",
    "name": "a sample item the user renamed/edited is not silently deleted by \"Remove sample items\"",
-   "ok": false,
-   "detail": "kept=false",
+   "ok": true,
+   "detail": "kept=true",
    "shot": ""
   },
   {
@@ -827,65 +176,12 @@
    "shot": ""
   },
   {
-   "id": "E8",
-   "name": "clipping @320 on normal data (scenario threw)",
-   "ok": false,
-   "detail": "page.waitForSelector: Timeout 8000ms exceeded. / Call log: / \u001b[2m  - waiting for locator('.reel[data-state=\"filled\"]') to be visible\u001b[22m / ",
-   "shot": ""
-  },
-  {
-   "id": "E9a",
-   "name": "delete then Undo restores the item and its photo",
-   "ok": true,
-   "detail": "{\"item\":true,\"photo\":true}",
-   "shot": ""
-  },
-  {
-   "id": "E9b",
-   "name": "deleting two items in a row: the first deletion remains undoable (toast stack or batched undo) — currently only the last toast survives",
-   "ok": false,
-   "detail": "toast shows: \"Deleted Second tee.\"",
-   "shot": ""
-  },
-  {
-   "id": "E9c",
-   "name": "long-press deletes an item with no confirmation (Undo toast only) — acceptable only if the toast is clearly offered",
-   "ok": true,
-   "detail": "deleted=false sheetOpen=0",
-   "shot": ""
-  },
-  {
-   "id": "E10",
-   "name": "weather auto / geolocation denied (scenario threw)",
-   "ok": false,
-   "detail": "page.waitForSelector: Timeout 8000ms exceeded. / Call log: / \u001b[2m  - waiting for locator('.reel[data-state=\"filled\"]') to be visible\u001b[22m / ",
-   "shot": ""
-  },
-  {
-   "id": "E11",
-   "name": "persistence of UI state (scenario threw)",
-   "ok": false,
-   "detail": "page.waitForSelector: Target page, context or browser has been closed / Call log: / \u001b[2m  - waiting for locator('.reel[data-state=\"filled\"]') to be visible\u001b[22m / ",
-   "shot": ""
-  },
-  {
    "id": "D.errors",
    "name": "zero console errors / page errors / unhandled rejections across the whole UI run",
-   "ok": false,
-   "detail": "[d11 console] Failed to load resource: the server responded with a status of 504 () | [d11 console] Failed to load resource: the server responded with a status of 503 (Offline) | [d11 console] Failed to load resource: the server responded with a status of 504 () | [d11 console] Failed to load resource: the server responded with a status of 503 (Offline) | [d11 console] Failed to load resource: the server responded with a status of 504 () | [d11 console] Failed to load resource: the server responded with a status of 503 (Offline) | [d11 console] Failed to load resource: the server responded wit",
+   "ok": true,
+   "detail": "",
    "shot": ""
   }
  ],
- "errors": [
-  "[d11 console] Failed to load resource: the server responded with a status of 504 ()",
-  "[d11 console] Failed to load resource: the server responded with a status of 503 (Offline)",
-  "[d11 console] Failed to load resource: the server responded with a status of 504 ()",
-  "[d11 console] Failed to load resource: the server responded with a status of 503 (Offline)",
-  "[d11 console] Failed to load resource: the server responded with a status of 504 ()",
-  "[d11 console] Failed to load resource: the server responded with a status of 503 (Offline)",
-  "[d11 console] Failed to load resource: the server responded with a status of 504 ()",
-  "[d11 console] Failed to load resource: the server responded with a status of 503 (Offline)",
-  "[d11 console] Failed to load resource: the server responded with a status of 504 ()",
-  "[d11 console] Failed to load resource: the server responded with a status of 503 (Offline)"
- ]
+ "errors": []
 }

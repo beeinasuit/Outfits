@@ -166,7 +166,7 @@ export function mount(root, { navigate }) {
         const v = verdict(c.o.score);
         const why = deciding(c.o, other.o);
         c.reveal.append(
-          isWin ? h('span', { class: 'bt-stamp' }, 'YOUR PICK') : null,
+          ...(isWin ? [h('span', { class: 'bt-stamp' }, 'YOUR PICK')] : []),
           h('span', { class: `bt-score tone-${v.tone}` }, h('b', {}, '0'), h('small', {}, '/100')),
           h('span', { class: 'bt-verdict' }, v.short),
           h('ul', { class: 'bt-why' }, why.map((r) => h('li', { class: r.delta >= 0 ? 'pos' : 'neg' }, h('b', {}, `${r.delta >= 0 ? '+' : '−'}${Math.abs(Math.round(r.delta))}`), ' ', r.text))));

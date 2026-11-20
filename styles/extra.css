@@ -177,3 +177,27 @@
   .onboard-slide { gap: 8px; }
   .onboard-slide p { font-size: 15px; }
 }
+
+/* ---------- long / unbroken / RTL names never break layouts ---------- */
+.hang-name, .look-names, .plan-names, .detail-list b, .edit-meta b, .edit-meta small, .rcard-n, .sel-chip, .toast-msg, .sheet-title, .reveal-title,
+.taste-label, .toggle-text b, .toggle-text small, .sticker-text, .look-why, .gap-card li span, .skin-read, .confirm-body, .hamper-count, .hamper small, .wash-tag,
+.chip, .detail-list li > span, .hang-item { overflow-wrap: anywhere; word-break: break-word; min-width: 0; }
+.hang-name { max-width: 100%; }
+.look-card, .plan-day, .detail, .edit, .itemform, .rcard { min-width: 0; max-width: 100%; }
+.look-names, .plan-names, .detail-list b { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.detail-list li { min-width: 0; } .detail-list li > span { display: grid; min-width: 0; }
+.edit-preview, .edit-meta { min-width: 0; }
+.wash-tag { max-width: 100px; }
+.hang-name, .look-names, .plan-names { unicode-bidi: plaintext; }
+
+/* ---------- keyboard focus ---------- */
+.rail:focus-visible, .hang-item:focus-visible, .wash-btn:focus-visible, .look-card:focus-visible, .laundry-btn:focus-visible, .entry-card:focus-visible,
+.drape-opt:focus-visible, .chip:focus-visible, .btn:focus-visible, .toggle-row:focus-visible, .icon-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+/* ---------- touch targets >= 44px ---------- */
+.chip, .sel-main, .sel-x, .icon-btn, .slot-btn, .btn-small, .page-sub.link, .toggle-row { min-height: 44px; }
+.sel-x, .icon-btn { min-width: 44px; }
+.set-card input, .set-card select, .itemform input, .itemform select, .text-input, select { font-size: 16px; min-height: 44px; }
+.detail-board { width: 100%; }
+.detail-board .board-holder { width: 100%; }
+.plan-board, .plan-board .board-holder { width: 100%; }

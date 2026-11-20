@@ -237,6 +237,7 @@ export function demoItems() {
   return d.map(([slot, kind, name, colors, extra], i) => makeItem({ id: `demo-${i + 1}`, slot, kind, name, colors, ...extra, createdAt: Date.now() + i }));
 }
 export async function loadDemo() {
-  for (const it of demoItems()) await saveItem(it, { silent: true });
+  const have = new Set(data.items.map((i) => i.id));
+  for (const it of demoItems()) if (!have.has(it.id)) await saveItem(it, { silent: true }); // never overwrite edits/wear history
   emit('items');
 }

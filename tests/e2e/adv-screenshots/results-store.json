@@ -592,14 +592,14 @@
    "id": "C2.big1",
    "name": "20 MB backup (valid + padding) is handled (clear result, < 20 s, no hang)",
    "ok": true,
-   "detail": "accepted 682ms \"Restored 3 items and 2 photos.\"",
+   "detail": "accepted 707ms \"Restored 3 items and 2 photos.\"",
    "shot": ""
   },
   {
    "id": "C2.big2",
    "name": "20 MB truncated file rejected, data intact",
    "ok": true,
-   "detail": "rejected 89ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
+   "detail": "rejected 74ms That file is not valid JSON, so it can’t be a Fit Machine backup.",
    "shot": ""
   },
   {
@@ -669,7 +669,7 @@
    "id": "C4.0a",
    "name": "IndexedDB unavailable (indexedDB getter throws): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 148ms",
+   "detail": "ready=true 126ms",
    "shot": ""
   },
   {
@@ -711,7 +711,7 @@
    "id": "C4.1a",
    "name": "IndexedDB unavailable (indexedDB.open throws): app boots in < 10 s",
    "ok": true,
-   "detail": "ready=true 192ms",
+   "detail": "ready=true 167ms",
    "shot": ""
   },
   {
@@ -722,19 +722,134 @@
    "shot": ""
   },
   {
-   "id": "RUN",
-   "name": "adv-store ran without throwing",
+   "id": "C4.1c",
+   "name": "... in-memory sample closet + spin still works",
    "ok": false,
-   "detail": "locator.count: Target page, context or browser has been closed\n    at /home/user/Outfits/tests/e2e/adv-store.mjs:394:54",
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.1d",
+   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.1e",
+   "name": "... backup download still works from memory",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.1f",
+   "name": "... clear-all in memory mode works and closet shows empty state",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2a",
+   "name": "IndexedDB unavailable (indexedDB.open fires onerror): app boots in < 10 s",
+   "ok": true,
+   "detail": "ready=true 152ms",
+   "shot": ""
+  },
+  {
+   "id": "C4.2b",
+   "name": "... shows the \"won’t save\" warning banner",
+   "ok": true,
+   "detail": "banner=1",
+   "shot": ""
+  },
+  {
+   "id": "C4.2c",
+   "name": "... in-memory sample closet + spin still works",
+   "ok": false,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2d",
+   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2e",
+   "name": "... backup download still works from memory",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.2f",
+   "name": "... clear-all in memory mode works and closet shows empty state",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3a",
+   "name": "IndexedDB unavailable (indexedDB.open never answers (hang)): app boots in < 10 s",
+   "ok": true,
+   "detail": "ready=true 4102ms",
+   "shot": ""
+  },
+  {
+   "id": "C4.3b",
+   "name": "... shows the \"won’t save\" warning banner",
+   "ok": true,
+   "detail": "banner=1",
+   "shot": ""
+  },
+  {
+   "id": "C4.3c",
+   "name": "... in-memory sample closet + spin still works",
+   "ok": false,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3d",
+   "name": "... Settings shows the \"Not saving\" card and \"Memory only\" storage",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3e",
+   "name": "... backup download still works from memory",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.3f",
+   "name": "... clear-all in memory mode works and closet shows empty state",
+   "ok": true,
+   "detail": "",
+   "shot": ""
+  },
+  {
+   "id": "C4.q1",
+   "name": "QuotaExceeded on save: user is told (toast) rather than silent failure / unhandled rejection",
+   "ok": false,
+   "detail": "toast=Your phone is out of storage space, so that change wasn’t saved. errors=[c4q console] UNHANDLED REJECTION: quota|[c4q pageerror] quota",
    "shot": ""
   },
   {
    "id": "C.errors",
    "name": "no console errors / page errors / unhandled rejections during the whole storage run",
-   "ok": true,
-   "detail": "",
+   "ok": false,
+   "detail": "[c4q console] UNHANDLED REJECTION: quota | [c4q pageerror] quota",
    "shot": ""
   }
  ],
- "errors": []
+ "errors": [
+  "[c4q console] UNHANDLED REJECTION: quota",
+  "[c4q pageerror] quota"
+ ]
 }

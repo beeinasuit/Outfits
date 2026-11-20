@@ -1,5 +1,5 @@
 // CLOSET screen: hangers on rails, one rail per slot.
-import { SLOTS, SLOT_LABELS, FORMALITY, wearsSinceWash } from '../model.js';
+import { SLOTS, SLOT_LABELS, FORMALITY, wearsSinceWash, newId } from '../model.js';
 import { h, clear, cap, sleep } from './dom.js';
 import { icon } from './icons.js';
 import { mascot, illustrate } from './illustrations.js';
@@ -7,7 +7,7 @@ import { itemArt } from './itemart.js';
 import { buzz, reduced, confetti } from './fx.js';
 import { toast, sheet, confirmDialog } from './overlay.js';
 import { buildItemForm, itemToDraft, draftToItem } from './itemform.js';
-import { data, saveItem, removeItem, removeDemo, loadDemo, demoCount, laundryDay, setClean } from './data.js';
+import { data, saveItem, removeItem, removeDemo, loadDemo, demoCount, laundryDay, setClean, isDemo } from './data.js';
 
 const RAIL_SLOTS = SLOTS.filter((s) => s !== 'extra');
 let filter = 'all';
@@ -100,7 +100,10 @@ export function mount(root, { navigate }) {
     const content = h('div', { class: 'edit' }, preview, form, h('div', { class: 'sheet-actions' }, save, washBtn, del));
     const s = sheet({ title: 'Edit item', content });
     save.addEventListener('click', async () => {
-      await saveItem(draftToItem(d, { photoId: orig.photoId, cutoutId: orig.cutoutId, worn: orig.worn, lastWashed: orig.lastWashed, createdAt: orig.createdAt, available: orig.available }));
+      // Editing a sample piece makes it the user's own: new id, so "Remove samples" / "Load samples" never touch it.
+      const adopt = isDemo(orig);
+      await saveItem(draftToItem(d, { id: adopt ? newId() : orig.id, photoId: orig.photoId, cutoutId: orig.cutoutId, worn: orig.worn, lastWashed: orig.lastWashed, createdAt: orig.createdAt, available: orig.available }));
+      if (adopt) await removeItem(orig.id);
       s.close(); toast('Saved.');
     });
     washBtn.addEventListener('click', async () => { s.close(); toggleWash(orig); });

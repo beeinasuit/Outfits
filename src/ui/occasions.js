@@ -74,8 +74,8 @@ export function occasionPicker({ value = 'any', onChange = () => {} } = {}) {
           if (!ok) return;
           const next = { ...(data.settings.customOccasions || {}) };
           delete next[key];
-          await setSetting({ customOccasions: next });
           const was = current === key;
+          await setSetting({ customOccasions: next });
           if (was) current = 'any';
           build();
           if (was) onChange('any');
