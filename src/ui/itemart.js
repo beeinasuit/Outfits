@@ -9,7 +9,7 @@ export function itemArt(item, { cls = '', title = true } = {}) {
   if (item.photoId) {
     getPhotoURL(item.photoId).then((url) => {
       if (!url) return;
-      const img = h('img', { src: url, alt: label, loading: 'lazy', decoding: 'async', draggable: 'false' });
+      const img = h('img', { src: url, alt: label, decoding: 'async', draggable: 'false' });
       img.addEventListener('load', () => { el.classList.add('has-photo'); el.replaceChildren(img); });
     }).catch(() => {});
   }

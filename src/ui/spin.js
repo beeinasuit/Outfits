@@ -138,7 +138,7 @@ export function mount(root, { navigate }) {
     if (!rs.length) els.stickers.append(h('p', { class: 'hint' }, 'Nothing to report. A quiet, sensible outfit.'));
     rs.forEach((r, i) => {
       const pos = r.delta > 0, neg = r.delta < 0;
-      const rot = (Math.random() * 8 - 4).toFixed(1);
+      const rot = (Math.random() * 6 - 3).toFixed(1);
       els.stickers.append(h('span', { class: `sticker ${pos ? 'pos' : neg ? 'neg' : 'neu'}`, style: { '--rot': `${rot}deg`, '--d': `${(instant ? 0 : 900 + i * 130)}ms` } },
         h('span', { class: 'sticker-ico', html: icon(pos ? 'check' : neg ? 'alert' : 'info', { size: 15, sw: 3 }) }),
         h('span', { class: 'sticker-text' }, r.text),
@@ -283,21 +283,22 @@ export function mount(root, { navigate }) {
       h('span', { class: 'meter-title' }, 'FIT METER'),
       h('span', { class: 'meter-track' }, meterFill, h('span', { class: 'meter-ticks', 'aria-hidden': 'true' })),
       h('span', { class: 'meter-num' }, meterNum, h('small', {}, '/100')));
-    const lockHint = h('p', { class: 'hint lock-hint', hidden: Object.keys(S.locks).length > 0 }, 'Tap a reel to lock it. Spins will build around it.');
-    machineEl.append(
-      h('div', { class: 'marquee', 'aria-hidden': 'true' }, h('span', { class: 'bulbs' }), h('span', { class: 'marquee-title' }, 'FIT MACHINE'), h('span', { class: 'bulbs' })),
-      h('div', { class: 'machine-body' }, reelsEl, lever),
-      meter);
-
-    const stamp = h('div', { class: 'stamp', 'aria-hidden': 'true' });
-    const stickers = h('div', { class: 'stickers' });
     const like_ = h('button', { class: 'round-btn', type: 'button', 'aria-label': 'Thumbs down: not for me', 'aria-pressed': 'false', html: icon('down', { size: 26 }), onclick: () => like('dislike') });
     const likeUp = h('button', { class: 'round-btn up', type: 'button', 'aria-label': 'Thumbs up: love it', 'aria-pressed': 'false', html: icon('up', { size: 26 }), onclick: () => like('like') });
     const spinBtn = h('button', { class: 'btn btn-big btn-tomato spin-btn', type: 'button', onclick: () => spin() }, h('span', { html: icon('spin', { size: 26, sw: 3 }) }), 'SPIN');
     const wearBtn = h('button', { class: 'btn btn-mint wear-btn', type: 'button', onclick: wear });
+    const lockHint = h('p', { class: 'hint lock-hint', hidden: Object.keys(S.locks).length > 0 }, 'Tap a reel to lock it. Spins will build around it.');
+    machineEl.append(
+      h('div', { class: 'marquee', 'aria-hidden': 'true' }, h('span', { class: 'bulbs' }), h('span', { class: 'marquee-title' }, 'FIT MACHINE'), h('span', { class: 'bulbs' })),
+      meter,
+      h('div', { class: 'machine-body' }, reelsEl, lever),
+      h('div', { class: 'machine-foot' }, spinBtn));
+
+    const stamp = h('div', { class: 'stamp', 'aria-hidden': 'true' });
+    const stickers = h('div', { class: 'stickers' });
     const card = h('div', { class: 'result-card' }, stamp,
       h('h2', { class: 'card-title' }, 'Why it works'), stickers,
-      h('div', { class: 'card-foot' }, wearBtn, h('span', { class: 'swipe-hint', 'aria-hidden': 'true' }, 'or swipe the card: right = love, left = nope')));
+      h('div', { class: 'card-foot' }, h('div', { class: 'feel-row' }, like_, wearBtn, likeUp), h('span', { class: 'swipe-hint', 'aria-hidden': 'true' }, 'or swipe this card: right = love, left = nope')));
     swipe(card, { right: () => like('like'), left: () => like('dislike') });
 
     const shakeChip = shakeSupported() && matchMedia('(pointer: coarse)').matches
@@ -307,7 +308,6 @@ export function mount(root, { navigate }) {
       demoBanner(),
       h('div', { class: 'ctxbar' }, h('label', { class: 'pill-select' }, h('span', { html: icon('target', { size: 16 }) }), occ), h('label', { class: 'pill-select' }, h('span', { html: icon('sun', { size: 16 }) }), wx), ctxNote),
       machineEl, lockHint, card,
-      h('div', { class: 'action-bar' }, like_, spinBtn, likeUp),
       shakeChip ? h('div', { class: 'center' }, shakeChip) : null);
     els = { machine: machineEl, meter, meterFill, meterNum, stamp, stickers, like: like_, dislike: like_, spin: spinBtn, wear: wearBtn, ctxNote, lockHint };
     els.like = likeUp; els.dislike = like_;
