@@ -98,8 +98,13 @@ export function mulberry32(a) {
 }
 
 export async function waitLanded(page, timeout = 15000) {
-  await page.waitForFunction(() => !document.querySelector('.spinning') && document.querySelector('.stamp.show') && document.querySelector('.sticker'), null, { timeout });
+  await page.waitForFunction(() => document.querySelector('.fm-piece[data-item]') && !document.querySelector('.fm-piece.fm-land') && !document.querySelector('.t-shuffle:disabled') && document.querySelector('.t-stamp.slam, .t-stamp.shown') && document.querySelector('.t-sticker, .t-why-title'), null, { timeout });
 }
+/** slot -> item id currently on the Today board. */
+export const boardSlots = (page) => page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.fm-board .fm-piece[data-item]')].map((p) => [p.dataset.slot, p.dataset.item])));
+export const boardNames = (page) => page.evaluate(() => [...document.querySelectorAll('.fm-board .fm-piece[data-item]')].map((p) => (p.getAttribute('aria-label') || '').replace(/ \(.*$/, '')));
+/** Count events in IndexedDB by type. */
+export const eventCounts = (page) => page.evaluate(async () => { const s = await import('./src/store.js'); const ev = await s.listEvents(); const c = {}; for (const e of ev) c[e.type] = (c[e.type] || 0) + 1; return c; });
 export async function waitIdle(page, ms = 1700) { await page.waitForTimeout(ms); }
 
 export async function snapshotDb(page) {

@@ -257,19 +257,24 @@ try {
     const bad = async () => page.evaluate(() => ({ pwned: window.__pwned, inj: document.querySelectorAll('body [onerror],body [onload],img[src="x"]').length }));
     const log = [];
     const probe = async (where) => { const b = await bad(); if (b.pwned || b.inj) log.push(`${where}: pwned=${b.pwned} injected=${b.inj}`); };
-    // spin screen: several spins, tap empty reels (opens pick sheet w/ itemArt title=true)
+    // today board: several shuffles, open Change sheets (swap sheet renders itemArt)
     await page.evaluate(() => { location.hash = '#/spin'; }); await page.waitForTimeout(900);
     for (let i = 0; i < 6; i++) {
-      await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 }).catch(() => {});
-      await page.waitForTimeout(300);
-      await probe(`spin#${i}`);
-      const empties = await page.locator('.reel[data-state="empty"]').all();
-      for (const e of empties) { await e.click().catch(() => {}); await page.waitForTimeout(250); await probe(`pick-sheet#${i}`); await page.keyboard.press('Escape'); await page.waitForTimeout(100); }
-      await page.locator('.spin-btn').click({ timeout: 3000 }).catch(() => {});
+      await page.waitForFunction(() => !document.querySelector('.t-shuffle:disabled'), null, { timeout: 15000 }).catch(() => {});
+      await page.waitForTimeout(500);
+      await probe(`board#${i}`);
+      for (const sl of ['top', 'bottom', 'shoes']) {
+        await page.locator(`.fm-piece[data-slot="${sl}"]`).dispatchEvent('click').catch(() => {});
+        await page.locator('.t-bar [data-act="change"]').click({ timeout: 1500 }).catch(() => {});
+        await page.waitForTimeout(300); await probe(`swap-sheet-${sl}#${i}`);
+        await page.locator('.sw-tab[data-tab="pick"]').click({ timeout: 800 }).catch(() => {}); await page.waitForTimeout(150); await probe(`swap-pick-${sl}#${i}`);
+        await page.keyboard.press('Escape'); await page.waitForTimeout(120);
+      }
+      await page.locator('.t-shuffle').click({ timeout: 3000 }).catch(() => {});
     }
-    await page.waitForTimeout(1800); await probe('spin-final');
+    await page.waitForTimeout(1500); await probe('board-final');
     await page.locator('.round-btn.up').click().catch(() => {}); await page.waitForTimeout(200); await probe('liked-toast');
-    await page.locator('.wear-btn').click().catch(() => {}); await page.waitForTimeout(300); await probe('wear');
+    await page.locator('.t-wear').click().catch(() => {}); await page.waitForTimeout(300); await probe('wear');
     await page.evaluate(() => { location.hash = '#/looks'; }); await page.waitForTimeout(1200); await probe('looks');
     const cards = await page.locator('.look-card').count();
     for (let i = 0; i < Math.min(cards, 4); i++) { await page.locator('.look-card').nth(i).click(); await page.waitForTimeout(250); await probe(`look-detail#${i}`); await page.locator('dialog.sheet .round-btn.up').click().catch(() => {}); await page.waitForTimeout(150); await probe('look-toast'); await page.keyboard.press('Escape'); await page.waitForTimeout(100); }
@@ -330,7 +335,7 @@ try {
     check('C3a2', 'form-entered hostile names appear in the closet literally, as text', nonLiteral.length === 0, `not literal: ${JSON.stringify(nonLiteral)}`);
     // stickers/reasons: any sticker text containing a payload must be text
     await page.evaluate(() => { location.hash = '#/spin'; }); await page.waitForTimeout(1500);
-    const stickerNodes = await page.evaluate(() => [...document.querySelectorAll('.sticker-text')].map((n) => n.children.length));
+    const stickerNodes = await page.evaluate(() => [...document.querySelectorAll('.t-sticker span:not(.t-sticker-ico)')].map((n) => n.children.length));
     check('C3a3', 'reason stickers contain only text nodes (no element children)', stickerNodes.every((c) => c === 0));
     await ctx.close();
   }
@@ -389,10 +394,13 @@ try {
     const banner = await page.locator('#banner .banner').count();
     check(`C4.${vi}b`, '... shows the "won’t save" warning banner', banner === 1, `banner=${banner}`);
     await page.getByRole('button', { name: 'Try with a sample closet' }).click().catch(() => {});
-    await page.waitForSelector('.reel[data-state="filled"]', { timeout: 8000 }).catch(() => {});
+    await page.waitForSelector('.fm-piece[data-item]', { timeout: 8000 }).catch(() => {});
     await waitLanded(page).catch(() => {});
-    const landed = await page.locator('.stamp.show').count();
-    check(`C4.${vi}c`, '... in-memory sample closet + spin still works', landed === 1);
+    const oldN = await page.locator('.fm-piece[data-item]').count();
+    await page.locator('.t-shuffle').click().catch(() => {});
+    await waitLanded(page).catch(() => {}); await page.waitForTimeout(500);
+    const landed = await page.locator('.t-stamp.slam, .t-stamp.shown').count();
+    check(`C4.${vi}c`, '... in-memory sample closet + shuffle still works', landed === 1 && oldN >= 3 && (await page.locator('.fm-piece[data-item]').count()) >= 3, `pieces=${oldN}`);
     await shot(page, `c4-${vi}-spin`);
     // add item, backup, restore in memory mode
     await page.evaluate(() => { location.hash = '#/settings'; }); await page.waitForSelector('.set-card');
