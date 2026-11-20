@@ -11,46 +11,6 @@
    "bg": "rgb(255,90,60)"
   },
   {
-   "screen": "look-detail",
-   "sel": "dialog .stamp",
-   "text": "CERTIFIED FIT",
-   "ratio": 3.85,
-   "size": "17px",
-   "weight": "900",
-   "fg": "rgb(7, 138, 94)",
-   "bg": "rgb(247,240,225)"
-  },
-  {
-   "screen": "spin",
-   "sel": ".stamp",
-   "text": "CERTIFIED FIT",
-   "ratio": 4.2,
-   "size": "17px",
-   "weight": "900",
-   "fg": "rgb(7, 138, 94)",
-   "bg": "rgb(255,250,240)"
-  },
-  {
-   "screen": "edit-sheet",
-   "sel": "dialog .btn",
-   "text": "Delete",
-   "ratio": 4.41,
-   "size": "16px",
-   "weight": "800",
-   "fg": "rgb(217, 58, 28)",
-   "bg": "rgb(255,250,240)"
-  },
-  {
-   "screen": "settings",
-   "sel": ".btn",
-   "text": "Clear all data",
-   "ratio": 4.41,
-   "size": "16px",
-   "weight": "800",
-   "fg": "rgb(217, 58, 28)",
-   "bg": "rgb(255,250,240)"
-  },
-  {
    "screen": "snap",
    "sel": ".big-tile small",
    "text": "Pick one or many",
@@ -73,7 +33,7 @@
   {
    "screen": "onboarding",
    "sel": ".onboard p",
-   "text": "A slot machine for your wardro",
+   "text": "It lays your real clothes out ",
    "ratio": 5.39,
    "size": "17px",
    "weight": "600",
@@ -83,7 +43,7 @@
   {
    "screen": "spin",
    "sel": ".hint",
-   "text": "Tap a reel to lock it. Spins w",
+   "text": "Tap any piece to change, lock ",
    "ratio": 5.39,
    "size": "13px",
    "weight": "600",
@@ -92,8 +52,8 @@
   },
   {
    "screen": "spin",
-   "sel": ".lock-hint",
-   "text": "Tap a reel to lock it. Spins w",
+   "sel": ".t-hint",
+   "text": "Tap any piece to change, lock ",
    "ratio": 5.39,
    "size": "13px",
    "weight": "600",
@@ -114,6 +74,16 @@
    "screen": "edit-sheet",
    "sel": "dialog .edit-meta small",
    "text": "Business · worn 0×",
+   "ratio": 5.39,
+   "size": "13.3333px",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
+   "bg": "rgb(247,240,225)"
+  },
+  {
+   "screen": "edit-sheet",
+   "sel": "dialog .edit-meta small",
+   "text": "0 wears since last wash",
    "ratio": 5.39,
    "size": "13.3333px",
    "weight": "600",
@@ -249,49 +219,39 @@
    "weight": "600",
    "fg": "rgb(101, 95, 114)",
    "bg": "rgb(247,240,225)"
-  }
- ],
- "failures": [
-  {
-   "screen": "spin",
-   "sel": ".stamp",
-   "text": "CERTIFIED FIT",
-   "ratio": 4.2,
-   "size": "17px",
-   "weight": "900",
-   "fg": "rgb(7, 138, 94)",
-   "bg": "rgb(255,250,240)"
   },
   {
-   "screen": "edit-sheet",
-   "sel": "dialog .btn",
-   "text": "Delete",
-   "ratio": 4.41,
+   "screen": "empty",
+   "sel": ".empty p",
+   "text": "Snap a few of your clothes, or",
+   "ratio": 5.39,
    "size": "16px",
-   "weight": "800",
-   "fg": "rgb(217, 58, 28)",
-   "bg": "rgb(255,250,240)"
-  },
-  {
-   "screen": "look-detail",
-   "sel": "dialog .stamp",
-   "text": "CERTIFIED FIT",
-   "ratio": 3.85,
-   "size": "17px",
-   "weight": "900",
-   "fg": "rgb(7, 138, 94)",
+   "weight": "600",
+   "fg": "rgb(101, 95, 114)",
    "bg": "rgb(247,240,225)"
   },
   {
-   "screen": "settings",
-   "sel": ".btn",
-   "text": "Clear all data",
-   "ratio": 4.41,
-   "size": "16px",
+   "screen": "onboarding",
+   "sel": ".onboard .btn",
+   "text": "Next",
+   "ratio": 5.86,
+   "size": "24px",
    "weight": "800",
-   "fg": "rgb(217, 58, 28)",
-   "bg": "rgb(255,250,240)"
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
   },
+  {
+   "screen": "spin",
+   "sel": ".tab span",
+   "text": "",
+   "ratio": 5.86,
+   "size": "11px",
+   "weight": "800",
+   "fg": "rgb(23, 20, 31)",
+   "bg": "rgb(255,90,60)"
+  }
+ ],
+ "failures": [
   {
    "screen": "confirm",
    "sel": "dialog .btn",

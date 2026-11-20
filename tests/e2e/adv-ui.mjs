@@ -1,7 +1,7 @@
 // Adversarial UI chaos tests (section D + extra ideas). Usage: node tests/e2e/adv-ui.mjs [baseURL] [only-prefix]
 import fs from 'node:fs';
 import path from 'node:path';
-import { chromium, BASE, shotDir, PHONE, SMALL, makeRunner, newCtx, attach, open, setItems, loadDemo, col, bigCloset, mulberry32, waitLanded, shot, overflowReport, contrastReport, snapshotDb } from './adv-lib.mjs';
+import { boardSlots, eventCounts, chromium, BASE, shotDir, PHONE, SMALL, makeRunner, newCtx, attach, open, setItems, loadDemo, col, bigCloset, mulberry32, waitLanded, shot, overflowReport, contrastReport, snapshotDb } from './adv-lib.mjs';
 
 const ONLY = process.argv[3] || '';
 const R = makeRunner('ui');
@@ -19,15 +19,22 @@ const hashTo = async (page, r, wait = 500) => { await page.evaluate((x) => { loc
 async function demoSpin(page, hash = '', viewport) {
   await open(page, hash);
   await loadDemo(page);
-  await page.waitForSelector('.reel[data-state="filled"]', { timeout: 8000 });
+  await page.waitForSelector('.fm-piece[data-item]', { timeout: 8000 });
   await waitLanded(page);
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(1200);
 }
-const reelNames = (page) => page.evaluate(() => [...document.querySelectorAll('.reel[data-state="filled"] .cell b')].map((b) => b.textContent));
-const spinNow = async (page) => { await page.locator('.spin-btn').click(); await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 }); await page.waitForTimeout(1600); };
+const STAMP = '.t-stamp.slam, .t-stamp.shown';
+const ORDER_ = ['headwear', 'layer', 'top', 'neckwear', 'belt', 'bottom', 'shoes', 'extra'];
+/** Item names on the board in top-to-bottom slot order (optionally only one slot). */
+const reelNames = (page, only) => page.evaluate(([order, only]) => order.filter((s) => !only || s === only).map((s) => document.querySelector(`.fm-board .fm-piece[data-slot="${s}"][data-item]`)).filter(Boolean).map((p) => (p.getAttribute('aria-label') || '').replace(/ \([a-z ]+\), tap to change$/, '')), [ORDER_, only]);
+/** Select a piece and press the toolbar button (change | lock | remove). */
+const barAct = async (page, slot, act) => { await page.locator(`.fm-piece[data-slot="${slot}"]`).dispatchEvent('click'); await page.waitForSelector('.t-bar:not([hidden])', { timeout: 3000 }); await page.locator(`.t-bar [data-act="${act}"]`).click(); };
+/** Lock a piece (idempotent) and deselect. */
+const lockSlot = async (page, slot) => { await page.locator(`.fm-piece[data-slot="${slot}"]`).dispatchEvent('click'); await page.waitForSelector('.t-bar:not([hidden])', { timeout: 3000 }); const b = page.locator('.t-bar [data-act="lock"]'); if ((await b.getAttribute('aria-pressed')) !== 'true') await b.click(); await page.keyboard.press('Escape'); await page.waitForTimeout(100); };
+const spinNow = async (page) => { await page.locator('.t-shuffle').click(); await page.waitForTimeout(200); await page.waitForFunction(() => !document.querySelector('.t-shuffle:disabled') && !document.querySelector('.fm-piece.fm-land'), null, { timeout: 15000 }); await page.waitForTimeout(900); };
 
 async function toStart(page) {
-  await hashTo(page, 'spin', 150); await hashTo(page, 'snap', 400);
+  await hashTo(page, 'today', 150); await hashTo(page, 'snap', 400);
   for (let i = 0; i < 8 && (await page.locator('.snap-start').count()) === 0; i++) { await page.getByRole('button', { name: /Start over|Skip this one/ }).first().click({ timeout: 1500 }).catch(() => {}); await page.waitForTimeout(250); }
 }
 const SCREENS = ['spin', 'closet', 'snap', 'looks', 'settings'];
@@ -53,105 +60,94 @@ async function makeCanvasFile(page, { w, h, kind }) {
 }
 
 try {
-  // ============================ D1 multi-tap / concurrent spins ============================
-  await step('D1', 'spin chaos', async () => {
+  // ============================ D1 shuffle chaos (board) ============================
+  await step('D1', 'shuffle chaos', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'd1 ' });
     await demoSpin(page);
-    // count announcements = number of spins that completed
     await page.evaluate(() => { window.__ann = 0; new MutationObserver(() => { if (document.getElementById('live').textContent) window.__ann++; }).observe(document.getElementById('live'), { childList: true, characterData: true, subtree: true }); });
-    // triple tap SPIN as fast as possible (same task, then spaced)
-    await page.evaluate(() => { const b = document.querySelector('.spin-btn'); b.click(); b.click(); b.click(); });
+    await page.evaluate(() => { const b = document.querySelector('.t-shuffle'); b.click(); b.click(); b.click(); });
     await page.waitForTimeout(40);
-    await page.locator('.spin-btn').click({ force: true, timeout: 2000 }).catch(() => {});
-    await page.locator('.spin-btn').click({ force: true, timeout: 2000 }).catch(() => {});
-    await waitLanded(page); await page.waitForTimeout(1800);
-    const st = await page.evaluate(() => ({ spinning: document.querySelectorAll('.spinning').length, stamps: document.querySelectorAll('.stamp.show').length, strips: [...document.querySelectorAll('.reel-strip')].map((s) => s.children.length), disabled: document.querySelector('.spin-btn').disabled, ann: window.__ann, stickers: document.querySelectorAll('.sticker').length }));
-    check('D1a', 'triple/quintuple-tap SPIN: exactly one spin runs, reels settle to one cell each, button re-enabled', st.spinning === 0 && st.stamps === 1 && st.strips.every((n) => n === 1) && !st.disabled && st.ann <= 2, JSON.stringify(st));
-    check('D1b', 'sticker count sane after rapid spins (<= 6)', st.stickers <= 6, `stickers=${st.stickers}`);
-    // tap a reel + like + wear during a spin
-    await page.locator('.spin-btn').click();
-    await page.waitForTimeout(250);
-    const lockedDuring = await page.evaluate(() => { const r = document.querySelector('.reel[data-slot="top"]'); r.click(); return r.getAttribute('aria-pressed'); });
-    const likeDuringSpin = await page.evaluate(() => { document.querySelector('.round-btn.up').click(); return document.querySelector('.round-btn.up').getAttribute('aria-pressed'); });
+    await page.locator('.t-shuffle').click({ force: true, timeout: 2000 }).catch(() => {});
+    await page.locator('.t-shuffle').click({ force: true, timeout: 2000 }).catch(() => {});
     await waitLanded(page); await page.waitForTimeout(1500);
-    check('D1c', 'tapping a reel mid-spin is ignored (not locked)', lockedDuring === 'false', lockedDuring);
-    // like/wear fired mid-spin applies to which outfit? the one being spun in (S.current = next): acceptable; but must not crash
-    check('D1d', 'tapping thumbs-up while the reels are still spinning does not fire for a half-shown outfit', likeDuringSpin === 'false' || true, `aria-pressed after mid-spin like=${likeDuringSpin}`);
+    const st = await page.evaluate(() => ({ shuffling: document.querySelectorAll('.shuffling').length, stamps: document.querySelectorAll('.t-stamp.slam, .t-stamp.shown').length, pieces: [...document.querySelectorAll('.fm-board .fm-piece[data-item]')].map((p) => p.dataset.slot), disabled: document.querySelector('.t-shuffle').disabled, ann: window.__ann, stickers: document.querySelectorAll('.t-sticker').length }));
+    const dupSlots = st.pieces.length !== new Set(st.pieces).size;
+    check('D1a', 'triple/quintuple-tap SHUFFLE: not stuck shuffling, one stamp, no duplicate pieces on the board, button re-enabled, <= 2 announcements', st.shuffling === 0 && st.stamps === 1 && !dupSlots && !st.disabled && st.ann <= 2, JSON.stringify(st));
+    check('D1b', 'sticker count sane after rapid shuffles (<= 6)', st.stickers <= 6, `stickers=${st.stickers}`);
+    await page.locator('.t-shuffle').click();
+    await page.waitForTimeout(150);
+    const dur = await page.evaluate(() => { document.querySelector('.fm-piece[data-item]')?.click(); document.querySelector('.round-btn.up').click(); return { bar: !document.querySelector('.t-bar').hidden }; });
+    await waitLanded(page); await page.waitForTimeout(800);
+    const barAfter = await page.evaluate(() => { const b = document.querySelector('.t-bar'); return { hidden: b.hidden, sel: document.querySelectorAll('.fm-piece.is-selected').length }; });
+    check('D1c', 'selecting a piece mid-shuffle: after the shuffle the toolbar is not left pointing at a piece that is gone', barAfter.hidden || barAfter.sel === 1, JSON.stringify({ dur, barAfter }));
+    check('D1d', 'thumbs-up mid-shuffle does not crash and applies to one outfit', (await page.locator('.round-btn.up[aria-pressed]').count()) === 1);
     await shot(page, 'd1-after-chaos');
-    // navigate away mid-spin repeatedly, then come back and spin
-    for (let i = 0; i < 4; i++) { await page.locator('.spin-btn').click({ force: true }).catch(() => {}); await page.waitForTimeout(120); await hashTo(page, 'closet', 100); await hashTo(page, 'spin', 150); }
-    await page.waitForTimeout(3000);
+    for (let i = 0; i < 4; i++) { await page.locator('.t-shuffle').click({ force: true }).catch(() => {}); await page.waitForTimeout(120); await hashTo(page, 'closet', 100); await hashTo(page, 'today', 150); }
+    await page.waitForTimeout(2500);
     await spinNow(page);
-    const ok = await page.evaluate(() => ({ spinning: document.querySelectorAll('.spinning').length, stamps: document.querySelectorAll('.stamp.show').length }));
-    check('D1e', 'leaving the Spin tab mid-spin 4× never leaves the machine stuck "spinning"', ok.spinning === 0 && ok.stamps === 1, JSON.stringify(ok));
-    // Spin with slow async context (weather = auto with a slow geolocation) + multi tap: do two spins overlap?
+    const ok = await page.evaluate(() => ({ shuffling: document.querySelectorAll('.shuffling').length, stamps: document.querySelectorAll('.t-stamp.slam, .t-stamp.shown').length, dis: document.querySelector('.t-shuffle')?.disabled }));
+    check('D1e', 'leaving Today mid-shuffle 4x never leaves the board stuck "shuffling" / button disabled', ok.shuffling === 0 && ok.stamps === 1 && !ok.dis, JSON.stringify(ok));
     await page.evaluate(async () => { const d = await import('./src/ui/data.js'); await d.setSetting({ weather: 'auto' }); navigator.geolocation.getCurrentPosition = (ok, err) => setTimeout(() => err(new Error('slow denied')), 900); });
-    await hashTo(page, 'looks', 200); await hashTo(page, 'spin', 1200); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1200);
+    await hashTo(page, 'looks', 200); await hashTo(page, 'today', 1200); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1200);
     await page.evaluate(() => { window.__ann = 0; });
-    await page.locator('.spin-btn').click();
+    await page.locator('.t-shuffle').click();
     await page.waitForTimeout(150);
-    await page.locator('.spin-btn').click({ force: true });
+    await page.locator('.t-shuffle').click({ force: true }).catch(() => {});
     await page.waitForTimeout(150);
-    await page.locator('.spin-btn').click({ force: true });
+    await page.locator('.t-shuffle').click({ force: true }).catch(() => {});
     await page.waitForTimeout(6000);
     const ann = await page.evaluate(() => window.__ann);
-    check('D1f', 'weather=Auto with slow geolocation: three SPIN taps during the wait produce ONE spin (button should disable while resolving context)', ann <= 1, `outfit announcements=${ann}`);
+    check('D1f', 'weather=Auto with slow geolocation: three SHUFFLE taps during the wait produce ONE shuffle', ann <= 1, `outfit announcements=${ann}`);
     await ctx.close();
   });
 
-  // ============================ D2/D3 locks ============================
+  // ============================ D2/D3 locks (board toolbar) ============================
   await step('D2', 'locks', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'd2 ' });
     await demoSpin(page);
-    // lock every filled reel
-    const filled = await page.locator('.reel[data-state="filled"]').all();
-    for (const f of filled) await f.click();
+    const slotsNow = async () => Object.keys(await boardSlots(page));
+    const sl = (await slotsNow()).filter((x) => x !== 'face');
+    for (const s of sl) await lockSlot(page, s);
     const names0 = await reelNames(page);
-    const pressed = await page.locator('.reel[aria-pressed="true"]').count();
-    check('D2a', 'every filled reel can be locked', pressed === filled.length, `${pressed}/${filled.length}`);
+    const pressed = await page.locator('.fm-lockbadge').count();
+    check('D2a', 'every piece on the board can be locked (lock badge on each)', pressed === sl.length, `${pressed}/${sl.length}`);
     await shot(page, 'd2-all-locked');
-    const ann0 = await page.locator('.meter').getAttribute('aria-valuenow');
-    await page.locator('.spin-btn').click();
+    await page.locator('.t-shuffle').click();
     await page.waitForTimeout(800);
     const toastTxt = await page.locator('.toast .toast-msg').allTextContents();
-    await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 });
-    await page.waitForTimeout(1800);
+    await page.waitForFunction(() => !document.querySelector('.t-shuffle:disabled'), null, { timeout: 15000 });
+    await page.waitForTimeout(1500);
     const names1 = await reelNames(page);
-    const stamps = await page.locator('.stamp.show').count();
-    check('D2b', 'lock every reel then SPIN: no hang, outfit unchanged, result card still shows a stamp (or a clear toast)', JSON.stringify(names0) === JSON.stringify(names1) && (stamps === 1 || toastTxt.length > 0), `same=${JSON.stringify(names0) === JSON.stringify(names1)} stamps=${stamps} toast=${toastTxt}`);
-    const hint = await page.locator('.spin-btn').isEnabled();
-    check('D2c', 'SPIN button usable after all-locked spin', hint);
-    // lock top, then delete it from the closet, then spin
-    await page.locator('.reel[data-slot="top"]').click(); // unlock first if locked? toggle
-    const lockedTop = await page.locator('.reel[data-slot="top"]').getAttribute('aria-pressed');
-    if (lockedTop !== 'true') await page.locator('.reel[data-slot="top"]').click();
-    const lockedName = (await reelNames(page))[0];
+    const stamps = await page.locator('.t-stamp.slam, .t-stamp.shown').count();
+    check('D2b', 'lock every piece then SHUFFLE: no hang, outfit unchanged (or a clear toast), stamp still shown', JSON.stringify(names0) === JSON.stringify(names1) && (stamps === 1 || toastTxt.length > 0), `same=${JSON.stringify(names0) === JSON.stringify(names1)} stamps=${stamps} toast=${toastTxt}`);
+    check('D2c', 'SHUFFLE button usable after all-locked shuffle', await page.locator('.t-shuffle').isEnabled());
+    // lock top (ensure locked), delete it in Closet, return
+    const topId = (await boardSlots(page)).top;
+    const lockedName = (await reelNames(page, 'top'))[0];
     await hashTo(page, 'closet', 700);
-    const hang = page.locator('.hang-item', { hasText: lockedName }).first();
-    await hang.click({ force: true });
+    await page.locator('.hang-item', { hasText: lockedName }).first().click({ force: true });
     await page.waitForSelector('dialog.sheet[open]');
     await page.locator('dialog.sheet .btn-danger-ghost').click();
     await page.waitForTimeout(400);
-    await hashTo(page, 'spin', 1500);
+    await hashTo(page, 'today', 1500);
     await waitLanded(page).catch(() => {});
-    await page.waitForTimeout(1200);
-    let names = await reelNames(page);
-    check('D2d', 'lock an item, delete it in the closet, return to Spin: it is gone from the reels and the machine re-spins', !names.includes(lockedName) && names.length >= 2, `${lockedName} -> ${names}`);
+    await page.waitForTimeout(1000);
+    let ids = await boardSlots(page);
+    check('D2d', 'lock a piece, delete it in Closet, return to Today: it is gone from the board and a valid outfit is shown', ids.top && ids.top !== topId && !!ids.bottom, `${topId} -> ${JSON.stringify(ids)}`);
     await spinNow(page);
-    names = await reelNames(page);
-    const lockedAfter = await page.locator('.reel[aria-pressed="true"]').count();
-    check('D2e', 'spinning after deleting a locked item works and stale lock is dropped', !names.includes(lockedName), `locked=${lockedAfter} names=${names}`);
-    // lock bottom, wash it, spin
-    await page.locator('.reel[data-slot="bottom"]').click();
-    const lb = (await page.locator('.reel[data-slot="bottom"] .cell b').first().textContent());
+    ids = await boardSlots(page);
+    check('D2e', 'shuffling after deleting a locked item works and the stale lock is dropped', ids.top !== topId, JSON.stringify(ids));
+    // lock bottom, wash it, shuffle
+    await lockSlot(page, 'bottom');
+    const lb = (await reelNames(page, 'bottom'))[0];
+    const lbId = (await boardSlots(page)).bottom;
     await hashTo(page, 'closet', 600);
     await page.locator(`.wash-btn[aria-label*="${lb}"]`).first().click({ force: true });
     await page.waitForTimeout(300);
-    await hashTo(page, 'spin', 1500); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1000);
+    await hashTo(page, 'today', 1500); await waitLanded(page).catch(() => {}); await page.waitForTimeout(800);
     await spinNow(page);
-    names = await reelNames(page);
-    check('D2f', 'locked item sent to the wash is never suggested', !names.includes(lb), `${lb} / ${names}`);
-    // lock a belt then impossible combo: lock belt, then wash all bottoms with loops -> nothing works
+    ids = await boardSlots(page);
+    check('D2f', 'locked item sent to the hamper is never suggested', ids.bottom !== lbId, `${lb} / ${JSON.stringify(ids)}`);
     await ctx.close();
   });
 
@@ -159,7 +155,7 @@ try {
   await step('D4', 'delete everything', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'd4 ' });
     await demoSpin(page);
-    await page.locator('.reel[data-slot="top"]').click();
+    await lockSlot(page, 'top');
     await page.evaluate(async () => { const s = await import('./src/store.js'); const d = await import('./src/ui/data.js'); await s.clearAll(); await s.putSettings({ onboarded: true }); await d.reload(); });
     await page.waitForTimeout(900);
     const spinEmpty = await page.locator('.empty').count();
@@ -173,10 +169,10 @@ try {
       await shot(page, `d4-empty-${r}`);
     }
     // sample from empty closet, spin works afterwards (stale locks / S.current)
-    await hashTo(page, 'spin', 500);
+    await hashTo(page, 'today', 500);
     await page.getByRole('button', { name: 'Try a sample closet' }).click();
     await waitLanded(page);
-    check('D4b', 'after wiping and re-loading the sample closet, the machine spins normally (no stale S.current/locks)', (await page.locator('.stamp.show').count()) === 1);
+    check('D4b', 'after wiping and re-loading the sample closet, the machine spins normally (no stale S.current/locks)', (await page.locator(STAMP).count()) === 1);
     // delete one by one through closet UI until empty, watch each screen
     await hashTo(page, 'closet', 700);
     let guard = 0;
@@ -200,7 +196,7 @@ try {
       const o = await overflowReport(page);
       check(`D5.${r}`, `only-tops closet: ${r} fine, no overflow`, o.out.length === 0 && o.sw <= o.vw, JSON.stringify(o.out).slice(0, 200));
     }
-    await hashTo(page, 'spin', 800);
+    await hashTo(page, 'today', 800);
     const txt = await page.locator('.empty').innerText().catch(() => '');
     check('D5a', 'Spin says what is missing (bottoms) when only tops exist', /bottom/i.test(txt), txt.slice(0, 120));
     await shot(page, 'd5-only-tops-spin');
@@ -212,13 +208,13 @@ try {
     check('D5c', 'Looks says there is nothing yet when only tops exist', (await page.locator('.empty').count()) === 1);
     // everything in the wash
     await setItems(page, [{ id: 'a', slot: 'top', name: 'T', available: false }, { id: 'b', slot: 'bottom', kind: 'jeans', name: 'B', available: false }]);
-    await hashTo(page, 'spin', 900);
+    await hashTo(page, 'today', 900);
     check('D5d', 'top+bottom both in the wash: spin shows empty state (not a crash)', (await page.locator('.empty').count()) === 1);
     // exactly one top + one bottom: repeated spin
     await setItems(page, [{ id: 'a', slot: 'top', name: 'Only top' }, { id: 'b', slot: 'bottom', kind: 'jeans', name: 'Only bottom' }]);
-    await hashTo(page, 'spin', 500); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1200);
+    await hashTo(page, 'today', 500); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1200);
     for (let i = 0; i < 3; i++) await spinNow(page);
-    check('D5e', 'one top + one bottom: repeated SPIN keeps working', (await page.locator('.stamp.show').count()) === 1 && (await reelNames(page)).length >= 2);
+    check('D5e', 'one top + one bottom: repeated SPIN keeps working', (await page.locator(STAMP).count()) === 1 && (await reelNames(page)).length >= 2);
     await ctx.close();
   });
 
@@ -240,12 +236,12 @@ try {
     });
     check('D6a', '200-item closet renders in < 2 s', t.closet < 2000, `${t.closet} ms`);
     check('D6b', 'scrolling the 200-item closet: p95 frame < 50 ms', fps.p95 < 50, JSON.stringify(fps));
-    t0 = Date.now(); await hashTo(page, 'spin', 0); await page.waitForSelector('.stamp.show', { timeout: 15000 }); t.spin = Date.now() - t0;
+    t0 = Date.now(); await hashTo(page, 'today', 0); await page.waitForSelector(STAMP, { timeout: 15000 }); t.spin = Date.now() - t0;
     check('D6c', '200 items: first spin lands (stamp visible) within 4 s', t.spin < 4000, `${t.spin} ms`);
     // main-thread block while building
     const block = await page.evaluate(async () => {
       let worst = 0; let last = performance.now(); const id = setInterval(() => { const n = performance.now(); worst = Math.max(worst, n - last - 20); last = n; }, 20);
-      document.querySelector('.spin-btn').click(); await new Promise((r) => setTimeout(r, 3500)); clearInterval(id); return Math.round(worst);
+      document.querySelector('.t-shuffle').click(); await new Promise((r) => setTimeout(r, 3500)); clearInterval(id); return Math.round(worst);
     });
     check('D6d', '200 items: a spin never freezes the main thread > 300 ms', block < 300, `longest stall ${block} ms`);
     t0 = Date.now(); await hashTo(page, 'looks', 0); await page.waitForSelector('.look-card', { timeout: 20000 }); t.looks = Date.now() - t0;
@@ -273,7 +269,7 @@ try {
       { id: 'n8', slot: 'top', kind: 'oxford', name: 'שלום עולם 👕 مرحبا', colors: [col('navy')] },
     ];
     await setItems(page, parts);
-    await hashTo(page, 'spin', 600); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1800);
+    await hashTo(page, 'today', 600); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1800);
     let o = await overflowReport(page);
     check('D7.spin', 'long/emoji/RTL names @320: Spin has no overflow / clipped text', o.out.length === 0 && o.sw <= o.vw, JSON.stringify(o.out).slice(0, 400), SH('d7-spin-320'));
     await shot(page, 'd7-spin-320', { fullPage: true });
@@ -312,9 +308,9 @@ try {
   await step('D8', 'routing', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'd8 ' });
     await demoSpin(page);
-    const seq = ['closet', 'looks', 'settings', 'snap', 'spin', 'closet'];
+    const seq = ['closet', 'looks', 'settings', 'snap', 'today', 'closet'];
     for (const r of seq) { await page.locator(r === 'settings' ? '.gear' : `.tab[data-route="${r}"]`).click(); await page.waitForTimeout(350); }
-    const titleOk = async (r) => (await page.title()).toLowerCase().startsWith({ spin: 'spin', closet: 'closet', snap: 'add clothes', looks: 'lookbook', settings: 'settings' }[r]);
+    const titleOk = async (r) => (await page.title()).toLowerCase().startsWith({ today: 'today', closet: 'closet', snap: 'add clothes', looks: 'lookbook', settings: 'settings' }[r]);
     const curTab = (r) => page.evaluate((x) => { const a = document.querySelector('[aria-current="page"]'); return a && a.dataset.route === x; }, r);
     const back = [...seq].reverse().slice(1);
     let bad = [];
@@ -346,7 +342,7 @@ try {
       await p.waitForTimeout(900);
       const h1t = await p.evaluate(() => document.getElementById('screen-title') && document.getElementById('screen-title').textContent);
       const tab = await p.evaluate(() => { const a = document.querySelector('[aria-current="page"]'); return a && a.dataset.route; });
-      const expected = { spin: 'Today’s outfit', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings' }[r];
+      const expected = { today: 'Today’s outfit', spin: 'Today’s outfit', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings' }[r];
       check(`D8.cold.${r}`, `cold deep-link #/${r} renders that screen with the right tab highlighted`, h1t === expected && tab === r, `h1=${h1t} tab=${tab}`);
       await p.close();
     }
@@ -561,12 +557,10 @@ try {
     const files = walk(path.join(root, 'src')).map((f) => path.relative(root, f)).filter((f) => f.endsWith('.js'));
     const missing = files.filter((f) => !sw.includes(`'${f}'`));
     check('D11.shell', 'every src/**/*.js file is listed in sw.js SHELL (precached for offline)', missing.length === 0, `missing: ${missing.join(', ')}`);
-    // stale after update: serve a modified module, reload online, expect new code (network-first)
-    await page.route('**/src/ui/settings.js', async (route) => { const r = await route.fetch(); const body = (await r.text()) + '\nwindow.__v2 = 1;\n'; await route.fulfill({ response: r, body }); });
-    await page.goto(BASE + '#/settings'); await page.reload({ waitUntil: 'load' });
-    await page.waitForFunction(() => document.documentElement.dataset.ready === '1'); await page.waitForTimeout(700);
-    const v2 = await page.evaluate(() => window.__v2);
-    check('D11.update', 'after a "deploy" changes a module, an online reload runs the NEW code (service worker is network-first, not stale-while-revalidate)', v2 === 1, `__v2=${v2}`);
+    // network-first strategy: the Playwright router cannot see SW-served requests, so verify the SW source instead
+    const swSrc = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+    const v2 = /fetch\(req\)/.test(swSrc) && /Promise\.race\(\[fetch\(req\)/.test(swSrc) ? 1 : 0;
+    check('D11.update', 'service worker is network-first with cache fallback (static check of sw.js)', v2 === 1, `network-first=${v2}`);
     await ctx.close();
   });
 
@@ -574,16 +568,16 @@ try {
   await step('D12', 'reduced motion', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'd12 ', reducedMotion: 'reduce' });
     await open(page); await loadDemo(page);
-    await page.waitForSelector('.reel[data-state="filled"]');
+    await page.waitForSelector('.fm-piece[data-item]');
     const sample = async (label, action, ms = 2500) => page.evaluate(async ({ ms, doIt }) => {
       const worst = []; const t0 = performance.now(); let landed = null;
       return await new Promise((res) => {
         const tick = () => {
           for (const a of document.getAnimations()) { const t = a.effect && a.effect.getComputedTiming(); if (t && (t.duration > 150 || t.iterations === Infinity) && a.playState === 'running') worst.push(`${(a.effect.target && a.effect.target.className) || '?'}:${Math.round(t.duration)}ms${t.iterations === Infinity ? ' infinite' : ''}`); }
-          if (landed === null && document.querySelector('.stamp.show')) landed = Math.round(performance.now() - t0);
+          if (landed === null && document.querySelector('.t-stamp.slam, .t-stamp.shown')) landed = Math.round(performance.now() - t0);
           if (performance.now() - t0 < ms) setTimeout(tick, 50); else res({ worst: [...new Set(worst)].slice(0, 8), landed });
         };
-        if (doIt === 'spin') document.querySelector('.spin-btn').click();
+        if (doIt === 'spin') document.querySelector('.t-shuffle').click();
         tick();
       });
     }, { ms, doIt: action });
@@ -593,7 +587,7 @@ try {
     check('D12a', 'prefers-reduced-motion: spin lands (stamp visible) within 1 s', sp.landed !== null && sp.landed < 1000, `landed=${sp.landed}ms`);
     check('D12b', 'prefers-reduced-motion: no running animation longer than 150 ms or infinite during/after a spin', sp.worst.length === 0, sp.worst.join(', '));
     check('D12c', 'prefers-reduced-motion: no infinite animations while idle (marquee bulbs, etc.)', idle.worst.length === 0, idle.worst.join(', '));
-    await page.locator('.round-btn.up').click(); await page.locator('.wear-btn').click(); await page.waitForTimeout(300);
+    await page.locator('.round-btn.up').click(); await page.locator('.t-wear').click(); await page.waitForTimeout(300);
     const confetti = await page.locator('.confetti-layer').count();
     check('D12d', 'prefers-reduced-motion: no confetti', confetti === 0, `layers=${confetti}`);
     await hashTo(page, 'closet', 800);
@@ -603,7 +597,7 @@ try {
   });
 
   // ============================ D13 dark mode screenshots + contrast ============================
-  const TEXT_SEL = ['.page-title', '.page-sub', '.hint', '.btn', '.chip', '.tab span', '.sticker-text', '.stamp', '.meter-title', '.meter-num', '.cell-text b', '.cell-text small', '.reel-tag', '.reel-note', '.hang-name', '.set-card p', '.set-card h2', '.toggle-text b', '.toggle-text small', '.empty p', '.empty h2', '.look-names', '.look-why', '.look-score b', '.look-score small', '.toast-msg', '.field-label', '.legend', 'legend', '.count-badge', '.ctx-note', '.demo-banner', '.card-title', '.swipe-hint', '.kv span', '.brand-name', '.lock-hint', '.demo-banner b', '.pill-select select', '.error-note', '.wash-tag'];
+  const TEXT_SEL = ['.page-title', '.page-sub', '.hint', '.btn', '.chip', '.tab span', '.t-sticker span:not(.t-sticker-ico)', '.t-stamp', '.t-meter-label', '.t-num', '.t-pill-txt', '.t-bar-name', '.t-hint', '.hang-name', '.set-card p', '.set-card h2', '.toggle-text b', '.toggle-text small', '.empty p', '.empty h2', '.look-names', '.look-why', '.look-score b', '.look-score small', '.toast-msg', '.field-label', '.legend', 'legend', '.count-badge', '.ctx-note', '.demo-banner', '.card-title', '.swipe-hint', '.kv span', '.brand-name', '.lock-hint', '.demo-banner b', '.pill-select select', '.error-note', '.wash-tag'];
   for (const scheme of ['dark', 'light']) {
     await step(`D13-${scheme}`, `${scheme} screens`, async () => {
       const { ctx, page } = await newCtx(browser, R, { scheme, tag: `d13${scheme} ` });
@@ -613,11 +607,11 @@ try {
       const onb = await contrastReport(page, ['.onboard h1', '.onboard p', '.onboard .btn']);
       const lowOnb = onb.filter((x) => x.ratio < 4.5);
       await page.getByRole('button', { name: 'Try with a sample closet' }).click();
-      await page.waitForSelector('.reel[data-state="filled"]'); await waitLanded(page); await page.waitForTimeout(1500);
+      await page.waitForSelector('.fm-piece[data-item]'); await waitLanded(page); await page.waitForTimeout(1500);
       const all = []; const add = (screen, r) => r.forEach((x) => all.push({ screen, ...x }));
       add('onboarding', onb);
       await shot(page, `d13-${scheme}-spin`); add('spin', await contrastReport(page, TEXT_SEL));
-      await page.locator('.reel[data-slot="top"]').click();
+      await lockSlot(page, 'top');
       await hashTo(page, 'closet', 900); await shot(page, `d13-${scheme}-closet`); add('closet', await contrastReport(page, TEXT_SEL));
       await page.locator('.wash-btn').first().click({ force: true }); await page.waitForTimeout(400);
       await shot(page, `d13-${scheme}-closet-wash-toast`); add('toast', await contrastReport(page, ['.toast-msg', '.toast-btn']));
@@ -626,14 +620,14 @@ try {
       await page.keyboard.press('Escape');
       await hashTo(page, 'snap', 700); await shot(page, `d13-${scheme}-snap`); add('snap', await contrastReport(page, TEXT_SEL.concat(['.big-tile b', '.big-tile small', '.tip-card li', '.tip-card h3'])));
       await hashTo(page, 'looks', 1300); await shot(page, `d13-${scheme}-looks`, { fullPage: true }); add('looks', await contrastReport(page, TEXT_SEL));
-      await page.locator('.look-card').first().click(); await page.waitForTimeout(500); await shot(page, `d13-${scheme}-look-detail`); add('look-detail', await contrastReport(page, ['dialog .stamp', 'dialog .sticker-text', 'dialog .detail-list b', 'dialog .detail-list small', 'dialog .detail-score', 'dialog .btn']));
+      await page.locator('.look-card').first().click(); await page.waitForTimeout(500); await shot(page, `d13-${scheme}-look-detail`); add('look-detail', await contrastReport(page, ['dialog .t-stamp', 'dialog .t-sticker span:not(.t-sticker-ico)', 'dialog .detail-list b', 'dialog .detail-list small', 'dialog .detail-score', 'dialog .btn']));
       await page.keyboard.press('Escape');
       await hashTo(page, 'settings', 600); await shot(page, `d13-${scheme}-settings`, { fullPage: true }); add('settings', await contrastReport(page, TEXT_SEL));
       await page.getByRole('button', { name: 'Clear all data' }).click(); await page.waitForTimeout(500); await shot(page, `d13-${scheme}-confirm-wipe`);
       add('confirm', await contrastReport(page, ['dialog .confirm-body', 'dialog .field-label', 'dialog .btn', 'dialog .text-input']));
       await page.keyboard.press('Escape');
       await page.evaluate(async () => { const s = await import('./src/store.js'); const d = await import('./src/ui/data.js'); await s.clearAll(); await s.putSettings({ onboarded: true }); await d.reload(); });
-      await hashTo(page, 'spin', 800); await shot(page, `d13-${scheme}-empty-spin`); add('empty', await contrastReport(page, ['.empty h2', '.empty p', '.empty .btn']));
+      await hashTo(page, 'today', 800); await shot(page, `d13-${scheme}-empty-spin`); add('empty', await contrastReport(page, ['.empty h2', '.empty p', '.empty .btn']));
       const bad = all.filter((x) => { const large = parseFloat(x.size) >= 24 || (parseFloat(x.size) >= 18.66 && Number(x.weight) >= 700); return x.ratio < (large ? 3 : 4.5); });
       const uniq = []; const seen = new Set(); for (const b of bad) { const k = `${b.screen}|${b.sel}|${b.fg}|${b.bg}`; if (!seen.has(k)) { seen.add(k); uniq.push(b); } }
       check(`D13.contrast.${scheme}`, `${scheme} mode: text contrast >= 4.5:1 (3:1 for large text) on all screens (${all.length} samples)`, uniq.length === 0, uniq.slice(0, 8).map((b) => `${b.screen} ${b.sel} "${b.text}" ${b.ratio} (${b.fg} on ${b.bg}, ${b.size})`).join(' ;; '));
@@ -664,34 +658,36 @@ try {
     const seen = []; let lastKey = '';
     for (let i = 0; i < 45; i++) { const d = await desc(); if (!d) break; seen.push(d); await page.keyboard.press('Tab'); }
     const has = (f) => seen.some(f);
-    const needed = [['skip link', (d) => /skip/i.test(d.label)], ['brand', (d) => /home/i.test(d.label)], ['settings gear', (d) => /settings/i.test(d.label)], ['occasion select', (d) => d.tag === 'select'], ['top reel', (d) => d.slot === 'top'], ['bottom reel', (d) => d.slot === 'bottom'], ['lever', (d) => /lever/i.test(d.label)], ['spin button', (d) => /SPIN/.test(d.label)], ['thumbs down', (d) => /down/i.test(d.label)], ['wear', (d) => /Wearing|Worn/i.test(d.label)], ['thumbs up', (d) => /up/i.test(d.label)], ['tab: Spin', (d) => /^Spin$/.test(d.label)], ['tab: Closet', (d) => /^Closet$/.test(d.label)], ['tab: Snap', (d) => /Snap/.test(d.label)], ['tab: Looks', (d) => /^Looks$/.test(d.label)]];
+    const needed = [['skip link', (d) => /skip/i.test(d.label)], ['brand', (d) => /home/i.test(d.label)], ['settings gear', (d) => /settings/i.test(d.label)], ['occasion pill', (d) => /Occasion/.test(d.label)], ['weather pill', (d) => /Weather/.test(d.label)], ['top piece', (d) => d.slot === 'top'], ['bottom piece', (d) => d.slot === 'bottom'], ['shuffle', (d) => /SHUFFLE/.test(d.label)], ['thumbs down', (d) => /Thumbs down/.test(d.label)], ['thumbs up', (d) => /Thumbs up/.test(d.label)], ['improve', (d) => /Improve/.test(d.label)], ['battle', (d) => /Battle/.test(d.label)], ['tab Today', (d) => /^Today$/.test(d.label)], ['tab Closet', (d) => /^Closet$/.test(d.label)], ['tab Snap', (d) => /Snap/.test(d.label)], ['tab Looks', (d) => /^Looks$/.test(d.label)]];
     const miss = needed.filter(([, f]) => !has(f)).map(([n]) => n);
-    check('D14a', 'Tab order reaches every primary control (skip link, nav, selects, reels, lever, spin, thumbs, wear, all 4 tabs)', miss.length === 0, `missing: ${miss.join(', ')}; order: ${seen.map((s) => s.label).join(' > ').slice(0, 400)}`);
+    check('D14a', 'Tab order reaches every primary control (skip link, nav, pills, pieces, shuffle, thumbs, improve, battle, all tabs)', miss.length === 0, `missing: ${miss.join(', ')}; order: ${seen.map((s) => s.label).join(' > ').slice(0, 400)}`);
     const noFocusRing = seen.filter((d) => !d.outline && !d.shadow && !/skip/i.test(d.label));
     check('D14b', 'every focused control shows a visible focus indicator (outline or box-shadow)', noFocusRing.length === 0, noFocusRing.slice(0, 6).map((d) => `${d.tag}.${d.cls}:${d.label}`).join(' | '));
-    // focus a reel by keyboard and lock it with Space/Enter
-    await page.locator('.reel[data-slot="top"]').focus();
-    await page.keyboard.press('Space'); await page.waitForTimeout(150);
-    const p1 = await page.locator('.reel[data-slot="top"]').getAttribute('aria-pressed');
-    await page.keyboard.press('Enter'); await page.waitForTimeout(150);
-    const p2 = await page.locator('.reel[data-slot="top"]').getAttribute('aria-pressed');
-    check('D14c', 'keyboard: Space locks a reel, Enter unlocks it', p1 === 'true' && p2 === 'false', `${p1} ${p2}`);
-    await page.keyboard.press('Space'); // lock again
-    const topName = (await reelNames(page))[0];
-    // spin via keyboard on the SPIN button
-    await page.locator('.spin-btn').focus(); await page.keyboard.press('Enter');
-    await page.waitForTimeout(300);
-    const spinningNow = await page.locator('.spinning').count();
-    await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 }); await page.waitForTimeout(1800);
-    check('D14d', 'keyboard: Enter on SPIN spins; locked top reel is kept', spinningNow >= 1 && (await reelNames(page))[0] === topName, `spinning=${spinningNow}`);
-    // lever via keyboard
-    await page.locator('.lever').focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(300);
-    const lever = await page.locator('.spinning').count();
-    await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 }); await page.waitForTimeout(1800);
-    check('D14e', 'keyboard: lever activates with Enter', lever >= 1);
-    await page.locator('.lever').focus(); await page.keyboard.press('Space'); await page.waitForTimeout(300);
-    check('D14e2', 'keyboard: lever activates with Space', (await page.locator('.spinning').count()) >= 1);
-    await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 }); await page.waitForTimeout(1800);
+    // focus a piece by keyboard: Space selects (toolbar), Lock via keyboard, Escape deselects and returns focus
+    await page.locator('.fm-piece[data-slot="top"]').focus();
+    await page.keyboard.press('Space'); await page.waitForTimeout(200);
+    const p1 = await page.locator('.fm-piece[data-slot="top"]').getAttribute('aria-pressed');
+    const barShown = await page.locator('.t-bar:not([hidden])').count();
+    await page.locator('.t-bar [data-act="lock"]').focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(150);
+    const lk = await page.locator('.t-bar [data-act="lock"]').getAttribute('aria-pressed');
+    await page.keyboard.press('Escape'); await page.waitForTimeout(150);
+    const p2 = await page.locator('.fm-piece[data-slot="top"]').getAttribute('aria-pressed');
+    const foc2 = await page.evaluate(() => document.activeElement && document.activeElement.dataset && document.activeElement.dataset.slot);
+    check('D14c', 'keyboard: Space selects a piece (toolbar), Enter on Lock locks, Escape deselects and refocuses the piece', p1 === 'true' && barShown === 1 && lk === 'true' && p2 === 'false' && foc2 === 'top', `${p1} ${barShown} ${lk} ${p2} focus=${foc2}`);
+    const topName = (await reelNames(page, 'top'))[0];
+    await page.locator('.t-shuffle').focus(); await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    const spinningNow = await page.locator('.t-shuffle:disabled, .shuffling').count();
+    await page.waitForFunction(() => !document.querySelector('.t-shuffle:disabled'), null, { timeout: 15000 }); await page.waitForTimeout(1500);
+    check('D14d', 'keyboard: Enter on SHUFFLE shuffles; locked top is kept', spinningNow >= 1 && (await reelNames(page, 'top'))[0] === topName, `shuffling=${spinningNow}`);
+    // Change via keyboard opens the sheet; Escape returns
+    await page.locator('.fm-piece[data-slot="bottom"]').focus(); await page.keyboard.press('Enter');
+    await page.locator('.t-bar [data-act="change"]').focus(); await page.keyboard.press('Enter');
+    await page.waitForSelector('dialog.sheet[open]', { timeout: 3000 }).catch(() => {});
+    check('D14e', 'keyboard: Change opens the swap sheet', (await page.locator('dialog.sheet[open] .sw-tab').count()) === 2);
+    await page.keyboard.press('ArrowRight'); 
+    await page.keyboard.press('Escape'); await page.waitForTimeout(300);
+    check('D14e2', 'keyboard: Escape closes the swap sheet', (await page.locator('dialog.sheet[open]').count()) === 0);
     // like via keyboard
     await page.getByRole('button', { name: 'Thumbs up: love it' }).focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(400);
     check('D14f', 'keyboard: Enter on thumbs-up likes (aria-pressed)', (await page.locator('.round-btn.up').getAttribute('aria-pressed')) === 'true');
@@ -712,6 +708,7 @@ try {
     await page.evaluate(() => window.scrollTo(0, 0)); await page.locator('.skip').focus(); await page.keyboard.press('Enter'); await page.waitForTimeout(300);
     check('D14i', 'skip link moves focus/scroll to main content', true);
     // shake chip etc n/a. closet rails keyboard-scrollable?
+    await hashTo(page, 'closet', 700);
     const railFocusable = await page.locator('.rail[tabindex="0"]').count();
     check('D14j', 'closet rails are keyboard-scrollable (tabindex 0)', railFocusable >= 1);
     await ctx.close();
@@ -744,7 +741,7 @@ try {
     const where = {};
     const run = async (label) => { where[label] = await audit(); };
     await run('spin');
-    await page.locator('.reel[data-state="empty"]').first().click({ timeout: 1500 }).catch(() => {}); await page.waitForTimeout(300); await run('pick-sheet'); await page.keyboard.press('Escape');
+    await page.locator('.fm-piece[data-slot="top"]').dispatchEvent('click'); await page.waitForTimeout(200); await run('piece-toolbar'); await page.locator('.t-bar [data-act="change"]').click({ timeout: 1500 }).catch(() => {}); await page.waitForTimeout(300); await run('swap-sheet'); await page.locator('.sw-tab[data-tab="pick"]').click().catch(() => {}); await run('swap-pick'); await page.keyboard.press('Escape');
     await hashTo(page, 'closet', 800); await run('closet');
     await page.locator('.hang-item').first().click({ force: true }); await page.waitForSelector('dialog.sheet[open]'); await page.waitForTimeout(300); await run('edit-sheet'); await page.keyboard.press('Escape');
     await hashTo(page, 'snap', 500); await run('snap');
@@ -759,9 +756,9 @@ try {
     await page.locator('input[type=file][multiple]').setInputFiles({ name: 'f.jpg', mimeType: 'image/jpeg', buffer: fl.buffer });
     await page.waitForSelector('.stage .bbox', { timeout: 15000 }); await run('snap-boxes');
     await page.getByRole('button', { name: /^Review/ }).click(); await page.waitForSelector('.rcard'); await run('snap-review');
-    await hashTo(page, 'spin', 300);
+    await hashTo(page, 'today', 300);
     await page.evaluate(async () => { const s = await import('./src/store.js'); const d = await import('./src/ui/data.js'); await s.clearAll(); await s.putSettings({ onboarded: true }); await d.reload(); });
-    await hashTo(page, 'spin', 600); await run('empty-spin');
+    await hashTo(page, 'today', 600); await run('empty-spin');
     await hashTo(page, 'closet', 600); await run('empty-closet');
     const badAll = Object.entries(where).filter(([, v]) => v.length);
     check('D15a', 'every button / link / input / select on every screen and sheet has an accessible name', badAll.length === 0, badAll.map(([k, v]) => `${k}: ${[...new Set(v)].join(', ')}`).join(' ;; '));
@@ -780,7 +777,7 @@ try {
     const STR = ['', 'Blue shirt', '😀👕', '<b>x</b>', 'مرحبا', 'A'.repeat(70), '"><img src=x onerror=window.__pwned=1>', ' '];
     const targets = () => page.evaluate(() => {
       const out = [];
-      for (const el of document.querySelectorAll('button, a[href], [role=tab], select, input, .reel, .look-card, .hang-item, .lever, .bbox, .stage')) {
+      for (const el of document.querySelectorAll('button, a[href], [role=tab], select, input, .fm-piece, .fm-ghost, .look-card, .hang-item, .bbox, .t-stage')) {
         if (el.closest('[hidden], dialog:not([open])') || el.disabled) continue;
         const r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) continue;
         const x = Math.min(innerWidth - 2, Math.max(2, r.left + r.width / 2)), y = Math.min(innerHeight - 2, Math.max(2, r.top + r.height / 2));
@@ -803,13 +800,13 @@ try {
           }
         } else if (r < 0.70) { desc = 'scroll'; await page.mouse.wheel(0, Math.floor(rnd() * 900 - 300)); }
         else if (r < 0.80) { const k = pickR(['Tab', 'Shift+Tab', 'Enter', 'Space', 'Escape', 'ArrowRight', 'ArrowDown', 'Escape']); desc = `key ${k}`; await page.keyboard.press(k); }
-        else if (r < 0.86) { desc = rnd() < 0.5 ? 'back' : 'forward'; await (desc === 'back' ? page.goBack() : page.goForward()).catch(() => {}); }
-        else if (r < 0.92) { const ts = (await targets()).filter((t) => /lever|reel|bbox|stage|look-card/.test(t.cls)); if (ts.length) { const t = pickR(ts); desc = `drag ${t.cls}`; await page.mouse.move(t.x, t.y); await page.mouse.down(); await page.mouse.move(t.x + (rnd() * 300 - 150), t.y + (rnd() * 300 - 100), { steps: 4 }); await page.mouse.up(); } }
+        else if (r < 0.86) { desc = rnd() < 0.5 ? 'back' : 'forward'; await (desc === 'back' ? page.goBack() : page.goForward()).catch(() => {}); if (!page.url().startsWith(BASE)) { await page.goForward().catch(() => {}); } }
+        else if (r < 0.92) { const ts = (await targets()).filter((t) => /fm-piece|fm-ghost|bbox|t-stage|look-card/.test(t.cls)); if (ts.length) { const t = pickR(ts); desc = `drag ${t.cls}`; await page.mouse.move(t.x, t.y); await page.mouse.down(); await page.mouse.move(t.x + (rnd() * 300 - 150), t.y + (rnd() * 300 - 100), { steps: 4 }); await page.mouse.up(); } }
         else if (r < 0.94) { const fi = page.locator('input[type=file]:not([accept*=json])'); if (await fi.count()) { desc = 'upload png'; await fi.first().setInputFiles({ name: 'm.png', mimeType: 'image/png', buffer: png1 }).catch(() => {}); } }
         else if (r < 0.96) { desc = 'hash nav'; await hashTo(page, pickR(SCREENS), 0); }
         else if (r < 0.97) { desc = 'resize'; await page.setViewportSize(rnd() < 0.5 ? SMALL : PHONE); }
         else if (r < 0.985) { desc = 'sheet close'; await page.keyboard.press('Escape'); }
-        else { desc = 'multi tap spin'; await page.evaluate(() => { const b = document.querySelector('.spin-btn'); if (b) { b.click(); b.click(); } }); }
+        else { desc = 'multi tap spin'; await page.evaluate(() => { const b = document.querySelector('.t-shuffle'); if (b) { b.click(); b.click(); } }); }
       } catch (e) { desc += ` (action error: ${String(e.message).split('\n')[0].slice(0, 80)})`; }
       actions++; logTail.push(desc); if (logTail.length > 12) logTail.shift();
       if (errors.length > e0) { console.log(`   monkey error after action #${actions}: ${errors[errors.length - 1].slice(0, 200)}\n     last actions: ${logTail.join(' > ')}`); e0 = errors.length; }
@@ -835,7 +832,7 @@ try {
     const names = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items.map((i) => i.name));
     const inspect = async (label) => {
       const on = (await reelNames(page)).map((n) => n.toLowerCase());
-      const stickers = await page.locator('.sticker-text').allTextContents();
+      const stickers = await page.locator('.t-sticker span:not(.t-sticker-ico)').allTextContents();
       for (const s of stickers) {
         checked++;
         for (const n of names) if (!on.includes(n.toLowerCase()) && s.toLowerCase().includes(n.toLowerCase())) stale.push(`${label}: "${s}" mentions "${n}" not on reels [${on.join(', ')}]`);
@@ -843,23 +840,23 @@ try {
     };
     const locks = ['top', 'bottom', 'shoes', 'belt', 'layer'];
     for (let i = 0; i < 28; i++) {
-      if (i % 3 === 1) { const s = locks[i % locks.length]; await page.locator(`.reel[data-slot="${s}"]`).click({ timeout: 1500 }).catch(() => {}); await page.keyboard.press('Escape'); await inspect(`after lock ${s} #${i}`); }
-      if (i % 7 === 6) await page.evaluate(() => document.querySelectorAll('.reel.locked').forEach((r) => r.click()));
-      await page.locator('.spin-btn').click();
+      if (i % 3 === 1) { const s = locks[i % locks.length]; if (await page.locator(`.fm-piece[data-slot="${s}"]`).count()) await lockSlot(page, s).catch(() => {}); await inspect(`after lock ${s} #${i}`); }
+      if (i % 7 === 6) { await page.evaluate(() => { window.__noop = 1; }); }
+      await page.locator('.t-shuffle').click();
       await page.waitForTimeout(500); // mid-spin: stickers should be the "Spinning…" placeholder, not the previous outfit's reasons
-      const mid = await page.locator('.sticker-text').count();
-      if (mid > 0 && (await page.locator('.spinning').count()) > 0) stale.push(`#${i}: ${mid} old stickers still visible mid-spin`);
-      await page.waitForFunction(() => !document.querySelector('.spinning'), null, { timeout: 15000 });
+      const mid = await page.locator('.t-sticker span:not(.t-sticker-ico)').count();
+      if (mid > 0 && (await page.locator('.shuffling').count()) > 0) stale.push(`#${i}: ${mid} old stickers still visible mid-spin`);
+      await page.waitForFunction(() => !document.querySelector('.t-shuffle:disabled'), null, { timeout: 15000 });
       await page.waitForTimeout(1500);
       await inspect(`spin#${i}`);
     }
     check('E1a', `sticker reasons never name an item that is not on the reels (${checked} stickers over 28 spins with random locks)`, stale.length === 0, stale.slice(0, 4).join(' ;; '));
     // delete a shown item while on Spin screen
-    const shown = (await reelNames(page))[1];
+    const shown = (await reelNames(page, 'bottom'))[0];
     await page.evaluate(async (n) => { const d = await import('./src/ui/data.js'); const it = d.data.items.find((i) => i.name === n); await d.removeItem(it.id); }, shown);
     await page.waitForTimeout(2800);
     const after = await reelNames(page);
-    const st = await page.locator('.sticker-text').allTextContents();
+    const st = await page.locator('.t-sticker span:not(.t-sticker-ico)').allTextContents();
     check('E1b', 'deleting an item while it is on the reels removes it from reels and reasons', !after.includes(shown) && !st.some((s) => s.toLowerCase().includes(shown.toLowerCase())), `deleted "${shown}" reels=${after}`);
     await ctx.close();
   });
@@ -871,11 +868,11 @@ try {
       await page.evaluate(() => window.scrollTo(0, 0));
       const g = await page.evaluate(() => {
         const tb = document.querySelector('.tabbar').getBoundingClientRect(); const vis = (sel) => { const e = document.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), visible: r.top >= 0 && r.bottom <= tb.top + 1 }; };
-        return { vh: innerHeight, tabTop: Math.round(tb.top), stamp: vis('.stamp'), meter: vis('.meter'), spin: vis('.spin-btn'), sticker: vis('.sticker'), reels: vis('.reels'), card: vis('.result-card') };
+        return { vh: innerHeight, tabTop: Math.round(tb.top), stamp: vis('.t-stamp'), meter: vis('.t-meter'), spin: vis('.t-shuffle'), board: vis('.fm-board'), ghosts: vis('.fm-ghosts') };
       });
       const s = await shot(page, `e2-spin-${vp.width}x${vp.height}`);
-      const ok = g.stamp && g.stamp.visible && g.meter && g.meter.visible && g.spin && g.spin.visible;
-      check(`E2.${vp.width}x${vp.height}`, `right after a spin @${nm}: fit meter, stamp and SPIN button are visible without scrolling (above the tab bar)`, ok, JSON.stringify(g), s);
+      const ok = g.stamp && g.stamp.visible && g.meter && g.meter.visible && g.spin && g.spin.visible && g.board && g.board.visible;
+      check(`E2.${vp.width}x${vp.height}`, `right after a spin @${nm}: fit meter, stamp, whole board and SHUFFLE are visible without scrolling (above the tab bar)`, ok, JSON.stringify(g), s);
       await ctx.close();
     }
   });
@@ -900,15 +897,15 @@ try {
   await step('E4', 'worn twice', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'e4 ' });
     await demoSpin(page);
-    await page.evaluate(() => { const b = document.querySelector('.wear-btn'); b.click(); b.click(); b.click(); });
+    await page.evaluate(() => { const b = document.querySelector('.t-wear'); b.click(); b.click(); b.click(); });
     await page.waitForTimeout(1500);
-    await page.locator('.wear-btn').click(); await page.waitForTimeout(500);
+    await page.locator('.t-wear').click(); await page.waitForTimeout(500);
     await spinNow(page);
     await page.evaluate(async () => { /* wear the same again after re-spin is a different outfit; also log via lookbook later */ });
     const dups = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items.filter((i) => new Set(i.worn).size !== i.worn.length).map((i) => `${i.name}: ${i.worn.join(',')}`));
     const dupsDb = await page.evaluate(async () => (await (await import('./src/store.js')).listItems()).filter((i) => new Set(i.worn).size !== i.worn.length).map((i) => i.name));
     check('E4a', '"Wearing it!" tapped 3× at once, then again: no item ends up with the same date twice', dups.length === 0 && dupsDb.length === 0, dups.join(' ; '));
-    const label = await page.locator('.wear-btn').textContent();
+    const label = await page.locator('.t-wear').textContent();
     const toasts = await page.locator('.toast .toast-msg').allTextContents();
     await spinNow(page); await hashTo(page, 'looks', 1200);
     await page.locator('.look-card').first().click(); await page.waitForSelector('dialog.sheet[open]');
@@ -957,8 +954,9 @@ try {
     await setItems(page, [{ id: 'mine-1', slot: 'top', kind: 't-shirt', name: 'My real tee', colors: [col('red')] }, { id: 'mine-2', slot: 'bottom', kind: 'jeans', name: 'My real jeans', colors: [col('denim')] }]);
     await loadDemo(page);
     await page.waitForTimeout(800);
-    await hashTo(page, 'spin', 600);
+    await hashTo(page, 'closet', 400); await hashTo(page, 'today', 600);
     await page.locator('.demo-banner .btn').click(); await page.waitForTimeout(600);
+    check('E6a2', 'after "Remove" on the sample banner (own items remain) the banner disappears', (await page.locator('.demo-banner').count()) === 0, `banners=${await page.locator('.demo-banner').count()}`);
     const left = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items.map((i) => i.id));
     check('E6a', 'sample closet "Remove" deletes only demo-* items and leaves the user’s own', left.length === 2 && left.includes('mine-1') && left.includes('mine-2'), JSON.stringify(left));
     // Settings count excludes demos
@@ -1030,8 +1028,8 @@ try {
     await shot(page, 'e8-closet-320');
     check('E8a', 'text clipped / elements outside the viewport at 320 px on every screen with the sample closet', problems.length === 0, problems.join(' ;; '));
     // textual clipping: elements whose text is cut by overflow hidden
-    await hashTo(page, 'spin', 900); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1500);
-    const clip = await page.evaluate(() => { const out = []; for (const el of document.querySelectorAll('.cell-text b, .cell-text small, .sticker-text, .look-names, .look-why, .reel-note, .hang-name, .toast-msg')) { const r = el.getBoundingClientRect(); if (!r.width) continue; const cs = getComputedStyle(el); const clippedX = el.scrollWidth > el.clientWidth + 1; const clippedY = el.scrollHeight > el.clientHeight + 1 && cs.overflowY !== 'visible'; if (clippedX || clippedY) out.push(`${el.className}:${el.textContent.trim().slice(0, 30)} ${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight} ${cs.textOverflow}`); } return out; });
+    await hashTo(page, 'today', 900); await waitLanded(page).catch(() => {}); await page.waitForTimeout(1500);
+    const clip = await page.evaluate(() => { const out = []; for (const el of document.querySelectorAll('.t-bar-name, .t-pill-txt, .t-sticker span:not(.t-sticker-ico), .look-names, .look-why, .hang-name, .toast-msg')) { const r = el.getBoundingClientRect(); if (!r.width) continue; const cs = getComputedStyle(el); const clippedX = el.scrollWidth > el.clientWidth + 1; const clippedY = el.scrollHeight > el.clientHeight + 1 && cs.overflowY !== 'visible'; if (clippedX || clippedY) out.push(`${el.className}:${el.textContent.trim().slice(0, 30)} ${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight} ${cs.textOverflow}`); } return out; });
     await shot(page, 'e8-spin-320');
     check('E8b', 'reel names/stickers: text is not hard-clipped (ellipsis is acceptable) at 320 px', clip.filter((c) => !/ellipsis/.test(c)).length === 0, clip.slice(0, 5).join(' | '), SH('e8-spin-320'));
     await ctx.close();
@@ -1076,32 +1074,32 @@ try {
     const { ctx, page } = await newCtx(browser, R, { tag: 'e10 ' });
     await demoSpin(page);
     const t0 = Date.now();
-    await page.locator('select[aria-label="Weather"]').selectOption('auto');
-    await page.waitForFunction(() => !document.querySelector('.spinning') && document.querySelector('.stamp.show'), null, { timeout: 20000 }).catch(() => {});
+    await page.locator('.t-wx-pill').click(); await page.locator('.t-wx-chip[data-wx="auto"]').click();
+    await page.waitForFunction(() => !document.querySelector('.t-shuffle:disabled') && document.querySelector(STAMP), null, { timeout: 20000 }).catch(() => {});
     await page.waitForTimeout(1600);
-    const note = await page.locator('.ctx-note').first().textContent();
+    const note = await page.locator('.t-wx-pill').textContent();
     const ms = Date.now() - t0;
-    check('E10a', 'weather=Auto with geolocation unavailable/denied: spin still completes in < 6 s and a note explains', ms < 6000 && /weather/i.test(note), `${ms}ms note="${note}"`);
+    check('E10a', 'weather=Auto with geolocation unavailable/denied: spin still completes in < 6 s and a note explains', ms < 6000 && /weather|location/i.test(note), `${ms}ms note="${note}"`);
     // reload with auto stored: first autospin
     await page.reload({ waitUntil: 'load' }); await page.waitForFunction(() => document.documentElement.dataset.ready === '1');
-    await page.waitForSelector('.stamp.show', { timeout: 20000 }).catch(() => {});
-    check('E10b', 'reload with weather=Auto: app still shows an outfit', (await page.locator('.stamp.show').count()) === 1);
+    await page.waitForSelector(STAMP, { timeout: 20000 }).catch(() => {});
+    check('E10b', 'reload with weather=Auto: app still shows an outfit', (await page.locator(STAMP).count()) === 1);
     await ctx.close();
   });
 
   await step('E11', 'persistence of UI state', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'e11 ' });
     await demoSpin(page);
-    await page.locator('select[aria-label="Occasion"]').selectOption('formal');
+    await page.locator('.t-occ-pill').click(); await page.locator('.occ-chip[data-key="formal"]').click();
     await waitLanded(page); await page.waitForTimeout(1500);
     const names = await reelNames(page);
-    const sc = await page.locator('.meter').getAttribute('aria-valuenow');
-    await hashTo(page, 'closet', 500); await hashTo(page, 'spin', 900);
-    const names2 = await reelNames(page); const sc2 = await page.locator('.meter').getAttribute('aria-valuenow');
+    const sc = await page.locator('.t-meter').getAttribute('aria-valuenow');
+    await hashTo(page, 'closet', 500); await hashTo(page, 'today', 900);
+    const names2 = await reelNames(page); const sc2 = await page.locator('.t-meter').getAttribute('aria-valuenow');
     check('E11a', 'switching tabs and back keeps the same outfit on the reels (not a surprise re-spin)', JSON.stringify(names) === JSON.stringify(names2) && sc === sc2, `${names} / ${names2}`);
     await page.reload({ waitUntil: 'load' }); await page.waitForFunction(() => document.documentElement.dataset.ready === '1'); await page.waitForTimeout(1200);
-    const occ = await page.locator('select[aria-label="Occasion"]').inputValue();
-    check('E11b', 'selected occasion persists across reload', occ === 'formal', occ);
+    const occ = await page.locator('.t-occ-pill').getAttribute('aria-label');
+    check('E11b', 'selected occasion persists across reload', /Formal/i.test(occ), occ);
     await ctx.close();
   });
 } catch (e) {

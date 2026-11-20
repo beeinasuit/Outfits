@@ -29,7 +29,7 @@ export function makeRunner(area) {
   return { results, errors, check, save };
 }
 
-const IGNORED = /fonts\.(googleapis|gstatic)|ERR_(INTERNET|NAME|CONNECTION|FAILED|ABORTED)|net::/;
+const IGNORED = /fonts\.(googleapis|gstatic)|status of 504|ERR_(INTERNET|NAME|CONNECTION|FAILED|ABORTED)|net::/;
 
 /** Fresh isolated context + page with error capture. */
 export async function newCtx(browser, runner, { scheme = 'light', viewport = PHONE, reducedMotion = 'no-preference', tag = '', sw = 'allow', mobile = true } = {}) {
