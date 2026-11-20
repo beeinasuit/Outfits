@@ -1,7 +1,7 @@
 // Style rules. Every rule returns Reason objects { text, delta, tag }.
 // All tunable weights live in WEIGHTS below. Pure, DOM-free, deterministic.
 
-import { COLOR_FAMILIES, BUSY_PATTERNS, OCCASIONS, WEATHER, outfitKey } from '../model.js';
+import { COLOR_FAMILIES, BUSY_PATTERNS, OCCASIONS, WEATHER, NEAR_FACE, makeProfile, outfitKey } from '../model.js';
 
 export const WEIGHTS = {
   // Calibration: base is a "nothing earned, nothing wrong" outfit. Positives are EARNED (small, specific) and
@@ -30,6 +30,9 @@ export const WEIGHTS = {
     coldAccessory: 3, hotAccessory: -5, coldShorts: -10, rainLayer: 10, noRainLayer: -4, rainSuede: -8,
     coldSandals: -14, freezingSandals: -22, coldCanvas: -5, coldBoots: 5, coldLeatherShoes: 3 },
   polish: 5,           // standout extra, outside posCap: dressy layer + collared top + leather shoes, all dressed alike
+  // Personal colouring: a nudge for near-face colours only (x NEAR_FACE weight); total is clamped to +-cap.
+  complexion: { cap: 10, undertoneGood: 6, undertoneBad: -4, neutralGood: 2, starkBlack: -4, starkWhite: -2, starkPair: -3,
+    highContrastBW: 2, lowContrastSoft: 2, paleWash: -3, deepRich: 3, deepWhite: 2 },
   feedback: { likedOutfit: 20, dislikedOutfit: -30, likedPair: 4, dislikedPair: -6, pairCap: 12 },
 };
 const W = WEIGHTS;
@@ -47,7 +50,7 @@ const list = (a) => (a.length <= 1 ? a.join('') : `${a.slice(0, -1).join(', ')} 
 const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
 
 const LOUD = new Set(['yellow', 'orange', 'red', 'pink', 'purple', 'green', 'blue']);
-const TONAL_OK = new Set(['black', 'white', 'cream', 'beige', 'grey', 'charcoal']);
+const TONAL_OK = new Set(['black', 'white', 'cream', 'charcoal']); // grey / beige tone-on-tone just blurs together
 const MID_PATTERNS = new Set(['stripe', 'check', 'polka']);
 const BUSY = new Set(BUSY_PATTERNS);
 const BROWNS = new Set(['brown', 'dark-brown', 'tan']);
@@ -465,6 +468,60 @@ export function polishRules(P) {
   return [R(`${cap(nm(layer))}, ${nm(top)} and ${nm(shoes)}: properly put together.`, W.polish, 'polish')];
 }
 
+// ---------- personal colouring ----------
+const WARM_FAMS = new Set(['olive', 'rust', 'beige', 'cream', 'mustard', 'brown', 'orange', 'forest', 'yellow']);
+const COOL_FAMS = new Set(['navy', 'burgundy', 'white', 'grey', 'blue', 'light-blue', 'pink', 'lavender', 'purple', 'teal']);
+const SOFT_FAMS = new Set(['charcoal', 'grey', 'cream', 'beige', 'navy', 'denim', 'olive', 'light-blue']);
+const PALE_FAMS = new Set(['beige', 'cream', 'yellow']);
+const RICH_FAMS = new Set(['burgundy', 'forest', 'rust', 'red', 'purple', 'teal', 'mustard', 'blue', 'green', 'orange']);
+
+export function complexionRules(P) {
+  const raw = P.ctx.profile;
+  if (!raw || typeof raw !== 'object' || !raw.enabled) return [];
+  const pr = makeProfile(raw);
+  if (!pr.enabled) return [];
+  const Wc = W.complexion;
+  const out = [];
+  const near = [];
+  for (const slot of Object.keys(NEAR_FACE)) if (P[slot]) near.push({ fam: familyOf(P[slot]), w: NEAR_FACE[slot] });
+  const add = (text, d, tag) => { if (d) out.push(R(text, d, tag)); };
+  for (const { fam, w } of near) {
+    const name = cap(pretty(fam));
+    const warm = WARM_FAMS.has(fam); const cool = COOL_FAMS.has(fam);
+    if (pr.undertone === 'warm') {
+      if (warm) add(`${name} warms up your complexion.`, Wc.undertoneGood * w, 'complexion-good');
+      else if (cool) add(`${name} can look a little cold against your warm undertone.`, Wc.undertoneBad * w, 'complexion-off');
+    } else if (pr.undertone === 'cool') {
+      if (cool) add(`${name} suits your cool undertone.`, Wc.undertoneGood * w, 'complexion-good');
+      else if (warm) add(`${name} can look a little flat against your cool undertone.`, Wc.undertoneBad * w, 'complexion-off');
+    } else if (pr.undertone === 'neutral' && (warm || cool)) {
+      add(`${name} works well with your colouring.`, Wc.neutralGood * w, 'complexion-good');
+    }
+    if (pr.contrast === 'low') {
+      if (fam === 'black') add('Pure black is a bit stark next to your face; charcoal is softer.', Wc.starkBlack * w, 'complexion-off');
+      else if (fam === 'white') add('Bright white is a bit stark next to your face; cream is softer.', Wc.starkWhite * w, 'complexion-off');
+      else if (SOFT_FAMS.has(fam)) add(`Soft ${pretty(fam)} flatters your gentle contrast.`, Wc.lowContrastSoft * w, 'complexion-good');
+    } else if (pr.contrast === 'high' && (fam === 'black' || fam === 'white')) {
+      add(`${name} makes a bold frame for your strong contrast.`, Wc.highContrastBW * w, 'complexion-good');
+    }
+    if (pr.depth === 'light' && PALE_FAMS.has(fam) && pr.contrast !== 'high') {
+      add(`Pale ${pretty(fam)} can wash out fair colouring; a bit more colour lifts it.`, Wc.paleWash * w, 'complexion-off');
+    } else if (pr.depth === 'deep') {
+      if (RICH_FAMS.has(fam)) add(`Rich ${pretty(fam)} looks great with your deep colouring.`, Wc.deepRich * w, 'complexion-good');
+      else if (fam === 'white') add('Crisp white stands out beautifully against your skin.', Wc.deepWhite * w, 'complexion-good');
+    }
+  }
+  if (pr.contrast === 'low' && near.some((n) => n.fam === 'black') && near.some((n) => n.fam === 'white')) {
+    add('Black and white together are stark next to your face.', Wc.starkPair, 'complexion-off');
+  }
+  const total = out.reduce((s, r) => s + r.delta, 0);
+  if (Math.abs(total) > Wc.cap) {
+    const k = Wc.cap / Math.abs(total);
+    return out.map((r) => ({ ...r, delta: Math.round(r.delta * k * 10) / 10 || (r.delta > 0 ? 0.1 : -0.1) }));
+  }
+  return out;
+}
+
 // ---------- feedback ----------
 const hasKey = (set, k) => (set instanceof Set ? set.has(k) : Array.isArray(set) ? set.includes(k) : false);
 const sizeOf = (set) => (set instanceof Set ? set.size : Array.isArray(set) ? set.length : 0);
@@ -518,15 +575,15 @@ const CONFLICTS = {
 export function evaluateRules(P) {
   let rs = [].concat(
     colorRules(P), contrastRules(P), patternRules(P), formalityRules(P), occasionRules(P),
-    neckwearRules(P), headwearRules(P), shoeRules(P), beltRules(P), weatherRules(P), polishRules(P), feedbackRules(P),
+    neckwearRules(P), headwearRules(P), shoeRules(P), beltRules(P), weatherRules(P), polishRules(P), complexionRules(P), feedbackRules(P),
   );
   const tags = new Set(rs.filter((r) => r.delta < 0).map((r) => r.tag));
   rs = rs.filter((r) => !(r.delta > 0 && CONFLICTS[r.tag] && CONFLICTS[r.tag].some((t) => tags.has(t))));
   let pos = 0;
-  for (const r of rs) if (r.delta > 0 && !r.tag.startsWith('feedback') && r.tag !== 'polish') pos += r.delta;
+  for (const r of rs) if (r.delta > 0 && !r.tag.startsWith('feedback') && !r.tag.startsWith('complexion') && r.tag !== 'polish') pos += r.delta;
   if (pos > W.posCap) {
     const k = W.posCap / pos;
-    rs = rs.map((r) => (r.delta > 0 && !r.tag.startsWith('feedback') && r.tag !== 'polish' ? { ...r, delta: Math.max(0.1, Math.round(r.delta * k * 10) / 10) } : r));
+    rs = rs.map((r) => (r.delta > 0 && !r.tag.startsWith('feedback') && !r.tag.startsWith('complexion') && r.tag !== 'polish' ? { ...r, delta: Math.max(0.1, Math.round(r.delta * k * 10) / 10) } : r));
   }
   return rs;
 }

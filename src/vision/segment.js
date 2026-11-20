@@ -128,6 +128,71 @@ function dilate(src, w, h, r, tmp, out) {
   }
 }
 
+
+/**
+ * Background as a mixture of colour clusters (k-means, k<=4, on border-ring Lab samples).
+ * Returns {cl, isBg(L,a,b)}; a pixel is background when it is inside any cluster's radius, on the line between two
+ * clusters (anti-aliased stripe edge), or a darker same-hue version of a cluster (shadow).
+ */
+function fitMixture(us, vs, lv, av, bv, tolL) {
+  const n = lv.length;
+  const pts = (k) => [lv[k], av[k], bv[k]];
+  const d2 = (p, c) => (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2;
+  // farthest-first init from the median-closest sample
+  const mL = median(lv), mA = median(av), mB = median(bv);
+  let first = 0, bd = Infinity;
+  for (let k = 0; k < n; k++) { const d = d2(pts(k), [mL, mA, mB]); if (d < bd) { bd = d; first = k; } }
+  const cent = [pts(first)];
+  const K = 4;
+  while (cent.length < K) {
+    let far = -1, fd = 0;
+    for (let k = 0; k < n; k++) {
+      let m = Infinity; for (const c of cent) m = Math.min(m, d2(pts(k), c));
+      if (m > fd) { fd = m; far = k; }
+    }
+    if (far < 0 || fd < 15 * 15) break;
+    cent.push(pts(far));
+  }
+  const asg = new Int32Array(n);
+  for (let it = 0; it < 10; it++) {
+    for (let k = 0; k < n; k++) {
+      let bi = 0, b2 = Infinity; const p = pts(k);
+      for (let c = 0; c < cent.length; c++) { const d = d2(p, cent[c]); if (d < b2) { b2 = d; bi = c; } }
+      asg[k] = bi;
+    }
+    const sum = cent.map(() => [0, 0, 0, 0]);
+    for (let k = 0; k < n; k++) { const s = sum[asg[k]]; s[0] += lv[k]; s[1] += av[k]; s[2] += bv[k]; s[3]++; }
+    for (let c = 0; c < cent.length; c++) if (sum[c][3]) cent[c] = [sum[c][0] / sum[c][3], sum[c][1] / sum[c][3], sum[c][2] / sum[c][3]];
+  }
+  const cl = [];
+  for (let c = 0; c < cent.length; c++) {
+    let cnt = 0, ss = 0;
+    for (let k = 0; k < n; k++) if (asg[k] === c) { cnt++; ss += d2(pts(k), cent[c]); }
+    if (cnt / n < 0.08) continue;                 // sparse clusters: items touching the frame, not background
+    cl.push({ c: cent[c], w: cnt / n, rad: Math.max(7, 3 * Math.sqrt(ss / cnt / 3) * 1.2) });
+  }
+  if (!cl.length) cl.push({ c: [mL, mA, mB], w: 1, rad: Math.max(7, tolL) });
+  const seg = (p, a, b) => {            // distance from p to segment a-b
+    const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], ap = [p[0] - a[0], p[1] - a[1], p[2] - a[2]];
+    const den = ab[0] ** 2 + ab[1] ** 2 + ab[2] ** 2 || 1;
+    const t = Math.max(0, Math.min(1, (ap[0] * ab[0] + ap[1] * ab[1] + ap[2] * ab[2]) / den));
+    return Math.sqrt(d2(p, [a[0] + t * ab[0], a[1] + t * ab[1], a[2] + t * ab[2]]));
+  };
+  const isBg = (L, a, b) => {
+    const p = [L, a, b];
+    for (const k of cl) {
+      if (Math.sqrt(d2(p, k.c)) <= k.rad) return true;
+      if (L < k.c[0] && k.c[0] > 1) {   // shadow: darker, same hue
+        const r = Math.max(0, L / k.c[0]);
+        if (Math.hypot(a - k.c[1] * r, b - k.c[2] * r) <= 5 && L > k.c[0] * 0.55) return true;
+      }
+    }
+    for (let i = 0; i < cl.length; i++) for (let j = i + 1; j < cl.length; j++) if (seg(p, cl[i].c, cl[j].c) <= 6) return true;
+    return false;
+  };
+  return { cl, isBg };
+}
+
 /**
  * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData
  * @param {{minAreaFrac?:number,maxItems?:number,padding?:number}} opts
@@ -210,20 +275,97 @@ function segment(im, opts) {
   const tolL = Math.max(6, 3.5 * fL.sigma);
   const tolC = Math.max(5, 3.5 * Math.max(fA.sigma, fB.sigma));
 
+  // 2b. periodic / patterned backgrounds (striped sheet, checks, wood): the plane model leaves many border outliers in
+  //     several separate runs along the ring. Then model the background as a mixture of colour clusters instead.
+  let mixture = null;
+  {
+    const ring = [];                       // outer line of the frame in walk order
+    for (let x = 0; x < w; x++) ring.push(x);
+    for (let y = 1; y < h; y++) ring.push(y * w + w - 1);
+    for (let x = w - 2; x >= 0; x--) ring.push((h - 1) * w + x);
+    for (let y = h - 2; y > 0; y--) ring.push(y * w);
+    let out = 0, runs = 0, prev = false, gap = 99, n = 0;
+    for (const p of ring) {
+      if (!solidPx[p]) continue;
+      n++;
+      const x = p % w, y = (p - x) / w;
+      const u = x / w - 0.5, v = y / h - 0.5;
+      const dl = L[p] - evalF(fL, u, v);
+      const cd = Math.hypot(A[p] - evalF(fA, u, v), B[p] - evalF(fB, u, v));
+      const bad = Math.abs(dl) > tolL || cd > tolC;
+      if (bad) { out++; if (!prev && gap > 2) runs++; prev = true; gap = 0; } else { prev = false; gap++; }
+    }
+    if (n > 40 && out / n > 0.12 && runs >= 4) mixture = fitMixture(us, vs, lv, av, bv, tolL);
+  }
+
   // 3. classify
   let M = new Uint8Array(N);
-  for (let y = 0; y < h; y++) {
-    const v = y / h - 0.5;
-    for (let x = 0; x < w; x++) {
-      const p = y * w + x;
+  let patterned = false;
+  if (mixture) {
+    patterned = mixture.cl.length >= 2;
+    for (let p = 0; p < N; p++) {
       if (!solidPx[p]) continue;
-      const u = x / w - 0.5;
-      const bl = evalF(fL, u, v);
-      let ba = evalF(fA, u, v), bb = evalF(fB, u, v);
-      const dL = L[p] - bl;
-      if (dL < 0 && bl > 1) { const ratio = Math.max(0, L[p] / bl); ba *= ratio; bb *= ratio; }
-      const cd = Math.hypot(A[p] - ba, B[p] - bb);
-      if (cd > tolC || dL > tolL || dL < -(tolL + 0.2 * Math.max(bl, 0))) M[p] = 1;
+      if (!mixture.isBg(L[p], A[p], B[p])) M[p] = 1;
+    }
+  } else {
+    for (let y = 0; y < h; y++) {
+      const v = y / h - 0.5;
+      for (let x = 0; x < w; x++) {
+        const p = y * w + x;
+        if (!solidPx[p]) continue;
+        const u = x / w - 0.5;
+        const bl = evalF(fL, u, v);
+        let ba = evalF(fA, u, v), bb = evalF(fB, u, v);
+        const dL = L[p] - bl;
+        if (dL < 0 && bl > 1) { const ratio = Math.max(0, L[p] / bl); ba *= ratio; bb *= ratio; }
+        const cd = Math.hypot(A[p] - ba, B[p] - bb);
+        if (cd > tolC || dL > tolL || dL < -(tolL + 0.2 * Math.max(bl, 0))) M[p] = 1;
+      }
+    }
+    // 3b. hard shadows: dark, same-hue regions that touch an item (the caster) are background even when much darker
+    //     than the sheet. Components of such "shadow candidates" are dropped when their darkness is uniform and a
+    //     good share of their perimeter touches non-candidate foreground.
+    const cand = new Uint8Array(N);
+    let nc = 0;
+    for (let y = 0; y < h; y++) {
+      const v = y / h - 0.5;
+      for (let x = 0; x < w; x++) {
+        const p = y * w + x;
+        if (!M[p]) continue;
+        const bl = evalF(fL, x / w - 0.5, v);
+        if (bl < 30) continue;
+        const ratio = L[p] / bl;
+        if (ratio < 0.3 || ratio > 0.95) continue;
+        const cd = Math.hypot(A[p] - evalF(fA, x / w - 0.5, v) * ratio, B[p] - evalF(fB, x / w - 0.5, v) * ratio);
+        if (cd <= tolC + 3) { cand[p] = 1; nc++; }
+      }
+    }
+    if (nc > 20) {
+      const lab = new Int32Array(N), stk = new Int32Array(N);
+      for (let s0 = 0; s0 < N; s0++) {
+        if (!cand[s0] || lab[s0]) continue;
+        let sp = 0; const cells = [];
+        stk[sp++] = s0; lab[s0] = 1;
+        while (sp) {
+          const p = stk[--sp]; cells.push(p);
+          const x = p % w;
+          if (x > 0 && cand[p - 1] && !lab[p - 1]) { lab[p - 1] = 1; stk[sp++] = p - 1; }
+          if (x < w - 1 && cand[p + 1] && !lab[p + 1]) { lab[p + 1] = 1; stk[sp++] = p + 1; }
+          if (p >= w && cand[p - w] && !lab[p - w]) { lab[p - w] = 1; stk[sp++] = p - w; }
+          if (p + w < N && cand[p + w] && !lab[p + w]) { lab[p + w] = 1; stk[sp++] = p + w; }
+        }
+        if (cells.length < 12) continue;
+        let sr = 0, sr2 = 0, casters = 0, bgN = 0;
+        for (const p of cells) {
+          const x = p % w, y = (p - x) / w;
+          const r = L[p] / Math.max(1, evalF(fL, x / w - 0.5, y / h - 0.5));
+          sr += r; sr2 += r * r;
+          const nb = [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1];
+          for (const q of nb) { if (q < 0) continue; if (!M[q]) bgN++; else if (!cand[q]) casters++; }
+        }
+        const mean = sr / cells.length, sd = Math.sqrt(Math.max(0, sr2 / cells.length - mean * mean));
+        if (sd < 0.12 && mean > 0.3 && mean < 0.9 && casters / (casters + bgN + 1) >= 0.25) for (const p of cells) M[p] = 0;
+      }
     }
   }
 
@@ -249,7 +391,10 @@ function segment(im, opts) {
   }
   let fg = 0;
   for (let p = 0; p < N; p++) fg += M[p];
-  if (fg === 0) return [];
+  if (fg === 0) {
+    if (patterned) return [{ x: 0, y: 0, w: W, h: H, area: W * H, mask: new Uint8Array(W * H).fill(1) }];
+    return [];
+  }
   if (fg / N > 0.85) {
     return [{ x: 0, y: 0, w: W, h: H, area: W * H, mask: new Uint8Array(W * H).fill(1) }];
   }

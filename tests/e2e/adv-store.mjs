@@ -319,7 +319,7 @@ try {
     await addByForm('Belt', P3);
     await addByForm('Layer', P1);
     await addByForm('Neckwear', P2);
-    await addByForm('Headwear', P3);
+    await addByForm('Hat', P3);
     // worn yesterday so the "You wore your X" reason names them
     await page.evaluate(async (y) => { const d = await import('./src/ui/data.js'); for (const it of [...d.data.items]) await d.saveItem({ ...it, worn: [y] }, { silent: true }); }, isoDaysAgo(1));
     await page.evaluate(async () => { const d = await import('./src/ui/data.js'); d.emit('items'); });

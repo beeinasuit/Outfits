@@ -17,6 +17,25 @@ function dayMs(s) {
   return Number.isFinite(t) ? t : NaN;
 }
 
+/** Everything that influences a score. Items equal on all of it are interchangeable twins. */
+function strictSig(i) {
+  const cs = Array.isArray(i.colors) ? i.colors.map((c) => `${c && c.family}:${Math.round((Number(c && c.weight) || 0) * 4)}`).join(',') : '';
+  return [i.slot, i.kind, cs, i.pattern, i.formality, i.warmth, i.collared, i.beltLoops, i.material, i.leather, i.rain].join('~');
+}
+/** Visual signature used by diversity: same slot, kind, primary family and pattern look the same. */
+function looseSig(i) { return `${i.slot}:${i.kind}:${familyOf(i)}:${i.pattern}`; }
+
+/** Keep one of each group of twins: the one that was worn least recently (lowest penalty), then lowest id. */
+function collapseTwins(list, penOf) {
+  const seen = new Map();
+  for (const it of list) {
+    const k = strictSig(it);
+    const cur = seen.get(k);
+    if (!cur || (penOf ? penOf(it) < penOf(cur) : false)) seen.set(k, it);
+  }
+  return list.length > seen.size ? [...seen.values()].sort(cmpId) : list;
+}
+
 function prepareWardrobe(items, opts) {
   const byId = new Map();
   const bySlot = {};
@@ -37,27 +56,17 @@ function prepareWardrobe(items, opts) {
   for (const s of SLOTS) {
     if (locked[s]) { pools[s] = [locked[s]]; continue; }
     const ex = new Set(Array.isArray(exclude[s]) ? exclude[s] : []);
-    pools[s] = bySlot[s].filter((i) => !ex.has(i.id)).sort(cmpId);
+    pools[s] = collapseTwins(bySlot[s].filter((i) => !ex.has(i.id)).sort(cmpId), opts.__penOf);
   }
   if (locked.belt) pools.bottom = pools.bottom.filter((b) => b.beltLoops === true);
   return { pools, locked };
 }
 
-export function buildOutfits(items, opts = {}) {
-  const o = opts && typeof opts === 'object' ? opts : {};
-  const limit = Number.isFinite(o.limit) ? Math.max(0, Math.floor(o.limit)) : 20;
-  const { pools, locked } = prepareWardrobe(items, o);
-  if (!pools.top.length || !pools.bottom.length || limit === 0) return [];
-
-  const ctx = { occasion: o.occasion || 'any', weather: o.weather || null, rain: !!o.rain, feedback: o.feedback,
-    beltAvailable: pools.belt.length > 0 };
-  const pairCtx = { ...ctx, weather: null, rain: false, beltAvailable: false };
-
-  // recent-wear penalty per item
+const SLOT_W = { top: 1, bottom: 0.6, layer: 0.6, shoes: 0.6 };
+function recentPenalty(o) {
   const recentDays = Number.isFinite(o.recentDays) ? o.recentDays : 3;
   const todayMs = dayMs(o.today || todayISO());
   const penCache = new Map();
-  const SLOT_W = { top: 1, bottom: 0.6, layer: 0.6, shoes: 0.6 };
   const diffOf = (it) => {
     let best = Infinity;
     for (const w of it.worn || []) {
@@ -77,6 +86,28 @@ export function buildOutfits(items, opts = {}) {
     return p;
   };
   const penalty = (sel) => { let t = 0; for (const s in SLOT_W) if (sel[s]) t += penOf(sel[s]); return t; };
+  return { penOf, diffOf, penalty };
+}
+
+/** Rain / cold are context REQUIREMENTS on the layer slot: diversity must never trade them away. */
+function layerRequired(ctx, pools) {
+  const cold = ctx.weather === 'cold' || ctx.weather === 'freezing';
+  const rain = !!ctx.rain && pools.layer.some((l) => l.rain === true);
+  return { rain, any: rain || (cold && pools.layer.length > 0) };
+}
+
+export function buildOutfits(items, opts = {}) {
+  const o = opts && typeof opts === 'object' ? opts : {};
+  const limit = Number.isFinite(o.limit) ? Math.max(0, Math.floor(o.limit)) : 20;
+  const rp = recentPenalty(o);
+  const { pools, locked } = prepareWardrobe(items, { ...o, __penOf: rp.penOf });
+  if (!pools.top.length || !pools.bottom.length || limit === 0) return [];
+
+  const ctx = { occasion: o.occasion || 'any', weather: o.weather || null, rain: !!o.rain, feedback: o.feedback, profile: o.profile,
+    beltAvailable: pools.belt.length > 0 };
+  const pairCtx = { ...ctx, weather: null, rain: false, beltAvailable: false };
+
+  const { penOf, diffOf, penalty } = rp;
   const raw = (sel, c) => rawScore(sel, c).raw - penalty(sel);
 
   const lockedExtras = {};
@@ -153,10 +184,11 @@ export function buildOutfits(items, opts = {}) {
     c.k = keyOf(c.sel);
     if (!uniq.has(c.k) || uniq.get(c.k).r < c.r) uniq.set(c.k, c);
   }
+  for (const c of uniq.values()) c.n = c.r; // net raw (recent-wear included) before any diversity adjustment
   let ranked = [...uniq.values()].sort(sortDesc);
-  ranked = o.diversity === false ? ranked.slice(0, limit) : diversify(ranked, limit, locked);
+  ranked = o.diversity === false ? ranked.slice(0, limit) : diversify(ranked, limit, locked, layerRequired(ctx, pools), ctx);
 
-  return ranked.map((c) => {
+  const out = ranked.map((c) => {
     const res = rawScore(c.sel, ctx);
     const reasons = res.reasons.slice();
     let r = res.raw;
@@ -170,29 +202,46 @@ export function buildOutfits(items, opts = {}) {
         reasons.push({ text: `You wore your ${it.name || it.kind} ${when}.`, delta: -Math.round(p * 10) / 10, tag: 'recently-worn' });
       }
     }
-    return { items: { ...c.sel }, score: squash(r), reasons: finalizeReasons(reasons, 6), key: c.k };
+    return { items: { ...c.sel }, score: squash(r), reasons: finalizeReasons(reasons, 6), key: c.k, _r: r };
   });
+  // best first; ties broken deterministically by the unsquashed score, then key
+  out.sort((a, b) => b.score - a.score || b._r - a._r || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+  for (const x of out) delete x._r;
+  return out;
 }
 
-function diversify(ranked, limit, locked) {
-  const PAIR_CAP = 2; const ITEM_CAP = 3; const TOP_N = 10;
-  const picked = []; const skipped = [];
-  const pairs = new Map(); const counts = new Map();
-  const slots = ['top', 'bottom', 'shoes', 'layer'].filter((s) => !locked[s]);
+const DIV = { pair: 10, item: 2.5, missingRequired: 1000 };
+
+/**
+ * Greedy selection: repeatedly take the candidate with the best score after penalties for what the list
+ * already contains (same top+bottom, same-looking items). Penalties choose WHICH outfits make the list;
+ * the caller sorts the chosen ones by score. Visual duplicates are never listed twice.
+ */
+function diversify(ranked, limit, locked, req, ctx) {
+  const picked = [];
+  const pairs = new Map(); const counts = new Map(); const seenSig = new Set();
+  const slots = ['top', 'bottom', 'shoes', 'layer'].filter((s) => !locked[s] && !(s === 'layer' && req.any));
+  const pool = [];
   for (const c of ranked) {
-    if (picked.length >= limit) break;
-    const pk = `${c.sel.top.id}|${c.sel.bottom.id}`;
-    let ok = (pairs.get(pk) || 0) < PAIR_CAP;
-    if (ok && picked.length < TOP_N) {
-      for (const s of slots) if (c.sel[s] && (counts.get(c.sel[s].id) || 0) >= ITEM_CAP) { ok = false; break; }
-    }
-    if (!ok) { skipped.push(c); continue; }
-    picked.push(c);
-    pairs.set(pk, (pairs.get(pk) || 0) + 1);
-    for (const s of slots) if (c.sel[s]) counts.set(c.sel[s].id, (counts.get(c.sel[s].id) || 0) + 1);
+    c.sig = Object.keys(c.sel).sort().map((s) => looseSig(c.sel[s])).join('|');
+    c.pk = `${looseSig(c.sel.top)}|${looseSig(c.sel.bottom)}`;
+    if (seenSig.has(c.sig)) continue; // `ranked` is best-first, so the first of a look-alike group wins
+    seenSig.add(c.sig);
+    pool.push(c);
   }
-  if (picked.length < limit) {
-    for (const c of skipped) { if (picked.length >= limit) break; picked.push(c); }
+  while (picked.length < limit && pool.length) {
+    let bi = -1; let bv = -Infinity;
+    for (let i = 0; i < pool.length; i++) {
+      const c = pool[i];
+      let v = c.n - DIV.pair * (pairs.get(c.pk) || 0);
+      for (const s of slots) if (c.sel[s]) v -= DIV.item * (counts.get(looseSig(c.sel[s])) || 0);
+      if (req.rain && !(c.sel.layer && c.sel.layer.rain === true)) v -= DIV.missingRequired;
+      if (v > bv) { bv = v; bi = i; }
+    }
+    const c = pool.splice(bi, 1)[0];
+    picked.push(c);
+    pairs.set(c.pk, (pairs.get(c.pk) || 0) + 1);
+    for (const s of slots) if (c.sel[s]) { const k = looseSig(c.sel[s]); counts.set(k, (counts.get(k) || 0) + 1); }
   }
   return picked;
 }
@@ -237,7 +286,7 @@ function toItem(c, idx) {
 export function gapAnalysis(items, opts = {}) {
   const o = opts && typeof opts === 'object' ? opts : {};
   const avail = (Array.isArray(items) ? items : []).filter((i) => i && i.id && i.available !== false);
-  const base = { occasion: o.occasion, weather: o.weather, rain: o.rain, feedback: o.feedback, today: o.today, recentDays: 0,
+  const base = { occasion: o.occasion, weather: o.weather, rain: o.rain, feedback: o.feedback, profile: o.profile, today: o.today, recentDays: 0,
     diversity: false, limit: 400 };
   const tops = avail.filter((i) => i.slot === 'top');
   const bottoms = avail.filter((i) => i.slot === 'bottom');
