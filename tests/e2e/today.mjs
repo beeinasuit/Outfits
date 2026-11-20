@@ -27,10 +27,13 @@ async function newCtx(browser, scheme = 'light', viewport = { width: 390, height
   await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
   return { ctx, page };
 }
-const overflow = (page) => page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, bw: document.body.scrollWidth }));
-const settle = (page) => page.waitForFunction(() => !document.querySelector('.fm-piece.fm-land') && !document.querySelector('.t-shuffle:disabled') && document.querySelector('.t-stamp.slam, .t-stamp.shown'), null, { timeout: 15000 }).then(() => page.waitForTimeout(350));
+const overflow = async (page) => { await page.waitForTimeout(500); await page.waitForFunction(() => !document.getAnimations().some((a) => a.playState === 'running' && a.effect && a.effect.getComputedTiming().iterations !== Infinity), null, { timeout: 5000 }).catch(() => {}); await page.waitForFunction(() => !document.querySelector('.confetti-layer'), null, { timeout: 5000 }).catch(() => {}); return overflowNow(page); };
+const overflowNow = (page) => page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, bw: document.body.scrollWidth }));
+const settle = (page) => page.waitForFunction(() => !document.querySelector('.fm-piece.fm-land') && !document.querySelector('.t-shuffle:disabled') && !document.querySelector('.confetti-layer') && document.querySelector('.t-stamp.slam, .t-stamp.shown'), null, { timeout: 15000 }).then(() => page.waitForTimeout(350));
 const slots = (page) => page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.fm-board .fm-piece[data-item]')].map((p) => [p.dataset.slot, p.dataset.item])));
 const score = (page) => page.locator('.t-meter').getAttribute('aria-valuenow').then(Number);
+const selectPiece = async (page, slot) => { await page.locator(`.fm-piece[data-slot="${slot}"]`).dispatchEvent('click'); await page.waitForSelector(`.t-bar:not([hidden])`); };
+const act = async (page, slot, what) => { await selectPiece(page, slot); await page.locator(`.t-bar [data-act="${what}"]`).click(); };
 const D = (page, fn, arg) => page.evaluate(async ([src, a]) => { const d = await import('./src/ui/data.js'); return (new Function('d', 'a', `return (${src})(d, a)`))(d, a); }, [fn.toString(), arg]);
 
 async function loadSample(page) {
@@ -110,8 +113,25 @@ try {
   check('shuffle button reachable in viewport (sticky dock)', shuffleBox && shuffleBox.y + shuffleBox.height <= 844 && shuffleBox.y > 0);
   let o = await overflow(page);
   check('no horizontal overflow @390', o.sw <= o.cw && o.bw <= o.cw, JSON.stringify(o));
-  check('every swap button is >= 44px', await page.evaluate(() => [...document.querySelectorAll('.fm-swap')].every((b) => { const r = b.getBoundingClientRect(); return r.width >= 43.5 && r.height >= 43.5; })));
-  check('swap buttons have accessible names', await page.evaluate(() => [...document.querySelectorAll('.fm-swap')].every((b) => /^Change /.test(b.getAttribute('aria-label')))));
+  check('default state is clean: no per-piece swap/lock/remove buttons', (await page.locator('.fm-swap, .fm-lock, .fm-x').count()) === 0 && (await page.locator('.t-bar:not([hidden])').count()) === 0);
+  check('pieces are labelled buttons', await page.evaluate(() => [...document.querySelectorAll('.fm-board .fm-piece[data-item]')].every((b) => b.tagName === 'BUTTON' && /tap to change/.test(b.getAttribute('aria-label')))));
+  check('first-time hint is shown', /Tap any piece/.test(await page.locator('.t-hint').textContent()) && await page.locator('.t-hint').isVisible());
+  const beltBox = await page.locator('.fm-piece[data-slot="belt"]').boundingBox();
+  check('belt is drawn wide and visible across the waist', !beltBox || (beltBox.width > 120 && beltBox.height >= 20), JSON.stringify(beltBox));
+  await selectPiece(page, 'shoes');
+  check('selecting a piece lifts it and shows a labelled toolbar (Change, Lock; no Remove for required slots)', (await page.locator('.fm-piece.is-selected[data-slot="shoes"]').count()) === 1 && (await page.locator('.t-bar [data-act="change"]').innerText()) === 'Change' && (await page.locator('.t-bar [data-act="remove"]').count()) === 0 && /Shoes/.test(await page.locator('.t-bar-name').textContent()));
+  await page.waitForTimeout(350);
+  check('toolbar buttons are >= 44px and inside the viewport', await page.evaluate(() => [...document.querySelectorAll('.t-bar button')].every((b) => { const r = b.getBoundingClientRect(); return r.height >= 43.5 && r.width >= 44 && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight; })));
+  await page.screenshot({ path: `${shots}/01b-selected.png` });
+  await page.keyboard.press('Escape');
+  check('Esc deselects', (await page.locator('.t-bar:not([hidden])').count()) === 0 && (await page.locator('.fm-piece.is-selected').count()) === 0);
+  await selectPiece(page, 'top');
+  await page.mouse.click(5, 300);
+  check('tapping elsewhere deselects', (await page.locator('.t-bar:not([hidden])').count()) === 0);
+  await page.locator('.fm-piece[data-slot="top"]').focus();
+  await page.keyboard.press('Enter');
+  check('Enter on a focused piece selects it', (await page.locator('.t-bar:not([hidden])').count()) === 1);
+  await page.keyboard.press('Escape');
 
   // shuffle
   const before = await slots(page);
@@ -129,18 +149,20 @@ try {
 
   // lock top, shuffle keeps it
   const topId = (await slots(page)).top;
-  await page.locator('.fm-ctl[data-slot="top"] .fm-lock').click();
-  check('lock toggles (aria-pressed)', (await page.locator('.fm-ctl[data-slot="top"] .fm-lock').getAttribute('aria-pressed')) === 'true');
+  await act(page, 'top', 'lock');
+  check('lock toggles (aria-pressed on toolbar button, badge on piece)', (await page.locator('.t-bar [data-act="lock"]').getAttribute('aria-pressed')) === 'true' && (await page.locator('.fm-ctl[data-slot="top"] .fm-lockbadge').count()) === 1);
+  await page.keyboard.press('Escape');
   let kept = true;
   for (let i = 0; i < 3; i++) { await page.locator('.t-shuffle').click(); await settle(page); if ((await slots(page)).top !== topId) kept = false; }
   check('locked top survives 3 shuffles', kept);
   await page.screenshot({ path: `${shots}/03-locked-top.png` });
-  await page.locator('.fm-ctl[data-slot="top"] .fm-lock').click();
+  await act(page, 'top', 'lock');
+  await page.keyboard.press('Escape');
 
   // swap via Suggest changes item + score
   const shoesBefore = (await slots(page)).shoes;
   const scoreBefore = await score(page);
-  await page.locator('.fm-ctl[data-slot="shoes"] .fm-swap').click();
+  await act(page, 'shoes', 'change');
   await page.waitForSelector('dialog.sheet .sw-row');
   await page.waitForTimeout(700);
   await page.screenshot({ path: `${shots}/04-swap-suggest.png` });
@@ -157,7 +179,7 @@ try {
   check('Suggest swap rescored', scoreAfter !== scoreBefore, `${scoreBefore} -> ${scoreAfter}`);
 
   // swap via I'll pick: pick the item whose delta is non-zero, no scores shown on the tab
-  await page.locator('.fm-ctl[data-slot="top"] .fm-swap').click();
+  await act(page, 'top', 'change');
   await page.waitForSelector('dialog.sheet .sw-row');
   const target = await page.evaluate(() => { const rows = [...document.querySelectorAll('.sw-row')].filter((r) => !r.classList.contains('is-current')); rows.sort((a, b) => Math.abs(Number((b.querySelector('.sw-delta')?.textContent || '0').replace('−', '-'))) - Math.abs(Number((a.querySelector('.sw-delta')?.textContent || '0').replace('−', '-')))); return rows[0]?.dataset.item; });
   await page.getByRole('tab', { name: 'I’ll pick' }).click();
@@ -175,11 +197,13 @@ try {
   const sAfter = await score(page);
   check('I’ll pick changed the top', (await slots(page)).top === target && target !== topBefore);
   check('I’ll pick rescored and showed a delta', sAfter !== sBefore ? deltaShown >= 1 : true, `${sBefore} -> ${sAfter}, pop=${deltaShown}`);
+  const popBox = await page.evaluate(() => { const p = document.querySelector('.t-delta-pop'); const pill = document.querySelector('.t-occ-pill'); if (!p) return null; const a = p.getBoundingClientRect(), b = pill.getBoundingClientRect(); return { inside: !!p.closest('.t-numwrap'), overlap: !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom) }; });
+  check('delta pop is anchored to the score number and does not cover the pills', !popBox || (popBox.inside && !popBox.overlap), JSON.stringify(popBox));
   check('score announced in live region', /Fit score/.test(await page.locator('#live').textContent()));
 
   // bottom -> joggers removes belt
   async function pickItem(slot, id) {
-    await page.locator(`.fm-ctl[data-slot="${slot}"] .fm-swap`).click();
+    await act(page, slot, 'change');
     await page.waitForSelector('dialog.sheet .sw-row');
     await page.getByRole('tab', { name: 'I’ll pick' }).click();
     await page.locator(`.sw-tile[data-item="${id}"]`).click();
@@ -195,7 +219,7 @@ try {
 
   // add / remove a layer
   await pickItem('bottom', 'demo-9'); // chinos
-  if ((await slots(page)).layer) { await page.locator('.fm-ctl[data-slot="layer"] .fm-x').click(); await settle(page); }
+  if ((await slots(page)).layer) { await act(page, 'layer', 'remove'); await settle(page); }
   check('ghost "+ layer" chip shows when no layer', await page.locator('.fm-ghost[data-slot="layer"]').count() === 1);
   await page.locator('.fm-ghost[data-slot="layer"]').click();
   await page.waitForSelector('dialog.sheet .sw-row');
@@ -206,7 +230,7 @@ try {
   check('adding a layer puts it on the board', !!(await slots(page)).layer);
   await page.screenshot({ path: `${shots}/08-with-layer.png` });
   const sc = await score(page);
-  await page.locator('.fm-ctl[data-slot="layer"] .fm-x').click();
+  await act(page, 'layer', 'remove');
   await settle(page);
   check('× removes the layer and rescores', !(await slots(page)).layer && await page.locator('.fm-ghost[data-slot="layer"]').count() === 1, `${sc} -> ${await score(page)}`);
 
@@ -353,7 +377,7 @@ try {
   check('SHUFFLE visible @320x640', sh320 && sh320.y + sh320.height <= 640 && sh320.y > 0, JSON.stringify(sh320));
   await page.screenshot({ path: `${shots}/18-today-320.png` });
   await page.screenshot({ path: `${shots}/18b-today-320-full.png`, fullPage: true });
-  await page.locator('.fm-ctl[data-slot="top"] .fm-swap').click();
+  await act(page, 'top', 'change');
   await page.waitForSelector('.sw-row');
   await page.screenshot({ path: `${shots}/19-swap-320.png` });
   const so = await page.evaluate(() => { const b = document.querySelector('dialog.sheet .sheet-body'); return b.scrollWidth - b.clientWidth; });

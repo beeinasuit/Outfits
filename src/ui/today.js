@@ -13,7 +13,7 @@ import { openSwap } from './swap.js';
 import { openGlowUp } from './glowup.js';
 import { occasionPicker } from './occasions.js';
 
-const S = { locks: {}, current: null, seen: new Set(), pool: [], sig: '', stopShake: null, ctx: null };
+const S = { hintDone: false, locks: {}, current: null, seen: new Set(), pool: [], sig: '', stopShake: null, ctx: null };
 const WX = [['none', '—', 'Any weather'], ['auto', '📍', 'Auto (location)'], ['hot', '🔥', 'Hot'], ['warm', '☀️', 'Warm'], ['mild', '🍃', 'Mild'], ['cold', '🧣', 'Cold'], ['freezing', '🥶', 'Freezing']];
 const SLOT_ORDER = ['headwear', 'layer', 'top', 'neckwear', 'belt', 'bottom', 'shoes', 'extra'];
 const signed = (n) => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '±0');
@@ -66,7 +66,7 @@ export function mount(root, { navigate }) {
     }
     if (delta != null && delta !== 0) {
       const pop = h('span', { class: `t-delta-pop ${delta > 0 ? 'up' : 'down'}`, 'aria-hidden': 'true' }, signed(delta));
-      els.score.append(pop);
+      els.numwrap.append(pop);
       setTimeout(() => pop.remove(), 2600);
     }
     paintStickers(outfit, instant);
@@ -142,6 +142,7 @@ export function mount(root, { navigate }) {
       S.seen.add(next.key);
       const from = S.current ? S.current.score : 0;
       buzz([18, 30, 18]);
+      deselect();
       const keep = Object.keys(S.locks).filter((s) => next.items[s] && next.items[s].id === S.locks[s]);
       els.stage.classList.add('shuffling');
       if (S.current) { resetResult(); await board.flyOut({ keep }); }
@@ -190,6 +191,35 @@ export function mount(root, { navigate }) {
     if (!row) return;
     applyChange({ items: row.items, score: row.score, reasons: row.reasons });
   }
+  // ----- selection toolbar -----
+  function onSelect(slot) {
+    if (!els.bar) return;
+    if (!slot) { els.bar.hidden = true; return; }
+    S.hintDone = true; els.lockHint.hidden = true;
+    paintBar(slot);
+  }
+  function paintBar(slot) {
+    const it = S.current && S.current.items[slot];
+    if (!it) { els.bar.hidden = true; return; }
+    const locked = S.locks[slot] === it.id;
+    const optional = ['layer', 'neckwear', 'headwear', 'extra', 'belt'].includes(slot);
+    els.bar.replaceChildren(
+      h('span', { class: 't-bar-name' }, `${SLOT_LABELS[slot]}: ${it.name}`),
+      h('div', { class: 't-bar-row' },
+        h('button', { class: 't-bar-btn primary', type: 'button', 'data-act': 'change', onclick: () => { deselect(); swapSlot(slot); } }, 'Change'),
+        h('button', { class: 't-bar-btn', type: 'button', 'data-act': 'lock', 'aria-pressed': String(locked), onclick: () => { toggleLock(slot); paintBar(slot); } }, locked ? '🔒 Locked' : '🔓 Lock'),
+        optional ? h('button', { class: 't-bar-btn danger', type: 'button', 'data-act': 'remove', onclick: () => { deselect(); removeSlot(slot); } }, 'Remove') : null));
+    els.bar.hidden = false;
+    const piece = board.pieceEl(slot);
+    if (piece) {
+      const st = els.stage.getBoundingClientRect(), pr = piece.getBoundingClientRect(), bh = els.bar.offsetHeight || 84;
+      let top = pr.top - st.top - bh - 8;
+      if (top < 0) top = pr.bottom - st.top + 8;
+      els.bar.style.top = `${Math.max(0, Math.min(top, st.height - bh))}px`;
+    }
+  }
+  function deselect() { if (board && board.selected()) board.select(null); else if (els.bar) els.bar.hidden = true; }
+
   function toggleLock(slot) {
     if (busy || !S.current) return;
     const it = S.current.items[slot];
@@ -199,7 +229,6 @@ export function mount(root, { navigate }) {
     board.setOptions({ locks: S.locks });
     buzz(on ? 8 : [14, 20, 22]);
     announce(`${SLOT_LABELS[slot]} ${on ? 'unlocked' : 'locked'}`);
-    els.lockHint.hidden = Object.keys(S.locks).length > 0;
     S.sig = '';
   }
 
@@ -250,19 +279,21 @@ export function mount(root, { navigate }) {
     const wxChips = null;
 
     const num = h('b', { class: 't-num' }, '0');
+    const numwrap = h('span', { class: 't-numwrap' }, num, h('small', {}, '/100'));
     const fill = h('span', { class: 't-fill' });
     const meter = h('div', { class: 't-meter', role: 'meter', 'aria-label': 'Fit score', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': 0 },
-      h('span', { class: 't-meter-top' }, h('span', { class: 't-meter-label' }, 'FIT SCORE'), h('span', { class: 't-numwrap' }, num, h('small', {}, '/100'))),
+      h('span', { class: 't-meter-top' }, h('span', { class: 't-meter-label' }, 'FIT SCORE'), numwrap),
       h('span', { class: 't-track' }, fill, h('span', { class: 't-ticks', 'aria-hidden': 'true' })));
     const stamp = h('div', { class: 't-stamp', 'aria-hidden': 'true' });
     const score = h('div', { class: 't-score' }, meter, stamp);
 
     board = renderBoard(S.current && currentValid() ? S.current.items : {}, {
       profile: S.ctx && S.ctx.profile, interactive: true, size: 'full', locks: S.locks, animate: !S.current,
-      onSwap: swapSlot, onRemove: removeSlot, onAdd: swapSlot, onLock: toggleLock, addable: addableNow(),
+      onSelect: onSelect, onAdd: swapSlot, addable: addableNow(),
     });
     const note = h('span', { class: 't-note', 'aria-live': 'polite' });
-    const stage = h('div', { class: 't-stage' }, board);
+    const bar = h('div', { class: 't-bar', role: 'toolbar', 'aria-label': 'Piece actions', hidden: true });
+    const stage = h('div', { class: 't-stage' }, board, bar);
     swipeCard(stage, { right: () => like('like'), left: () => like('dislike') });
 
     const shuffleBtn = h('button', { class: 'btn btn-big btn-sun t-shuffle', type: 'button', onclick: () => shuffle() }, h('span', { class: 't-shuffle-ico', html: icon('spin', { size: 26, sw: 3 }) }), 'SHUFFLE');
@@ -273,7 +304,7 @@ export function mount(root, { navigate }) {
     const improveBtn = h('button', { class: 'btn btn-cobalt btn-small t-improve', type: 'button', onclick: improve }, h('span', { html: icon('sparkle', { size: 18 }) }), 'Improve this look');
     const battle = h('button', { class: 'btn btn-ghost btn-small t-battle', type: 'button', onclick: () => navigate('battle') }, '⚔️ Battle');
     const stickers = h('div', { class: 't-stickers' });
-    const lockHint = h('p', { class: 'hint t-hint', hidden: Object.keys(S.locks).length > 0 }, 'Tap 🔒 on a piece to keep it. Shuffles build around it.');
+    const lockHint = h('p', { class: 'hint t-hint', hidden: S.hintDone }, 'Tap any piece to change, lock or remove it.');
     const shakeChip = shakeSupported() && matchMedia('(pointer: coarse)').matches
       ? h('button', { class: 'chip shake-chip', type: 'button', 'aria-pressed': String(!!data.settings.shake), onclick: toggleShake }, h('span', { html: icon('vibrate', { size: 16 }) }), 'Shake to shuffle') : null;
 
@@ -287,7 +318,7 @@ export function mount(root, { navigate }) {
         h('a', { class: 'btn btn-ghost btn-small', href: '#/plan' }, '🗓️ Plan the week')),
       lockHint, h('h2', { class: 't-why-title' }, 'Why it works'), stickers,
       shakeChip ? h('div', { class: 'center' }, shakeChip) : null);
-    els = { score, meter, num, fill, stamp, stickers, stage, shuffle: shuffleBtn, like: likeB, dislike, wear: wear_, improve: improveBtn, battle, note, lockHint, occPill, wxPill, dock };
+    els = { numwrap, bar, score, meter, num, fill, stamp, stickers, stage, shuffle: shuffleBtn, like: likeB, dislike, wear: wear_, improve: improveBtn, battle, note, lockHint, occPill, wxPill, dock };
 
     paintPills();
     fit();
@@ -389,7 +420,10 @@ export function mount(root, { navigate }) {
     if (data.settings.shake && shakeSupported()) S.stopShake = startShake(() => { if (alive && (location.hash.startsWith('#/today') || location.hash.startsWith('#/spin') || location.hash === '')) shuffle(); });
   }
 
-  const onResize = () => fit();
+  const onDocDown = (e) => { if (els.bar && !els.bar.hidden && !e.target.closest('.fm-piece, .t-bar, dialog')) deselect(); };
+  const onKey = (e) => { if (e.key === 'Escape' && els.bar && !els.bar.hidden && !document.querySelector('dialog.sheet')) { const sl = board && board.selected(); deselect(); const p = sl && board.pieceEl(sl); if (p) p.focus({ preventScroll: true }); } };
+  document.addEventListener('pointerdown', onDocDown); document.addEventListener('keydown', onKey);
+  const onResize = () => { fit(); if (board && board.selected()) paintBar(board.selected()); };
   window.addEventListener('resize', onResize);
   render();
   startStopShake();
@@ -416,7 +450,7 @@ export function mount(root, { navigate }) {
       paintPills();
     } else if (what === 'worn' || what === 'feedback') syncActions();
   };
-  api.destroy = () => { alive = false; window.removeEventListener('resize', onResize); if (S.stopShake) { S.stopShake(); S.stopShake = null; } };
+  api.destroy = () => { alive = false; window.removeEventListener('resize', onResize); document.removeEventListener('pointerdown', onDocDown); document.removeEventListener('keydown', onKey); if (S.stopShake) { S.stopShake(); S.stopShake = null; } };
   return api;
 }
 

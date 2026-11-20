@@ -9,10 +9,10 @@
 //     size?:        'full' | 'card' | 'mini' = 'full'   card/mini are static thumbnails sized by their parent's width
 //     animate?:     boolean = (size === 'full')        pieces drop onto the surface on first render
 //     locks?:       Object<slot, itemId>               pieces whose id matches show a pressed lock toggle
-//     onSwap?(slot)  change this piece (also fired by tapping the piece)
-//     onRemove?(slot) remove an optional piece (shows a small ×)
+//     onSelect?(slot|null) pieces are buttons; tapping selects one (lifted + outlined) and the caller shows a toolbar. el.select(slot|null)
+//     onSwap?(slot)  fallback when onSelect is absent: tapping a piece calls this directly
 //     onAdd?(slot)   add an optional piece (ghost chips)
-//     onLock?(slot)  toggle lock (lock toggle only shown when provided)
+//     locks          locked pieces get a tiny lock badge (no per-piece buttons)
 //     addable?:     string[]   which optional slots may show a ghost "+" chip (default layer/headwear/neckwear/belt)
 //   }
 //
@@ -44,7 +44,7 @@ const BOX = {
   top: { x: 21, y: 23, w: 58, h: 46, r: 1.5, z: 3 },
   layer: { x: -1, y: 24, w: 56, h: 50, r: -5, z: 2 },
   neckwear: { x: 42, y: 25, w: 16, h: 30, r: 0, z: 6 },
-  belt: { x: 22, y: 64, w: 56, h: 11, r: -1, z: 7 },
+  belt: { x: 22, y: 62, w: 56, h: 13, r: -1, z: 7 },
   bottom: { x: 24, y: 70, w: 52, h: 40, r: 0.6, z: 4 },
   shoes: { x: 18, y: 109, w: 64, h: 20, r: -1.2, z: 5 },
   headwear: { x: 66, y: 1, w: 31, h: 20, r: 9, z: 4 },
@@ -131,32 +131,37 @@ export function renderBoard(items, opts = {}) {
   const pieces = new Map(); // key -> { el, item }
   let faceOff = false;
   let cur = {};
+  let selected = null;
+  function setSelected(slot) {
+    if (slot && !pieces.get(slot)) slot = null;
+    selected = slot;
+    for (const [k, rec] of pieces) {
+      const on = k === slot;
+      rec.el.classList.toggle('is-selected', on);
+      if (rec.el.tagName === 'BUTTON' && o.onSelect) rec.el.setAttribute('aria-pressed', String(on));
+    }
+  }
   const hasFace = () => !!(o.profile && o.profile.cutoutId) && !faceOff;
 
+  /** Default state is clean: only a tiny lock badge on locked pieces. Actions live in the caller's toolbar (see onSelect). */
   function controls(slot, item, piece) {
-    piece = piece.__ctl;
-    if (!piece) return;
-    const label = SLOT_LABELS[slot] || slot;
-    if (o.onSwap) {
-      piece.append(h('button', { class: 'fm-swap', type: 'button', 'aria-label': `Change ${label.toLowerCase()}`, title: `Change ${label.toLowerCase()}`, html: swapSvg, onclick: (e) => { e.stopPropagation(); o.onSwap(slot); } }));
-    }
-    if (o.onLock && slot !== 'extra') {
-      const on = !!(o.locks && item && o.locks[slot] === item.id);
-      piece.append(h('button', { class: 'fm-lock', type: 'button', 'aria-pressed': String(on), 'aria-label': `${on ? 'Unlock' : 'Lock'} ${label.toLowerCase()}`, title: on ? 'Locked: shuffles keep it' : 'Lock it for the next shuffle', html: lockSvg(on), onclick: (e) => { e.stopPropagation(); o.onLock(slot); } }));
-    }
-    if (o.onRemove && (OPTIONAL.has(slot) || slot === 'belt')) {
-      piece.append(h('button', { class: 'fm-x', type: 'button', 'aria-label': `Remove ${label.toLowerCase()}`, title: `Remove ${label.toLowerCase()}`, html: xSvg, onclick: (e) => { e.stopPropagation(); o.onRemove(slot); } }));
-    }
+    const c = piece.__ctl;
+    if (!c) return;
+    c.replaceChildren();
+    if (o.locks && item && o.locks[slot] === item.id) c.append(h('span', { class: 'fm-lockbadge', 'aria-hidden': 'true', html: lockSvg(true) }));
   }
 
   function makePiece(slot, item) {
     const label = SLOT_LABELS[slot] || slot;
     const art = h('span', { class: 'fm-art', html: illustrate(item, { title: '' }) });
-    const piece = h('div', { class: 'fm-piece is-illo', 'data-slot': slot, 'data-item': item.id, role: 'group', 'aria-label': `${label}: ${item.name}` }, art);
+    if (slot === 'belt') { const svg = art.querySelector('svg'); if (svg) svg.setAttribute('preserveAspectRatio', 'none'); }
+    const tappable = full() && (o.onSelect || o.onSwap);
+    const piece = h(tappable ? 'button' : 'div', { class: 'fm-piece is-illo', 'data-slot': slot, 'data-item': item.id, type: tappable ? 'button' : null, role: tappable ? null : 'group',
+      'aria-pressed': tappable && o.onSelect ? 'false' : null, 'aria-label': tappable ? `${item.name} (${label.toLowerCase()}), tap to change` : `${label}: ${item.name}` }, art);
     piece.__alive = true;
-    if (full() && o.onSwap) {
+    if (tappable) {
       piece.classList.add('tappable');
-      piece.addEventListener('click', () => o.onSwap(slot));
+      piece.addEventListener('click', () => { if (o.onSelect) el.select(selected === slot ? null : slot); else o.onSwap(slot); });
     }
     if (full()) { piece.__ctl = h('div', { class: 'fm-ctl', 'data-slot': slot }); controls(slot, item, piece); }
     loadImage(piece, art, item);
@@ -237,11 +242,15 @@ export function renderBoard(items, opts = {}) {
       pieces.set(slot, { el: pe, item });
     });
     el.classList.toggle('has-face', hasFace());
+    if (selected && !pieces.get(selected)) { setSelected(null); o.onSelect && o.onSelect(null); } else setSelected(selected);
     syncGhosts(cur);
   }
 
   el.update = (next, { animate = true } = {}) => { el.items = next; render(next, { animate }); };
   el.setOptions = (partial) => { Object.assign(o, partial); if ('profile' in partial) faceOff = false; render(cur, { animate: false }); };
+  el.select = (slot) => { setSelected(slot); if (o.onSelect) o.onSelect(selected); };
+  el.selected = () => selected;
+  stage.addEventListener('click', (e) => { if (selected && !e.target.closest('.fm-piece')) el.select(null); });
   el.pieceEl = (slot) => (pieces.get(slot) ? pieces.get(slot).el : null);
   el.flyOut = ({ keep = [] } = {}) => {
     const keepSet = new Set(keep);
