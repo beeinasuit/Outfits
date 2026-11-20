@@ -2,10 +2,10 @@
 
 import { WEIGHTS, prepare, evaluateRules } from './rules.js';
 
-/** Identity on 20..80, soft exponential edges toward 0 and 100. Monotonic, smooth. */
+/** Identity on lo..hi, soft exponential edges toward 0 and 100. Monotonic, smooth. */
 export function squash(x) {
   if (!Number.isFinite(x)) return 50;
-  const LO = 20; const HI = 80;
+  const { lo: LO, hi: HI } = WEIGHTS.squash;
   let y;
   if (x >= HI) y = HI + (100 - HI) * (1 - Math.exp(-(x - HI) / (100 - HI)));
   else if (x <= LO) y = LO * Math.exp((x - LO) / LO);

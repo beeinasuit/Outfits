@@ -4,9 +4,13 @@
 import { COLOR_FAMILIES, BUSY_PATTERNS, OCCASIONS, WEATHER, outfitKey } from '../model.js';
 
 export const WEIGHTS = {
-  base: 70,
+  // Calibration: base is a "nothing earned, nothing wrong" outfit. Positives are EARNED (small, specific) and
+  // their total is capped (posCap); mistakes are not capped here so a clash can really sink an outfit.
+  base: 64,
+  posCap: 30,          // total of all earned positives (feedback excluded) is scaled down to this
+  squash: { lo: 20, hi: 90 }, // identity between lo and hi; soft edges outside
   color: {
-    neutralSafe: 6, onePop: 10, goodPair: 5, goodPairMax: 2,
+    neutralSafe: 4, onePop: 6, goodPair: 5, goodPairMax: 2,
     twoAccents: -5, manyAccents: -16,
     brownBlack: -10, navyBlack: -3, redGreen: -22, orangePurple: -20, redPink: -6, loudPair: -9,
     clashCap: -30,
@@ -15,14 +19,16 @@ export const WEIGHTS = {
   pattern: { twoBusy: -14, extraBusy: -6, busyPlusLines: -5, linesClash: -6, single: 2, graphicFormal: -8 },
   statement: { each: -6 },
   formality: { close: 4, spread2: -5, spread3: -18, shoes2: -5, shoes3: -10 },
-  occasion: { perLevel: -4, cap: -16, fits: 4 },
-  neckwear: { tieNoCollar: -28, tieTooCasual: -10, bowTieNotFormal: -10, bowTieCasual: -14, tieOk: 3 },
+  occasion: { perLevel: -6, cap: -24, fits: 4 },
+  neckwear: { tieNoCollar: -30, tieTooCasual: -10, bowTieNotFormal: -10, bowTieCasual: -14, tieOk: 3 },
   headwear: { casualHatDressy: -6, casualHatFormal: -10, fedoraSneakers: -6 },
-  shoes: { sportyWithDress: -14, oxfordJeansTee: -6, oxfordJeansBlazer: 3, shortsDressy: -8, shortsBoots: -5 },
-  leather: { match: 10, clash: -20, near: -4, nearBurgundy: -3, nearOther: -2, casualBeltCasualShoes: 4,
+  shoes: { sportyWithDress: -14, sandalsFormal: -14, oxfordJeansTee: -6, oxfordJeansBlazer: 3, shortsDressy: -8, shortsBoots: -5,
+    heavySandals: -14, heavyShorts: -10 },
+  leather: { match: 10, clash: -20, near: -4, nearBurgundy: -3, nearOther: -2, casualBeltCasualShoes: 3,
     casualBeltDressy: -8, beltFormalityPerLevel: -4, beltFormalityCap: -10, missingBelt: -6, beltNoLoops: -6 },
-  weather: { fits: 5, perLevel: -6, cap: -18, hotNoLayer: 3, hotShorts: 4, coldNoLayer: -10, coldLayer: 4,
-    coldAccessory: 3, hotAccessory: -5, coldShorts: -10, rainLayer: 10, noRainLayer: -4, rainSuede: -8 },
+  weather: { fits: 5, perLevel: -7, cap: -21, hotNoLayer: 3, hotShorts: 4, coldNoLayer: -10, coldLayer: 4,
+    coldAccessory: 3, hotAccessory: -5, coldShorts: -10, rainLayer: 10, noRainLayer: -4, rainSuede: -8,
+    coldSandals: -14, freezingSandals: -22, coldCanvas: -5, coldBoots: 5, coldLeatherShoes: 3 },
   feedback: { likedOutfit: 20, dislikedOutfit: -30, likedPair: 4, dislikedPair: -6, pairCap: 12 },
 };
 const W = WEIGHTS;
@@ -318,6 +324,14 @@ export function shoeRules(P) {
       else if (tee) out.push(R('Formal oxfords with jeans and a tee are too dressy on the feet.', W.shoes.oxfordJeansTee, 'shoes-oxford-jeans'));
     }
   }
+  if (shoes && shoes.kind === 'sandals') {
+    const dressy = [top, bottom, layer, neckwear && TIES.has(neckwear.kind) ? neckwear : null].filter((i) => i && fm(i) >= 4);
+    if (dressy.length) out.push(R(`Sandals with ${nm(dressy[0])} are far too casual on the feet.`, W.shoes.sandalsFormal, 'shoes-sandals-formal'));
+  }
+  if (layer && wm(layer) >= 3) {
+    if (shoes && shoes.kind === 'sandals') out.push(R(`${cap(nm(layer))} with sandals: pick one season.`, W.shoes.heavySandals, 'shoes-heavy-sandals'));
+    if (bottom && (bottom.kind === 'shorts' || bottom.kind === 'athletic shorts')) out.push(R(`${cap(nm(layer))} with shorts sends mixed signals.`, W.shoes.heavyShorts, 'shorts-heavy'));
+  }
   if (bottom && isShorts(bottom)) {
     if (layer && DRESSY_LAYERS.has(layer.kind)) out.push(R(`Shorts with ${nm(layer)} look confused.`, W.shoes.shortsDressy, 'shorts-dressy'));
     if (neckwear && TIES.has(neckwear.kind)) out.push(R('Shorts with a tie look confused.', W.shoes.shortsDressy, 'shorts-dressy'));
@@ -405,6 +419,18 @@ export function weatherRules(P) {
       }
       if (shortsBottom) out.push(R('Shorts in the cold: brrr.', W.weather.coldShorts, 'weather-shorts-cold'));
     }
+    if ((wk === 'cold' || wk === 'freezing') && P.shoes) {
+      const sh = P.shoes;
+      if (sh.kind === 'sandals') {
+        out.push(R(`Sandals in ${label} weather: your toes won't thank you.`, wk === 'freezing' ? W.weather.freezingSandals : W.weather.coldSandals, 'weather-footwear'));
+      } else if (sh.material === 'canvas') {
+        out.push(R(`${cap(nm(sh))} are thin for ${label} weather.`, W.weather.coldCanvas, 'weather-footwear'));
+      } else if (sh.kind === 'boots' || sh.kind === 'chelsea boots') {
+        out.push(R(`${cap(nm(sh))} are right for ${label} weather.`, W.weather.coldBoots, 'weather-footwear-ok'));
+      } else if (sh.material === 'leather') {
+        out.push(R(`Leather ${sh.kind} hold up well in ${label} weather.`, W.weather.coldLeatherShoes, 'weather-footwear-ok'));
+      }
+    }
     if (wk === 'hot' || wk === 'warm') {
       for (const a of [neckwear, headwear]) {
         if (a && wm(a) > 0) out.push(R(`${cap(nm(a))} is too warm for today.`, W.weather.hotAccessory, 'weather-accessory-hot'));
@@ -450,10 +476,36 @@ export function feedbackRules(P) {
   return out;
 }
 
-/** Run every rule. Returns the unsorted list of Reasons. */
+// A positive reason is dropped when a stronger negative says the opposite about the same thing.
+const CONFLICTS = {
+  'color-neutral': ['color-clash', 'color-clash-mild', 'leather-clash', 'leather-near'],
+  'color-accent': ['color-clash'],
+  'color-good-pair': ['color-clash'],
+  'contrast-tonal': ['color-clash'],
+  'contrast-good': ['contrast-muddy'],
+  'leather-match': ['leather-clash'],
+  'formality-ok': ['formality-clash', 'formality-shoes'],
+  'weather-ok': ['weather-footwear', 'shoes-heavy-sandals'],
+  'weather-footwear-ok': ['weather-footwear'],
+  'pattern-ok': ['pattern-busy', 'pattern-risky'],
+  'belt-casual-ok': ['belt-casual', 'belt-formality'],
+  'tie-ok': ['tie-no-collar', 'tie-too-casual'],
+  'occasion-ok': ['occasion-off'],
+};
+
+/** Run every rule. Returns the Reasons: conflicts resolved, earned positives capped at WEIGHTS.posCap. */
 export function evaluateRules(P) {
-  return [].concat(
+  let rs = [].concat(
     colorRules(P), contrastRules(P), patternRules(P), formalityRules(P), occasionRules(P),
     neckwearRules(P), headwearRules(P), shoeRules(P), beltRules(P), weatherRules(P), feedbackRules(P),
   );
+  const tags = new Set(rs.filter((r) => r.delta < 0).map((r) => r.tag));
+  rs = rs.filter((r) => !(r.delta > 0 && CONFLICTS[r.tag] && CONFLICTS[r.tag].some((t) => tags.has(t))));
+  let pos = 0;
+  for (const r of rs) if (r.delta > 0 && !r.tag.startsWith('feedback')) pos += r.delta;
+  if (pos > W.posCap) {
+    const k = W.posCap / pos;
+    rs = rs.map((r) => (r.delta > 0 && !r.tag.startsWith('feedback') ? { ...r, delta: Math.max(0.1, Math.round(r.delta * k * 10) / 10) } : r));
+  }
+  return rs;
 }

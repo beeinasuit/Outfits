@@ -114,7 +114,10 @@ function familyOfLab(lab) {
 }
 
 /** Map one sRGB colour to the closest COLOR_FAMILIES key. */
-export function nameColor([r, g, b]) {
+export function nameColor(rgb) {
+  if (!Array.isArray(rgb) && !ArrayBuffer.isView(rgb)) return 'grey';
+  const [r, g, b] = rgb;
+  if (!Number.isFinite(+r) && !Number.isFinite(+g) && !Number.isFinite(+b)) return 'grey';
   return familyOfLab(rgbToLab(+r || 0, +g || 0, +b || 0));
 }
 
@@ -176,28 +179,97 @@ function borderMedianRGB(im) {
   return [medianOf(R), medianOf(G), medianOf(B)];
 }
 
+/** Fraction of border-ring samples within dE ~9 of the border median (1 = perfectly uniform background). */
+function borderUniformity(im, bg) {
+  const { width: w, height: h, data } = im;
+  const t = Math.max(1, Math.round(Math.min(w, h) * 0.03));
+  const stepB = Math.max(1, Math.floor((w + h) / 200));
+  const bgLab = rgbToLab(bg[0], bg[1], bg[2]);
+  let n = 0, near = 0;
+  for (let y = 0; y < h; y += stepB) {
+    for (let x = 0; x < w; x += stepB) {
+      if (!(x < t || y < t || x >= w - t || y >= h - t)) continue;
+      const i = (y * w + x) * 4;
+      if (data[i + 3] < 128) continue;
+      n++;
+      if (deltaE2000(rgbToLab(data[i], data[i + 1], data[i + 2]), bgLab) < 9) near++;
+    }
+  }
+  return n ? near / n : 0;
+}
+
+/**
+ * Estimate the colour cast of a photo from its border ring (the sheet/floor the clothes lie on) and return an RGB
+ * the caller can pass as `opts.whitePoint` to extractColors. Call once per PHOTO (full frame), not per crop.
+ * Grey-world on the border, deliberately gentle: the per-channel cast is clamped to +-25% and a +-4% dead band is
+ * ignored so a legitimately cream/coloured sheet is not "corrected" away. Returns null when there is no usable border.
+ * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData
+ * @returns {[number,number,number]|null}
+ */
+export function estimateWhitePoint(imageData) {
+  try {
+    if (!validImage(imageData)) return null;
+    const bg = borderMedianRGB(imageData);
+    if (!bg) return null;
+    const Y = (bg[0] + bg[1] + bg[2]) / 3;
+    if (Y < 40) return null;
+    const dead = (v) => { const d = v - 1; const a = Math.max(0, Math.abs(d) - 0.04); return 1 + Math.sign(d) * Math.min(0.25, a); };
+    return [Y * dead(bg[0] / Y), Y * dead(bg[1] / Y), Y * dead(bg[2] / Y)];
+  } catch (e) {
+    return null;
+  }
+}
+
+/** Per-channel gains that map `wp` to neutral grey of the same mean level; clamped to [0.6, 1.7]. */
+function whiteGains(wp) {
+  if (!Array.isArray(wp) && !ArrayBuffer.isView(wp)) return null;
+  const v = [+wp[0], +wp[1], +wp[2]];
+  if (!v.every((x) => Number.isFinite(x) && x > 5)) return null;
+  const Y = (v[0] + v[1] + v[2]) / 3;
+  const g = v.map((x) => Math.max(0.6, Math.min(1.7, Y / x)));
+  return g.every((x) => Math.abs(x - 1) < 0.005) ? null : g;
+}
+
 // ---------- extractColors ----------
 /**
+ * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData
+ * @param {object} [opts]
+ * @param {Uint8Array} [opts.mask]  per-pixel 0/1 mask of the item (preferred)
+ * @param {number} [opts.maxColors=3]  1..4; NaN/0/negative fall back to 3, larger values are capped at 4
+ * @param {boolean} [opts.ignoreBackground=true]  without a mask: drop pixels close to a UNIFORM border colour
+ * @param {number[]} [opts.whitePoint]  RGB the caller believes is neutral (e.g. estimateWhitePoint(fullPhoto) or the
+ *   sheet median); channels are rescaled so it becomes grey (gains clamped to 0.6..1.7). Output hex values are corrected.
+ * @param {boolean} [opts.autoWhiteBalance=false]  shorthand for whitePoint = estimateWhitePoint(imageData); only
+ *   meaningful when imageData is a full photo with a visible background, not a tight crop.
  * @returns {{hex:string,family:string,weight:number}[]}
  */
 export function extractColors(imageData, opts = {}) {
-  const { mask = null, maxColors = 3, ignoreBackground = true } = opts;
+  const { mask = null, ignoreBackground = true } = opts || {};
+  const mcRaw = opts && Number.isFinite(opts.maxColors) && opts.maxColors >= 1 ? Math.floor(opts.maxColors) : 3;
+  const maxColors = Math.min(4, mcRaw);
   try {
     if (!validImage(imageData)) return GREY();
     const useMask = mask && mask.length >= imageData.width * imageData.height ? mask : null;
     const smp = samplePixels(imageData, useMask);
     if (smp.n === 0) return GREY();
+    let wp = opts && opts.whitePoint ? opts.whitePoint : (opts && opts.autoWhiteBalance ? estimateWhitePoint(imageData) : null);
+    const gains = wp ? whiteGains(wp) : null;
+    if (gains) for (let i = 0; i < smp.rgb.length; i += 3) {
+      smp.rgb[i] = Math.min(255, smp.rgb[i] * gains[0]); smp.rgb[i + 1] = Math.min(255, smp.rgb[i + 1] * gains[1]); smp.rgb[i + 2] = Math.min(255, smp.rgb[i + 2] * gains[2]);
+    }
     let idx = Array.from({ length: smp.n }, (_, i) => i);
 
     if (!useMask && ignoreBackground) {
-      const bg = borderMedianRGB(imageData);
-      if (bg) {
+      let bg = borderMedianRGB(imageData);
+      const uniform = bg ? borderUniformity(imageData, bg) : 0;
+      if (bg && gains) bg = bg.map((v, i) => Math.min(255, v * gains[i]));
+      if (bg && uniform >= 0.8) {
         const bgLab = rgbToLab(bg[0], bg[1], bg[2]);
         const keep = idx.filter((i) => {
           const lab = rgbToLab(smp.rgb[i * 3], smp.rgb[i * 3 + 1], smp.rgb[i * 3 + 2]);
           return deltaE2000(lab, bgLab) > 9;
         });
-        if (keep.length >= smp.n * 0.1) idx = keep;
+        if (keep.length >= Math.max(8, smp.n * 0.02)) idx = keep;
       }
     }
 
@@ -290,7 +362,7 @@ export function extractColors(imageData, opts = {}) {
 }
 
 // ---------- guessPattern ----------
-/** @returns {'solid'|'stripe'|'check'|'textured'|'print'} */
+/** @returns {'solid'|'stripe'|'check'|'polka'|'textured'|'print'} */
 export function guessPattern(imageData, opts = {}) {
   try {
     if (!validImage(imageData)) return 'solid';
@@ -362,9 +434,12 @@ export function guessPattern(imageData, opts = {}) {
     let bigCols = 0;
     for (const c of cols.values()) if (c / nOk > 0.04) bigCols++;
     const edgeFrac = strong / valid;
+    const pure = (hist[topBin] + hist[ortho]) / eTot;   // energy in exactly two orthogonal orientation bins
     if (share1 > 0.78 && coherence > 0.6 && edgeFrac > 0.05) return 'stripe';
-    if (share1 + share2 > 0.78 && share2 > 0.22 && edgeFrac > 0.08) return 'check';
+    if (share1 + share2 > 0.7 && share2 > 0.22 && edgeFrac > 0.08 && pure > 0.6) return 'check';   // straight orthogonal lines
     if (bigCols >= 5 && edgeFrac > 0.2) return 'print';
+    // isotropic blobs (edges in all directions) in <= 3 colours with strong contrast: polka dots
+    if (bigCols <= 3 && pure < 0.6 && std > 40 && edgeFrac > 0.12) return 'polka';
     if (std > 22 && edgeFrac > 0.15) return 'textured';
     return 'solid';
   } catch (e) {

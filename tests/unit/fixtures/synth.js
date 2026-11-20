@@ -170,3 +170,19 @@ export function standardItems(n, { belt = false } = {}) {
   if (belt) items.push({ shape: 'rect', x: 150, y: 620, w: 700, h: 36, color: [110, 70, 40] });
   return items;
 }
+
+/** Regular polka dots: `dot` circles of radius `rad` on a `step` grid (half-step offset on alternate rows). */
+export function polka(width, height, { bg = [240, 236, 228], dot = [31, 42, 68], rad = 4, step = 18, noiseSigma = 0, seed = 4 } = {}) {
+  const im = solid(width, height, bg);
+  for (let row = 0; row * step < height + step; row++) {
+    for (let col = 0; col * step < width + step; col++) {
+      const cx = col * step + (row % 2 ? step / 2 : 0), cy = row * step;
+      for (let y = Math.max(0, Math.floor(cy - rad)); y <= Math.min(height - 1, Math.ceil(cy + rad)); y++) {
+        for (let x = Math.max(0, Math.floor(cx - rad)); x <= Math.min(width - 1, Math.ceil(cx + rad)); x++) {
+          if ((x - cx) ** 2 + (y - cy) ** 2 <= rad * rad) { const i = (y * width + x) * 4; im.data[i] = dot[0]; im.data[i + 1] = dot[1]; im.data[i + 2] = dot[2]; }
+        }
+      }
+    }
+  }
+  return noiseSigma ? addNoise(im, noiseSigma, seed) : im;
+}
