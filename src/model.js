@@ -144,6 +144,39 @@ export function needsWash(item) {
   return limit > 0 && wearsSinceWash(item) >= limit;
 }
 
+/**
+ * Personal colouring profile (optional). Stored in settings.profile.
+ * Drives the complexion rules: colours worn near the face (top, layer, neckwear, headwear) are
+ * checked against undertone / depth / contrast. Treated as a nudge, never a veto.
+ * @typedef {Object} Profile
+ * @property {boolean} enabled
+ * @property {'warm'|'cool'|'neutral'|null} undertone
+ * @property {'light'|'medium'|'deep'|null}  depth     skin depth
+ * @property {'low'|'medium'|'high'|null}    contrast  difference between hair/skin/eyes
+ * @property {string|null} skinHex   sampled skin colour (white-balance corrected), informational
+ * @property {string|null} selfieId  photo store key of the selfie
+ * @property {string|null} cutoutId  photo store key of the head-and-shoulders cutout
+ * @property {boolean} includeSelfieInBackup  default false
+ */
+export const UNDERTONES = ['warm', 'cool', 'neutral'];
+export const DEPTHS = ['light', 'medium', 'deep'];
+export const CONTRASTS = ['low', 'medium', 'high'];
+/** Slots whose colour sits next to the face, with how much they count for complexion. */
+export const NEAR_FACE = { top: 1, layer: 0.8, neckwear: 0.7, headwear: 0.9 };
+
+export function makeProfile(p = {}) {
+  return {
+    enabled: p.enabled !== false && !!(p.undertone || p.depth || p.contrast),
+    undertone: UNDERTONES.includes(p.undertone) ? p.undertone : null,
+    depth: DEPTHS.includes(p.depth) ? p.depth : null,
+    contrast: CONTRASTS.includes(p.contrast) ? p.contrast : null,
+    skinHex: typeof p.skinHex === 'string' && /^#[0-9a-f]{6}$/i.test(p.skinHex) ? p.skinHex.toLowerCase() : null,
+    selfieId: p.selfieId || null,
+    cutoutId: p.cutoutId || null,
+    includeSelfieInBackup: p.includeSelfieInBackup === true,
+  };
+}
+
 /** Dress level scale used everywhere. */
 export const FORMALITY = { 1: 'Lounge', 2: 'Casual', 3: 'Smart casual', 4: 'Business', 5: 'Formal' };
 

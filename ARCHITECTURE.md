@@ -202,3 +202,34 @@ export function cutoutCanvas(sourceCanvas, box, mask, { feather = 2 } = {})
 ```
 Store `item.cutoutId` (photo store key of a transparent WebP/PNG) alongside `photoId`. `canvasToBlob` must keep alpha
 (WebP keeps alpha; the JPEG fallback must not be used for cutouts — fall back to PNG).
+
+## Personal colouring (complexion)
+
+Optional `settings.profile` (`Profile` / `makeProfile` in model.js). Passed to the engine as `ctx.profile`
+(ScoreContext gains `profile?: Profile`). Only used when `profile.enabled`.
+
+- **Selfie**: taken inside an oval guide; the head-and-shoulders cutout is shown at the top of the outfit board so the
+  user sees the colours next to their own face. Never leaves the device; excluded from backups unless opted in.
+- **Drape test** (UI): the selfie cutout is shown over pairs of colour backgrounds (gold vs silver, rust vs burgundy,
+  cream vs pure white, black vs charcoal, camel vs grey, coral vs fuchsia-pink); ~6 taps "which looks better?" decide
+  undertone and contrast. A skin sample gives an initial guess for depth/undertone. User can also set them manually.
+
+### `src/vision/skin.js` (pure)
+```js
+/** Sample skin inside an ellipse (the oval guide, in image coords), robust to hair/eyes/background (skin-likelihood
+ *  filter in YCbCr/Lab + trimmed mean), with optional white point correction.
+ * @returns {{ hex, lab:[L,a,b], depth:'light'|'medium'|'deep', undertoneGuess:'warm'|'cool'|'neutral', confidence:0..1 } | null}
+ */
+export function analyzeSkin(imageData, { cx, cy, rx, ry, whitePoint } = {})
+/** Contrast guess from the oval: luminance spread between skin and the darkest large region (hair/brows). */
+export function guessContrast(imageData, ellipse, skinLab)   // -> 'low'|'medium'|'high'
+```
+
+### Engine complexion rules (`src/engine/rules.js`)
+Weighted by `NEAR_FACE`; magnitude modest (a great complexion match ≈ +6, a poor one ≈ −6; never more than ±10 total),
+only for colours near the face. Friendly reasons ("Rust warms up your complexion", "Pure black is a bit stark next to your
+face — charcoal is softer"). Heuristics: warm ↔ olive, rust, camel/beige, cream, mustard, warm brown, coral, forest;
+cool ↔ navy, burgundy, crisp white, grey, blue, pink, lavender, emerald/teal; neutral: mild bonus to both, no penalties.
+High contrast handles black/white and bold pairings (+); low contrast is flattered by tonal/muted (+) and overpowered by
+stark black-and-white (−). Very light depth: pale beige/cream/pastel yellow near the face can wash out (mild −) unless
+contrast is high. Deep depth: rich saturated colours and crisp white (+).
