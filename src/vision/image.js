@@ -1,4 +1,5 @@
 // Browser-only image helpers (canvas / createImageBitmap). Never import this from Node tests.
+import { refineMaskAlpha } from './segment.js';
 
 const hasOffscreen = typeof OffscreenCanvas !== 'undefined';
 
@@ -78,8 +79,9 @@ function toBlob(canvas, type, quality) {
 /**
  * Encode to a Blob, long edge <= maxDim. Tries WebP, falls back to JPEG when the browser
  * silently returns PNG (older Safari) or null.
+ * `alpha: true` (cutouts): the fallback is PNG instead of JPEG so transparency survives.
  */
-export async function canvasToBlob(canvas, { maxDim = 600, type = 'image/webp', quality = 0.8 } = {}) {
+export async function canvasToBlob(canvas, { maxDim = 600, type = 'image/webp', quality = 0.8, alpha = false } = {}) {
   let src = canvas;
   const k = Math.min(1, maxDim / Math.max(canvas.width, canvas.height));
   if (k < 1) {
@@ -89,7 +91,10 @@ export async function canvasToBlob(canvas, { maxDim = 600, type = 'image/webp', 
     ctx.drawImage(canvas, 0, 0, src.width, src.height);
   }
   let blob = await toBlob(src, type, quality);
-  if (!blob || (blob.type && blob.type !== type)) {
+  if (alpha && (!blob || (blob.type && blob.type !== type))) {
+    // keep transparency: PNG fallback (never JPEG)
+    blob = await toBlob(src, 'image/png');
+  } else if (!blob || (blob.type && blob.type !== type)) {
     // unsupported type -> browser falls back to PNG; use JPEG for size (flatten any transparency on white)
     const flat = makeCanvas(src.width, src.height);
     const ctx = flat.getContext('2d');
@@ -100,6 +105,38 @@ export async function canvasToBlob(canvas, { maxDim = 600, type = 'image/webp', 
   }
   if (!blob) throw new Error('encode-failed');
   return blob;
+}
+
+/**
+ * Transparent cutout of one segmented item: pixels outside `mask` become transparent, edge feathered ~`feather` px
+ * (mask smoothed by refineMaskAlpha), result trimmed to the item's opaque bounds. `box` is {x,y,w,h} in source px and
+ * `mask` is the box-sized w*h mask from segmentItems. Encode with canvasToBlob(c, { alpha: true }).
+ * @returns {HTMLCanvasElement|OffscreenCanvas}
+ */
+export function cutoutCanvas(sourceCanvas, box, mask, { feather = 2 } = {}) {
+  const x = Math.max(0, Math.round(box.x)), y = Math.max(0, Math.round(box.y));
+  const w = Math.max(1, Math.min(sourceCanvas.width - x, Math.round(box.w)));
+  const h = Math.max(1, Math.min(sourceCanvas.height - y, Math.round(box.h)));
+  const c = makeCanvas(w, h);
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(sourceCanvas, x, y, w, h, 0, 0, w, h);
+  const img = ctx.getImageData(0, 0, w, h);
+  let m = mask;
+  if (!m || m.length < w * h) m = new Uint8Array(w * h).fill(1);
+  const alpha = refineMaskAlpha(img, m, { feather });
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+    const a = alpha[j * w + i];
+    img.data[(j * w + i) * 4 + 3] = a;
+    if (a > 8) { if (i < x0) x0 = i; if (i > x1) x1 = i; if (j < y0) y0 = j; if (j > y1) y1 = j; }
+  }
+  ctx.putImageData(img, 0, 0);
+  if (x1 < 0) return c;
+  const tw = x1 - x0 + 1, th = y1 - y0 + 1;
+  if (tw === w && th === h) return c;
+  const t = makeCanvas(tw, th);
+  t.getContext('2d').drawImage(c, x0, y0, tw, th, 0, 0, tw, th);
+  return t;
 }
 
 /** Small RGBA ImageData for analysis (long edge <= maxDim). */

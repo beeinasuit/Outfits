@@ -142,3 +142,23 @@ test('segment: degenerate inputs never throw', () => {
   for (const im of imgs) assert.ok(Array.isArray(segmentItems(im)));
   assert.ok(Array.isArray(segmentItems(solid(100, 100, [1, 2, 3]), { minAreaFrac: NaN, maxItems: -3, padding: 'x' })));
 });
+
+import { refineMaskAlpha } from '../../src/vision/segment.js';
+test('refineMaskAlpha: opaque inside, transparent outside, smooth edge, no holes in a solid item', () => {
+  const w = 60, h = 50, mask = new Uint8Array(w * h), data = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const inside = x >= 12 && x < 48 && y >= 10 && y < 40;
+    mask[y * w + x] = inside ? 1 : 0;
+    const c = inside ? [31, 42, 68] : [230, 228, 220];
+    data.set([...c, 255], (y * w + x) * 4);
+  }
+  const a = refineMaskAlpha({ width: w, height: h, data }, mask, { feather: 2 });
+  assert.equal(a.length, w * h);
+  assert.equal(a[25 * w + 30], 255);
+  assert.equal(a[2 * w + 2], 0);
+  for (let y = 14; y < 36; y++) for (let x = 16; x < 44; x++) assert.equal(a[y * w + x], 255, `hole at ${x},${y}`);
+  let partial = 0; for (let x = 8; x < 20; x++) if (a[25 * w + x] > 0 && a[25 * w + x] < 255) partial++;
+  assert.ok(partial >= 1 && partial <= 6, `edge ramp ${partial}px`);
+  for (let x = 9; x < 30; x++) assert.ok(a[25 * w + x] >= a[25 * w + x - 1], 'monotonic edge');
+  assert.deepEqual(refineMaskAlpha(null, mask), new Uint8ClampedArray(0));
+});

@@ -38,6 +38,7 @@ const goSettings = async (page) => { await page.evaluate(() => { location.hash =
 /** Drive the real restore UI. Returns { phase, msg }. */
 async function uiRestore(page, name, buffer, mode = 'replace', mime = 'application/json') {
   await goSettings(page);
+  await page.evaluate(() => { document.querySelectorAll('dialog.sheet').forEach((d) => d.remove()); document.documentElement.classList.remove('lock-scroll'); document.getElementById('toasts').replaceChildren(); });
   await page.locator('input[type=file][accept*="json"]').setInputFiles({ name, mimeType: mime, buffer });
   const t0 = Date.now();
   const got = await page.waitForSelector('.toast.warn, dialog.sheet[open]', { timeout: 25000 }).catch(() => null);

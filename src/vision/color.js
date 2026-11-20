@@ -434,12 +434,14 @@ export function guessPattern(imageData, opts = {}) {
     let bigCols = 0;
     for (const c of cols.values()) if (c / nOk > 0.04) bigCols++;
     const edgeFrac = strong / valid;
+    let topColFrac = 0;
+    for (const c of cols.values()) topColFrac = Math.max(topColFrac, c / nOk);
     const pure = (hist[topBin] + hist[ortho]) / eTot;   // energy in exactly two orthogonal orientation bins
     if (share1 > 0.78 && coherence > 0.6 && edgeFrac > 0.05) return 'stripe';
     if (share1 + share2 > 0.7 && share2 > 0.22 && edgeFrac > 0.08 && pure > 0.6) return 'check';   // straight orthogonal lines
     if (bigCols >= 5 && edgeFrac > 0.2) return 'print';
     // isotropic blobs (edges in all directions) in <= 3 colours with strong contrast: polka dots
-    if (bigCols <= 3 && pure < 0.6 && std > 40 && edgeFrac > 0.12) return 'polka';
+    if (bigCols <= 3 && pure < 0.6 && std > 40 && edgeFrac > 0.12 && edgeFrac < 0.45 && topColFrac > 0.4) return 'polka';
     if (std > 22 && edgeFrac > 0.15) return 'textured';
     return 'solid';
   } catch (e) {

@@ -42,6 +42,7 @@ export function attach(page, runner, tag = '') {
   page.on('console', (m) => { if (m.type() === 'error') { const t = m.text(); if (!IGNORED.test(t)) runner.errors.push(`[${tag}console] ${t}`); } });
   page.on('pageerror', (e) => runner.errors.push(`[${tag}pageerror] ${e.message}`));
   page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+  page.addInitScript(() => { window.addEventListener('unhandledrejection', (e) => console.error('UNHANDLED REJECTION: ' + ((e.reason && (e.reason.message || e.reason.name)) || e.reason))); });
 }
 
 /** Open the app, skip onboarding. */

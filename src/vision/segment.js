@@ -364,3 +364,62 @@ function segment(im, opts) {
   rows.sort((a, b) => a.cy - b.cy);
   return rows.flatMap((r) => r.items.sort((a, b) => a.x - b.x));
 }
+
+/**
+ * Turn a blocky box-sized segmentation mask into a smooth alpha channel for a cutout.
+ * Pure (Node-testable). Interior stays 255, exterior 0, the edge is a ~`feather` px ramp. Pixels in the edge band whose
+ * colour is close to the background (median colour of the non-mask pixels in the crop) are made more transparent, which
+ * trims the halo that low-resolution masks leave around the item.
+ * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData  RGBA crop, same size as the mask
+ * @param {Uint8Array} mask  w*h 0/1
+ * @param {{feather?:number}} [opts]  feather radius in px (default 2, 0 = hard edge)
+ * @returns {Uint8ClampedArray} alpha, length w*h
+ */
+export function refineMaskAlpha(imageData, mask, opts = {}) {
+  const w = imageData && imageData.width | 0, h = imageData && imageData.height | 0;
+  const out = new Uint8ClampedArray(Math.max(0, w * h));
+  if (!(w > 0 && h > 0) || !mask || mask.length < w * h) return out;
+  const feather = Number.isFinite(opts.feather) ? Math.max(0, Math.min(12, Math.round(opts.feather))) : 2;
+  if (feather === 0) { for (let i = 0; i < w * h; i++) out[i] = mask[i] ? 255 : 0; return out; }
+  const N = w * h;
+  // mask -> float, box blur (separable, two passes ~ triangle kernel), edge handled by clamping
+  let a = new Float32Array(N);
+  for (let i = 0; i < N; i++) a[i] = mask[i] ? 1 : 0;
+  const tmp = new Float32Array(N);
+  const r = feather;
+  for (let pass = 0; pass < 2; pass++) {
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let s = 0;
+      for (let k = -r; k <= r; k++) s += a[y * w + Math.min(w - 1, Math.max(0, x + k))];
+      tmp[y * w + x] = s / (2 * r + 1);
+    }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let s = 0;
+      for (let k = -r; k <= r; k++) s += tmp[Math.min(h - 1, Math.max(0, y + k)) * w + x];
+      a[y * w + x] = s / (2 * r + 1);
+    }
+  }
+  // background colour from pixels clearly outside the mask
+  const d = imageData.data;
+  const R = [], G = [], B = [];
+  for (let i = 0; i < N; i += 1) {
+    if (a[i] < 0.01 && d[i * 4 + 3] > 127 && (i & 3) === 0) { R.push(d[i * 4]); G.push(d[i * 4 + 1]); B.push(d[i * 4 + 2]); }
+  }
+  let bg = null;
+  if (R.length >= 16) { const med = (v) => Float64Array.from(v).sort()[v.length >> 1]; bg = [med(R), med(G), med(B)]; }
+  const bgLab = bg ? rgbToLab(bg[0], bg[1], bg[2]) : null;
+  for (let i = 0; i < N; i++) {
+    const v = a[i];
+    if (v <= 0.02) { out[i] = 0; continue; }
+    // sharpen the ramp a little: 0.2 -> 0, 0.8 -> 1 (the blur straddles the true edge)
+    let t = Math.max(0, Math.min(1, (v - 0.2) / 0.6));
+    t = t * t * (3 - 2 * t);
+    if (bgLab && t < 0.98 && t > 0) {
+      const lab = rgbToLab(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]);
+      const dist = Math.hypot(lab[0] - bgLab[0], lab[1] - bgLab[1], lab[2] - bgLab[2]);
+      if (dist < 8) t *= 0.5 + 0.5 * (dist / 8);
+    }
+    out[i] = Math.round(t * 255);
+  }
+  return out;
+}

@@ -6,21 +6,21 @@ import { COLOR_FAMILIES, BUSY_PATTERNS, OCCASIONS, WEATHER, outfitKey } from '..
 export const WEIGHTS = {
   // Calibration: base is a "nothing earned, nothing wrong" outfit. Positives are EARNED (small, specific) and
   // their total is capped (posCap); mistakes are not capped here so a clash can really sink an outfit.
-  base: 64,
-  posCap: 30,          // total of all earned positives (feedback excluded) is scaled down to this
+  base: 63,
+  posCap: 26,          // total of all earned positives (feedback excluded) is scaled down to this
   squash: { lo: 20, hi: 90 }, // identity between lo and hi; soft edges outside
   color: {
-    neutralSafe: 4, onePop: 6, goodPair: 5, goodPairMax: 2,
+    neutralSafe: 4, onePop: 6, goodPair: 5, goodPairMax: 1,
     twoAccents: -5, manyAccents: -16,
     brownBlack: -10, navyBlack: -3, redGreen: -22, orangePurple: -20, redPink: -6, loudPair: -9,
     clashCap: -30,
   },
-  contrast: { muddy: -8, denimDenim: -2, tonal: 2, lightOverDark: 3, similarDL: 12, lightDL: 15 },
-  pattern: { twoBusy: -14, extraBusy: -6, busyPlusLines: -5, linesClash: -6, single: 2, graphicFormal: -8 },
+  contrast: { muddy: -8, denimDenim: -2, tonal: 2, lightOverDark: 3, darkOver: 25, darkOverLight: 1, similarDL: 12, lightDL: 15 },
+  pattern: { twoBusy: -14, extraBusy: -6, busyPlusLines: -5, linesClash: -6, single: 1, graphicFormal: -8 },
   statement: { each: -6 },
-  formality: { close: 4, spread2: -5, spread3: -18, shoes2: -5, shoes3: -10 },
+  formality: { close: 3, shoesAligned: 2, spread2: -8, spread3: -18, shoes2: -7, shoes3: -12 },
   occasion: { perLevel: -6, cap: -24, fits: 4 },
-  neckwear: { tieNoCollar: -30, tieTooCasual: -10, bowTieNotFormal: -10, bowTieCasual: -14, tieOk: 3 },
+  neckwear: { tieNoCollar: -30, tieTooCasual: -10, bowTieNotFormal: -10, bowTieCasual: -14, tieOk: 2 },
   headwear: { casualHatDressy: -6, casualHatFormal: -10, fedoraSneakers: -6 },
   shoes: { sportyWithDress: -14, sandalsFormal: -14, oxfordJeansTee: -6, oxfordJeansBlazer: 3, shortsDressy: -8, shortsBoots: -5,
     heavySandals: -14, heavyShorts: -10 },
@@ -29,6 +29,7 @@ export const WEIGHTS = {
   weather: { fits: 5, perLevel: -7, cap: -21, hotNoLayer: 3, hotShorts: 4, coldNoLayer: -10, coldLayer: 4,
     coldAccessory: 3, hotAccessory: -5, coldShorts: -10, rainLayer: 10, noRainLayer: -4, rainSuede: -8,
     coldSandals: -14, freezingSandals: -22, coldCanvas: -5, coldBoots: 5, coldLeatherShoes: 3 },
+  polish: 5,           // standout extra, outside posCap: dressy layer + collared top + leather shoes, all dressed alike
   feedback: { likedOutfit: 20, dislikedOutfit: -30, likedPair: 4, dislikedPair: -6, pairCap: 12 },
 };
 const W = WEIGHTS;
@@ -129,7 +130,8 @@ export function colorRules(P) {
   if (accents.length === 0) {
     out.push(R(`${cap(list(all.slice(0, 3).map(pretty)))}: easy neutral colours that always go together.`, W.color.neutralSafe, 'color-neutral'));
   } else if (accents.length === 1) {
-    out.push(R(`${cap(pretty(accents[0]))} is your one pop of colour, balanced by neutrals.`, W.color.onePop, 'color-accent'));
+    const partner = all.some((f) => f !== accents[0] && GOOD_PAIRS.has(pairKey(f, accents[0])));
+    out.push(R(`${cap(pretty(accents[0]))} is your one pop of colour, balanced by neutrals.`, partner ? W.color.onePop : W.color.onePop - 2, 'color-accent'));
   } else if (accents.length === 2) {
     if (!GOOD_PAIRS.has(pairKey(accents[0], accents[1]))) {
       out.push(R(`${cap(pretty(accents[0]))} and ${pretty(accents[1])} are two bold colours competing for attention.`, W.color.twoAccents, 'color-risky'));
@@ -191,7 +193,11 @@ export function contrastRules(P) {
     return [];
   }
   if (lt - lb >= W.contrast.lightDL) {
-    return [R(`A lighter top over darker ${kindOf(bottom)} is a safe classic.`, W.contrast.lightOverDark, 'contrast-good')];
+    const g = Math.min(1, (lt - lb - W.contrast.lightDL) / 30); // 0..1: the bolder the contrast, the bigger the reward
+    return [R(`A lighter top over darker ${kindOf(bottom)} is a safe classic.`, W.contrast.lightOverDark * (0.5 + g), 'contrast-good')];
+  }
+  if (lb - lt >= W.contrast.darkOver) {
+    return [R(`A darker top against lighter ${kindOf(bottom)} gives a clean contrast.`, W.contrast.darkOverLight, 'contrast-good')];
   }
   return [];
 }
@@ -238,7 +244,11 @@ export function formalityRules(P) {
     let hi = gs[0]; let lo = gs[0];
     for (const g of gs) { if (fm(g) > fm(hi)) hi = g; if (fm(g) < fm(lo)) lo = g; }
     const spread = fm(hi) - fm(lo);
-    if (spread <= 1) out.push(R('Everything sits at a similar dress level.', W.formality.close, 'formality-ok'));
+    if (spread <= 1) {
+      let d = spread === 0 ? W.formality.close : W.formality.close * 0.5;
+      if (P.shoes) { const mean = gs.reduce((s, i) => s + fm(i), 0) / gs.length; const dd = Math.abs(fm(P.shoes) - mean); d += dd <= 0.5 ? W.formality.shoesAligned : dd <= 1 ? W.formality.shoesAligned * 0.3 : 0; }
+      out.push(R('Everything sits at a similar dress level.', d, 'formality-ok'));
+    }
     else if (spread === 2) out.push(R(`${cap(nm(hi))} is a notch dressier than ${nm(lo)}.`, W.formality.spread2, 'formality-gap'));
     else out.push(R(`${cap(nm(hi))} with ${nm(lo)}: way too dressy meets way too casual.`, W.formality.spread3, 'formality-clash'));
   }
@@ -445,6 +455,16 @@ export function weatherRules(P) {
   return out;
 }
 
+// ---------- standout polish ----------
+export function polishRules(P) {
+  const { layer, top, shoes, bottom, neckwear } = P;
+  if (!layer || !top || !bottom || !shoes || !DRESSY_LAYERS.has(layer.kind)) return [];
+  const collared = top.collared === true || (neckwear && TIES.has(neckwear.kind));
+  const leather = shoes.material === 'leather' && fm(shoes) >= 3;
+  if (!collared || !leather || fm(top) < 3 || fm(bottom) < 3) return [];
+  return [R(`${cap(nm(layer))}, ${nm(top)} and ${nm(shoes)}: properly put together.`, W.polish, 'polish')];
+}
+
 // ---------- feedback ----------
 const hasKey = (set, k) => (set instanceof Set ? set.has(k) : Array.isArray(set) ? set.includes(k) : false);
 const sizeOf = (set) => (set instanceof Set ? set.size : Array.isArray(set) ? set.length : 0);
@@ -491,21 +511,22 @@ const CONFLICTS = {
   'belt-casual-ok': ['belt-casual', 'belt-formality'],
   'tie-ok': ['tie-no-collar', 'tie-too-casual'],
   'occasion-ok': ['occasion-off'],
+  polish: ['leather-clash', 'leather-near', 'formality-gap', 'formality-clash', 'formality-shoes', 'belt-formality', 'belt-casual', 'color-clash', 'pattern-busy', 'hat-casual', 'weather-footwear'],
 };
 
 /** Run every rule. Returns the Reasons: conflicts resolved, earned positives capped at WEIGHTS.posCap. */
 export function evaluateRules(P) {
   let rs = [].concat(
     colorRules(P), contrastRules(P), patternRules(P), formalityRules(P), occasionRules(P),
-    neckwearRules(P), headwearRules(P), shoeRules(P), beltRules(P), weatherRules(P), feedbackRules(P),
+    neckwearRules(P), headwearRules(P), shoeRules(P), beltRules(P), weatherRules(P), polishRules(P), feedbackRules(P),
   );
   const tags = new Set(rs.filter((r) => r.delta < 0).map((r) => r.tag));
   rs = rs.filter((r) => !(r.delta > 0 && CONFLICTS[r.tag] && CONFLICTS[r.tag].some((t) => tags.has(t))));
   let pos = 0;
-  for (const r of rs) if (r.delta > 0 && !r.tag.startsWith('feedback')) pos += r.delta;
+  for (const r of rs) if (r.delta > 0 && !r.tag.startsWith('feedback') && r.tag !== 'polish') pos += r.delta;
   if (pos > W.posCap) {
     const k = W.posCap / pos;
-    rs = rs.map((r) => (r.delta > 0 && !r.tag.startsWith('feedback') ? { ...r, delta: Math.max(0.1, Math.round(r.delta * k * 10) / 10) } : r));
+    rs = rs.map((r) => (r.delta > 0 && !r.tag.startsWith('feedback') && r.tag !== 'polish' ? { ...r, delta: Math.max(0.1, Math.round(r.delta * k * 10) / 10) } : r));
   }
   return rs;
 }

@@ -165,7 +165,7 @@ test('extractColors: degenerate inputs never throw and never return empty', () =
     assert.ok(c.length >= 1);
     assert.ok(COLOR_FAMILIES[c[0].family]);
     assert.ok(Math.abs(c.reduce((s, x) => s + x.weight, 0) - 1) < 1e-6);
-    assert.ok(['solid', 'stripe', 'check', 'textured', 'print'].includes(guessPattern(im)));
+    assert.ok(['solid', 'stripe', 'check', 'textured', 'print', 'polka'].includes(guessPattern(im)));
   }
   assert.equal(extractColors(blank(40, 40))[0].family, 'grey');
   // mask that selects nothing
