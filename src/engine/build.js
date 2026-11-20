@@ -264,16 +264,16 @@ const hexOf = (f) => COLOR_FAMILIES[f].hex;
 const cand = (slot, kind, family, extra = {}) => ({ slot, kind, family, ...extra });
 
 const CATALOGUE = [
-  cand('top', 'oxford', 'white'), cand('top', 'button-down', 'light-blue'), cand('top', 't-shirt', 'grey'),
+  cand('top', 'oxford', 'white'), cand('top', 'button-down', 'light-blue'), cand('top', 't-shirt', 'gray'),
   cand('top', 't-shirt', 'white'), cand('top', 'polo', 'navy'), cand('top', 'sweater', 'cream'),
   cand('bottom', 'chinos', 'navy'), cand('bottom', 'chinos', 'beige'), cand('bottom', 'jeans', 'denim'),
-  cand('bottom', 'jeans', 'black'), cand('bottom', 'chinos', 'olive'), cand('bottom', 'dress pants', 'grey'),
+  cand('bottom', 'jeans', 'black'), cand('bottom', 'chinos', 'olive'), cand('bottom', 'dress pants', 'gray'),
   cand('shoes', 'sneakers', 'white'), cand('shoes', 'boots', 'brown', { leather: 'brown' }),
   cand('shoes', 'loafers', 'brown', { leather: 'brown' }), cand('shoes', 'derbies', 'black', { leather: 'black' }),
   cand('belt', 'leather belt', 'brown', { leather: 'brown' }), cand('belt', 'leather belt', 'black', { leather: 'black' }),
   cand('belt', 'leather belt', 'tan', { leather: 'tan' }), cand('belt', 'leather belt', 'dark-brown', { leather: 'dark-brown' }),
   cand('layer', 'blazer', 'navy'), cand('layer', 'denim jacket', 'denim'), cand('layer', 'overshirt', 'olive'),
-  cand('layer', 'cardigan', 'grey'), cand('layer', 'rain jacket', 'navy'), cand('layer', 'peacoat', 'charcoal'),
+  cand('layer', 'cardigan', 'gray'), cand('layer', 'rain jacket', 'navy'), cand('layer', 'peacoat', 'charcoal'),
 ];
 
 const LEATHER_FAMILY = { black: 'black', 'dark-brown': 'brown', brown: 'brown', tan: 'beige', burgundy: 'burgundy', white: 'white', other: 'brown' };
@@ -321,7 +321,7 @@ export function gapAnalysis(items, opts = {}) {
     if (!catalogue.some((c) => c.slot === 'belt' && c.leather === t)) catalogue.push(cand('belt', 'leather belt', LEATHER_FAMILY[t] || 'brown', { leather: t }));
   }
 
-  // "owned" counts the laundry too (you still have it): same slot + kind and the same colour, or for belts/shoes the same leather
+  // "owned" counts the laundry too (you still have it): same slot + kind and the same color, or for belts/shoes the same leather
   const everything = (Array.isArray(items) ? items : []).filter((i) => i && i.id);
   const owned = (c) => (c.slot === 'belt' && c.leather && everything.some((i) => i.slot === 'belt' && leatherTone(i) === c.leather))
     || everything.some((i) => i.slot === c.slot && i.kind === c.kind

@@ -314,7 +314,7 @@ export function mount(root, { navigate }) {
       dock,
       h('div', { class: 't-actions' }, h('div', { class: 'feel-row t-feel' }, dislike, wear_, likeB), h('div', { class: 't-extra' }, improveBtn, battle)),
       h('div', { class: 't-links' },
-        !(data.settings.profile && data.settings.profile.cutoutId) ? h('a', { class: 'btn btn-ghost btn-small', href: '#/profile' }, '🎨 Find your colours') : null,
+        !(data.settings.profile && data.settings.profile.cutoutId) ? h('a', { class: 'btn btn-ghost btn-small', href: '#/profile' }, '🎨 Find your colors') : null,
         h('a', { class: 'btn btn-ghost btn-small', href: '#/plan' }, '🗓️ Plan the week')),
       lockHint, h('h2', { class: 't-why-title' }, 'Why it works'), stickers,
       shakeChip ? h('div', { class: 'center' }, shakeChip) : null);

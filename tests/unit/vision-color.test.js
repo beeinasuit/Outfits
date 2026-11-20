@@ -27,7 +27,7 @@ const TABLE = [
   ['#6b4a2f', 'brown', 'brown corduroys'], ['#5b4030', 'brown', 'coffee'], ['#7a5a3c', 'brown', 'tobacco'], ['#4a3426', 'brown', 'chocolate'],
   ['#f5f5f2', 'white', 'white tee'], ['#fbfbfb', 'white', 'bright white'], ['#ececec', 'white', 'off-white shirt'],
   ['#efe6d2', 'cream', 'cream sweater'], ['#f2ead8', 'cream', 'ivory'],
-  ['#8e9196', 'grey', 'heather grey'], ['#9b9b9b', 'grey', 'mid grey'], ['#a6a8ab', 'grey', 'light heather'], ['#c9cacc', 'grey', 'light grey'],
+  ['#8e9196', 'gray', 'heather gray'], ['#9b9b9b', 'gray', 'mid gray'], ['#a6a8ab', 'gray', 'light heather'], ['#c9cacc', 'gray', 'light gray'],
   ['#f2a7bb', 'pink', 'pink shirt'], ['#f4b8c8', 'pink', 'light pink'],
   ['#b9a7e0', 'lavender', 'lavender'], ['#c5b5e6', 'lavender', 'pale lavender'],
   ['#6c4ab6', 'purple', 'purple'], ['#5a3a8a', 'purple', 'deep purple'],
@@ -65,7 +65,7 @@ test('nameColor: jittered (held-out) variants of the table stay >= 88%', () => {
   assert.ok(ok / n >= 0.88);
 });
 
-test('nameColor: no neutral grey/black/white is ever named a loud colour', () => {
+test('nameColor: no neutral gray/black/white is ever named a loud color', () => {
   for (let v = 0; v <= 255; v += 5) {
     for (const tint of [[0, 0, 0], [3, 0, -3], [-3, 0, 3], [4, 2, -2], [2, 2, -4]]) {
       const rgb = [v + tint[0], v + tint[1], v + tint[2]].map((c) => Math.max(0, Math.min(255, c)));
@@ -73,14 +73,14 @@ test('nameColor: no neutral grey/black/white is ever named a loud colour', () =>
       assert.ok(COLOR_FAMILIES[fam].neutral, `rgb ${rgb} -> ${fam}`);
     }
   }
-  // greys must stay in the grey ladder
-  for (const [rgb, want] of [[[10, 10, 10], 'black'], [[60, 60, 60], 'charcoal'], [[130, 130, 130], 'grey'], [[250, 250, 250], 'white']]) {
+  // grays must stay in the gray ladder
+  for (const [rgb, want] of [[[10, 10, 10], 'black'], [[60, 60, 60], 'charcoal'], [[130, 130, 130], 'gray'], [[250, 250, 250], 'white']]) {
     assert.equal(nameColor(rgb), want);
   }
 });
 
 test('nameColor: shadowed variants keep their family', () => {
-  const base = TABLE.filter(([, fam]) => !['black', 'charcoal', 'white', 'cream', 'grey', 'yellow', 'light-blue', 'pink', 'lavender', 'orange'].includes(fam));
+  const base = TABLE.filter(([, fam]) => !['black', 'charcoal', 'white', 'cream', 'gray', 'yellow', 'light-blue', 'pink', 'lavender', 'orange'].includes(fam));
   const bad = [];
   let n = 0;
   for (const [hex, fam, label] of base) {
@@ -90,8 +90,8 @@ test('nameColor: shadowed variants keep their family', () => {
   }
   if (bad.length) console.log('shadow variants:\n  ' + bad.join('\n  '));
   assert.ok(1 - bad.length / n >= 0.85, `${bad.length}/${n} shadowed variants changed family`);
-  // light colours dimmed a bit
-  for (const [hex, fam] of [['#f5f5f2', 'white'], ['#efe6d2', 'cream'], ['#c3b091', 'beige'], ['#8e9196', 'grey'], ['#f2c94c', 'yellow'], ['#9cc3e6', 'light-blue']]) {
+  // light colors dimmed a bit
+  for (const [hex, fam] of [['#f5f5f2', 'white'], ['#efe6d2', 'cream'], ['#c3b091', 'beige'], ['#8e9196', 'gray'], ['#f2c94c', 'yellow'], ['#9cc3e6', 'light-blue']]) {
     assert.equal(nameColor(dim(hexRgb(hex), 0.92)), fam, `${hex} @0.92`);
   }
 });
@@ -104,7 +104,7 @@ test('nameColor: never throws on odd input', () => {
 
 const weightOf = (cols, fam) => cols.filter((c) => c.family === fam).reduce((s, c) => s + c.weight, 0);
 
-test('extractColors: two-colour image gives both with right weights', () => {
+test('extractColors: two-color image gives both with right weights', () => {
   const im = solid(100, 100, [31, 42, 68]);
   for (let y = 0; y < 100; y++) for (let x = 0; x < 30; x++) { const i = (y * 100 + x) * 4; im.data[i] = 196; im.data[i + 1] = 60; im.data[i + 2] = 50; }
   addNoise(im, 4);
@@ -167,9 +167,9 @@ test('extractColors: degenerate inputs never throw and never return empty', () =
     assert.ok(Math.abs(c.reduce((s, x) => s + x.weight, 0) - 1) < 1e-6);
     assert.ok(['solid', 'stripe', 'check', 'textured', 'print', 'polka'].includes(guessPattern(im)));
   }
-  assert.equal(extractColors(blank(40, 40))[0].family, 'grey');
+  assert.equal(extractColors(blank(40, 40))[0].family, 'gray');
   // mask that selects nothing
-  assert.equal(extractColors(solid(10, 10, [200, 0, 0]), { mask: new Uint8Array(100) })[0].family, 'grey');
+  assert.equal(extractColors(solid(10, 10, [200, 0, 0]), { mask: new Uint8Array(100) })[0].family, 'gray');
 });
 
 test('guessPattern', () => {
@@ -212,8 +212,8 @@ test('estimateWhitePoint: neutral sheet -> ~neutral, tinted sheet -> pulled towa
   const cs = extractColors(solid(40, 40, [247, 205, 160]), { autoWhiteBalance: true });
   assert.ok(cs.length >= 1);
 });
-test('robust input: nameColor(null/undefined/NaN) -> grey; maxColors NaN/0/negative never returns []', () => {
-  for (const v of [null, undefined, [NaN, NaN, NaN], 'x']) assert.equal(nameColor(v), 'grey');
+test('robust input: nameColor(null/undefined/NaN) -> gray; maxColors NaN/0/negative never returns []', () => {
+  for (const v of [null, undefined, [NaN, NaN, NaN], 'x']) assert.equal(nameColor(v), 'gray');
   for (const mc of [NaN, 0, -3, 50]) { const c = extractColors(print(60, 60), { maxColors: mc }); assert.ok(c.length >= 1 && c.length <= 4); }
 });
 test('guessPattern: regular polka dots -> polka, not check', () => {

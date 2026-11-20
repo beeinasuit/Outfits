@@ -190,7 +190,7 @@ try {
   await step('D5', 'only tops', async () => {
     const { ctx, page } = await newCtx(browser, R, { tag: 'd5 ' });
     await open(page);
-    await setItems(page, [1, 2, 3, 4].map((i) => ({ id: 't' + i, slot: 'top', kind: 't-shirt', name: `Tee ${i}`, colors: [col(['white', 'black', 'navy', 'grey'][i - 1])] })));
+    await setItems(page, [1, 2, 3, 4].map((i) => ({ id: 't' + i, slot: 'top', kind: 't-shirt', name: `Tee ${i}`, colors: [col(['white', 'black', 'navy', 'gray'][i - 1])] })));
     for (const r of SCREENS) {
       await hashTo(page, r, 700);
       const o = await overflowReport(page);
@@ -265,7 +265,7 @@ try {
     const parts = [
       { id: 'n1', slot: 'top', kind: 't-shirt', name: names.top, colors: [col('white')] }, { id: 'n2', slot: 'bottom', kind: 'jeans', name: names.bottom, colors: [col('denim')] },
       { id: 'n3', slot: 'shoes', kind: 'sneakers', name: names.shoes, colors: [col('white')] }, { id: 'n4', slot: 'belt', kind: 'leather belt', name: names.belt, colors: [col('brown')], leather: 'brown' },
-      { id: 'n5', slot: 'layer', kind: 'blazer', name: names.layer, colors: [col('navy')] }, { id: 'n6', slot: 'neckwear', kind: 'tie', name: names.neckwear, colors: [col('red')] }, { id: 'n7', slot: 'headwear', kind: 'beanie', name: names.headwear, colors: [col('grey')] },
+      { id: 'n5', slot: 'layer', kind: 'blazer', name: names.layer, colors: [col('navy')] }, { id: 'n6', slot: 'neckwear', kind: 'tie', name: names.neckwear, colors: [col('red')] }, { id: 'n7', slot: 'headwear', kind: 'beanie', name: names.headwear, colors: [col('gray')] },
       { id: 'n8', slot: 'top', kind: 'oxford', name: 'שלום עולם 👕 مرحبا', colors: [col('navy')] },
     ];
     await setItems(page, parts);
@@ -385,12 +385,12 @@ try {
     await input().setInputFiles({ name: 'IMG_0001.HEIC', mimeType: 'image/heic', buffer: Buffer.from('heic-ish bytes') });
     await page.waitForTimeout(2000);
     check('D9d', 'HEIC the browser cannot decode: friendly error, not stuck', (await page.locator('.busy').count()) === 0 && (await page.locator('.error-note').count()) === 1, '');
-    // cancelled picker (empty selection)
+    // canceled picker (empty selection)
     await page.evaluate(() => document.getElementById('toasts').replaceChildren());
     await input().setInputFiles([]);
     await page.waitForTimeout(500);
     t = await toasts();
-    check('D9e', 'cancelling the picker (empty selection) shows no scolding "That doesn’t look like a photo" toast', !t.some((x) => /doesn.t look like a photo/i.test(x)), JSON.stringify(t));
+    check('D9e', 'canceling the picker (empty selection) shows no scolding "That doesn’t look like a photo" toast', !t.some((x) => /doesn.t look like a photo/i.test(x)), JSON.stringify(t));
     // transparent PNG
     const tp = await makeCanvasFile(page, { w: 400, h: 300, kind: 'transparent' });
     await input().setInputFiles({ name: 'clear.png', mimeType: 'image/png', buffer: tp.buffer });
@@ -401,7 +401,7 @@ try {
     if (nb) {
       await page.getByRole('button', { name: /^Review/ }).click();
       await page.waitForSelector('.rcard, .snap-start', { timeout: 15000 });
-      check('D9f2', 'transparent PNG can be reviewed (colour extraction does not throw / produce NaN colours)', (await page.locator('.rcard').count()) === 1 || (await page.locator('.snap-start').count()) === 1);
+      check('D9f2', 'transparent PNG can be reviewed (color extraction does not throw / produce NaN colors)', (await page.locator('.rcard').count()) === 1 || (await page.locator('.snap-start').count()) === 1);
       await shot(page, 'd9-transparent-review');
     }
     await page.getByRole('button', { name: /Start over|Skip this one/ }).first().click().catch(() => {});
@@ -501,14 +501,14 @@ try {
     const rc = await page.waitForSelector('.rcard', { timeout: 20000 }).catch(() => null);
     check('D10g', 'review step opens for odd boxes', !!rc);
     await shot(page, 'd10-review');
-    // remove all colours and save in review
+    // remove all colors and save in review
     for (let i = 0; i < 4; i++) { const x = page.locator('.rcard .sel-x').first(); if (await x.count()) await x.click(); }
     const before = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items.length);
     await page.getByRole('button', { name: /^Save all/ }).click();
     await page.waitForSelector('.rail-sec', { timeout: 20000 }).catch(() => {});
     const after = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items);
-    const grey = after.slice(before).filter((i) => i.colors.length === 1 && i.colors[0].family === 'grey').length;
-    check('D10h', 'review: removing all colours then Save all should be blocked/prompted (not silently saved as grey)', after.length === before || grey === 0, `saved ${after.length - before}, silently grey=${grey}`);
+    const gray = after.slice(before).filter((i) => i.colors.length === 1 && i.colors[0].family === 'gray').length;
+    check('D10h', 'review: removing all colors then Save all should be blocked/prompted (not silently saved as gray)', after.length === before || gray === 0, `saved ${after.length - before}, silently gray=${gray}`);
     // review: Previous/Next + skip all
     await hashTo(page, 'snap', 400); await upload();
     await page.getByRole('button', { name: /^Review/ }).click(); await page.waitForSelector('.rcard');
@@ -931,7 +931,7 @@ try {
       await page.mouse.click(Math.max(2, 5), 2); await page.waitForTimeout(250);
       const closedByBackdrop = (await page.locator('dialog[open]').count()) === 0;
       if (!closedByBackdrop) await page.keyboard.press('Escape');
-      await hashTo(page, 'snap', 400); await page.getByRole('button', { name: /No photo/ }).click(); await page.waitForSelector('dialog[open] .itemform'); await page.waitForTimeout(300); await probe('add-by-colour');
+      await hashTo(page, 'snap', 400); await page.getByRole('button', { name: /No photo/ }).click(); await page.waitForSelector('dialog[open] .itemform'); await page.waitForTimeout(300); await probe('add-by-color');
       await page.keyboard.press('Escape');
       await hashTo(page, 'settings', 400); await page.getByRole('button', { name: 'Clear all data' }).click(); await page.waitForTimeout(300); await probe('wipe-confirm');
       await page.keyboard.press('Escape'); await page.waitForTimeout(200);
@@ -968,10 +968,10 @@ try {
     await hashTo(page, 'closet', 600);
     await page.locator('.hang-item', { hasText: 'White tee' }).click({ force: true });
     await page.waitForSelector('dialog.sheet[open]');
-    await page.locator('dialog.sheet input.text-input').fill('My favourite white tee');
+    await page.locator('dialog.sheet input.text-input').fill('My favorite white tee');
     await page.getByRole('button', { name: 'Save changes' }).click(); await page.waitForTimeout(400);
     await page.locator('.demo-banner .btn').click(); await page.waitForTimeout(500);
-    const kept = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items.some((i) => i.name === 'My favourite white tee'));
+    const kept = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items.some((i) => i.name === 'My favorite white tee'));
     check('E6c', 'a sample item the user renamed/edited is not silently deleted by "Remove sample items"', kept, `kept=${kept}`);
     // load sample twice overwrites edits?
     await page.evaluate(async () => { const d = await import('./src/ui/data.js'); await d.loadDemo(); });

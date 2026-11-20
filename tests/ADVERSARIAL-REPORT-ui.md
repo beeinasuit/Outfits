@@ -23,7 +23,7 @@ Monkey test: 60 s with a fixed seed (20241120), hundreds of random taps, keys, d
    - Observed: script executes. Expected: rendered as text.
    - Cause: `src/ui/illustrations.js:192` puts `title` unescaped into `aria-label="${title}"`, and `src/ui/itemart.js:8` passes it through `innerHTML`. `itemArt(it, {cls:'tile'})` with the default `title: true` is used in the pick sheet (`spin.js:223`). Any new screen that calls `itemArt` with a title will be vulnerable too.
    - Screenshot: `adv-screenshots/c3-form-closet.png`.
-2. **XSS via colour hex from an imported backup, major to blocker.** An import with `colors:[{family:'red',hex:'#fff"/><img src=x onerror=...>'}]` injects an element on every screen that draws the item (closet, reels, looks).
+2. **XSS via color hex from an imported backup, major to blocker.** An import with `colors:[{family:'red',hex:'#fff"/><img src=x onerror=...>'}]` injects an element on every screen that draws the item (closet, reels, looks).
    - Cause: `src/model.js:241` only checks `COLOR_FAMILIES[c.family]` and never validates `hex`. The value reaches SVG markup at `illustrations.js:~180-190` (`path(d, p, S)` and `fill="${p}"`).
    - Screenshot: `adv-screenshots/c3-import-closet.png`.
    - Names, reasons, stickers, toasts, edit sheet, review card and looks are safe: they render as text nodes (checks C3a2, C3a3, C3b2 pass).
@@ -38,8 +38,8 @@ Monkey test: 60 s with a fixed seed (20241120), hundreds of random taps, keys, d
 
 - **Back with a sheet open leaves the sheet floating** over the previous route (`overlay.js sheet()` is not tied to the hash; `app.js render()` doesn't close dialogs). Not a trap (Escape and ✕ work) but a visible glitch. Check D8d.
 - **Unknown/odd hashes:** `#/constructor` (and `__proto__`, `toString`) is looked up with `ROUTES[m[1]]` on a plain object (`app.js:23`); it resolved to inherited properties. In the run it rendered no highlighted tab. Use `Object.hasOwn`. Other odd hashes were fine.
-- **Cancelled photo picker** (empty selection) shows "That doesn’t look like a photo" (`snap.js:66`). Should be silent. D9e.
-- **Boxes editor:** after deleting every box the hint still says "Drag boxes to move…" instead of "add a box" (`snap.js:126`). Review screen lets you remove all colours and "Save all" silently saves a grey item (D10h).
+- **Canceled photo picker** (empty selection) shows "That doesn’t look like a photo" (`snap.js:66`). Should be silent. D9e.
+- **Boxes editor:** after deleting every box the hint still says "Drag boxes to move…" instead of "add a box" (`snap.js:126`). Review screen lets you remove all colors and "Save all" silently saves a gray item (D10h).
 - **Long names break layout at 320 px:** an unbroken 80-char name overflows `.cell-text b` (reel) and `.look-names` (clipped, sw 734 vs cw 272), and the look-detail head is pushed off-screen. Import also accepts a 2,000,000-char name (no length cap; the form caps at 40). Needs `overflow-wrap: anywhere` plus an import cap. Screenshots: `d7-spin-320.png`, `d7-looks-320.png`, `d7-look-detail-320.png`.
 - **Contrast (WCAG AA):** light mode: CERTIFIED FIT stamp 4.2 on card and 3.85 on paper (`--stamp-mint #078a5e`), Delete / Clear-all buttons 4.41 (`--stamp-tomato #d93a1c`). Dark mode: danger button "Delete it all" 2.29 (dark text `#17141f` on `#ff5a3c`... actually the confirm button sits on the tomato accent with the dark ink: 2.29 as measured; see `d13-dark-confirm-wipe.png`). Data in `adv-screenshots/contrast-*.json`. All other sampled text (about 229 samples per theme) passes.
 - **Sample closet:** renaming a demo item then "Remove sample items" deletes it (E6c); "Load sample closet" again overwrites edits and wear history of demo items (E6d). Own (non-demo) items are untouched (E6a, E6b pass).
@@ -82,9 +82,9 @@ Result of the last completed run of each check. "n/a (redesign)" means it was di
 | D7 long / emoji / RTL names at 320 px | **fail** (overflow, see above) |
 | D8 back / forward, cold deep links, odd hashes | pass except sheet-after-Back and `#/constructor` |
 | D9 non-image, corrupt jpg, 0-byte, HEIC, transparent PNG, 6000x4000 JPEG (0.26 MB file, boxes and saved photo downscaled), multi-select | pass |
-| D9 cancelled picker | **fail** (scolding toast) |
+| D9 canceled picker | **fail** (scolding toast) |
 | D10 delete all boxes, zero-size, off-screen drag, resize, skip all, leave mid-flow | pass |
-| D10 hint after deleting all boxes; save with zero colours | **fail** (minor) |
+| D10 hint after deleting all boxes; save with zero colors | **fail** (minor) |
 | D11 offline reload per route; lazy vision modules offline | **fail** while SHELL lacked new modules; recheck |
 | D11 SHELL completeness | **fail** then fixed by another agent (`taste.js`, `skin.js` now listed) |
 | D12 reduced motion: lands < 1 s, no long or infinite animations, no confetti | pass |

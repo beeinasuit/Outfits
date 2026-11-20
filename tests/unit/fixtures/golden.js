@@ -6,7 +6,7 @@
 import { makeItem } from '../../../src/model.js';
 
 const C = {
-  navy: '#1f2a44', white: '#f5f5f2', grey: '#8e9196', charcoal: '#3a3d42', black: '#1c1c1e',
+  navy: '#1f2a44', white: '#f5f5f2', gray: '#8e9196', charcoal: '#3a3d42', black: '#1c1c1e',
   beige: '#d8c3a0', brown: '#6b4a2f', olive: '#5d6136', denim: '#4a6286', 'light-blue': '#9cc3e6',
   burgundy: '#6d1f2f', red: '#d13b3b', green: '#2e8b4a', orange: '#e8742a', purple: '#6c4ab6',
   yellow: '#f2c94c', pink: '#f2a7bb', cream: '#efe6d2', rust: '#a4502a', mustard: '#c99a2e',
@@ -21,7 +21,7 @@ const whiteOxford = it('top', 'oxford', 'white');
 const lbOxford = it('top', 'oxford', 'light-blue');
 const navyTee = it('top', 't-shirt', 'navy');
 const whiteTee = it('top', 't-shirt', 'white');
-const greyTee = it('top', 't-shirt', 'grey');
+const grayTee = it('top', 't-shirt', 'gray');
 const blackTee = it('top', 't-shirt', 'black');
 const redTee = it('top', 't-shirt', 'red');
 const orangeTee = it('top', 't-shirt', 'orange');
@@ -38,7 +38,7 @@ const greenChinos = it('bottom', 'chinos', 'green');
 const purpleChinos = it('bottom', 'chinos', 'purple');
 const darkJeans = it('bottom', 'jeans', 'denim');
 const blackJeans = it('bottom', 'jeans', 'black');
-const greyTrousers = it('bottom', 'dress pants', 'grey');
+const grayTrousers = it('bottom', 'dress pants', 'gray');
 const charcoalTrousers = it('bottom', 'dress pants', 'charcoal');
 const camoCargo = it('bottom', 'cargo pants', 'olive', { pattern: 'camo' });
 const navyJoggers = it('bottom', 'joggers', 'navy');
@@ -54,7 +54,7 @@ const brownLoafers = it('shoes', 'loafers', 'brown', { leather: 'brown' });
 const blackDerbies = it('shoes', 'derbies', 'black', { leather: 'black' });
 const blackOxfords = it('shoes', 'oxfords', 'black', { leather: 'black' });
 const whiteSneakers = it('shoes', 'sneakers', 'white');
-const runners = it('shoes', 'running shoes', 'grey');
+const runners = it('shoes', 'running shoes', 'gray');
 const sandals = it('shoes', 'sandals', 'brown');
 const suedeBoots = it('shoes', 'chelsea boots', 'beige', { material: 'suede', leather: 'tan' });
 
@@ -68,14 +68,14 @@ const navyTie = it('neckwear', 'tie', 'navy');
 const burgundyTie = it('neckwear', 'tie', 'burgundy');
 const plaidTie = it('neckwear', 'tie', 'green', { pattern: 'plaid' });
 const cap = it('headwear', 'baseball cap', 'navy');
-const beanie = it('headwear', 'beanie', 'grey');
+const beanie = it('headwear', 'beanie', 'gray');
 
 export const GOLDEN = [
-  // ---- Colour
+  // ---- Color
   { why: 'navy + beige is a classic; navy + black reads as a mistake',
     better: { top: navyTee, bottom: beigeChinos, shoes: whiteSneakers },
     worse:  { top: navyTee, bottom: blackJeans, shoes: whiteSneakers } },
-  { why: 'one accent colour beats two loud brights',
+  { why: 'one accent color beats two loud brights',
     better: { top: redTee, bottom: darkJeans, shoes: whiteSneakers },
     worse:  { top: redTee, bottom: greenChinos, shoes: whiteSneakers } },
   { why: 'orange + purple clashes; orange + denim works',
@@ -84,9 +84,9 @@ export const GOLDEN = [
   { why: 'light top over dark bottom is the safe classic vs muddy same-tone',
     better: { top: whiteOxford, bottom: navyChinos, belt: brownBelt, shoes: brownLoafers },
     worse:  { top: it('top', 'oxford', 'navy'), bottom: navyChinos, belt: brownBelt, shoes: brownLoafers } },
-  { why: 'grey tee + jeans beats grey tee + grey chino-ish trousers of the same tone',
-    better: { top: greyTee, bottom: darkJeans, belt: brownBelt, shoes: whiteSneakers },
-    worse:  { top: greyTee, bottom: it('bottom', 'chinos', 'grey'), belt: brownBelt, shoes: whiteSneakers } },
+  { why: 'gray tee + jeans beats gray tee + gray chino-ish trousers of the same tone',
+    better: { top: grayTee, bottom: darkJeans, belt: brownBelt, shoes: whiteSneakers },
+    worse:  { top: grayTee, bottom: it('bottom', 'chinos', 'gray'), belt: brownBelt, shoes: whiteSneakers } },
   { why: 'all-black tonal outfit is a legit look, better than black + brown leathers',
     better: { top: blackTee, bottom: blackJeans, belt: blackBelt, shoes: blackDerbies },
     worse:  { top: blackTee, bottom: blackJeans, belt: brownBelt, shoes: blackDerbies } },
@@ -103,10 +103,10 @@ export const GOLDEN = [
     worse:  { top: navyTee, bottom: beigeShorts, belt: blackDressBelt, shoes: whiteSneakers } },
 
   // ---- Belt rules (user requirement): no loops => no belt, and no penalty for lacking one
-  { why: 'joggers without a belt must not be penalised vs jeans without a belt (same everything else)',
+  { why: 'joggers without a belt must not be penalized vs jeans without a belt (same everything else)',
     tie: true, // scores should be close: |diff| <= 12
-    better: { top: greyTee, bottom: navyJoggers, shoes: whiteSneakers },
-    worse:  { top: greyTee, bottom: darkJeans, shoes: whiteSneakers } },
+    better: { top: grayTee, bottom: navyJoggers, shoes: whiteSneakers },
+    worse:  { top: grayTee, bottom: darkJeans, shoes: whiteSneakers } },
 
   // ---- Pattern
   { why: 'one pattern + solids beats two busy patterns',
@@ -116,12 +116,12 @@ export const GOLDEN = [
     better: { top: floralShirt, bottom: beigeChinos, belt: brownBelt, shoes: brownLoafers },
     worse:  { top: floralShirt, bottom: beigeChinos, belt: brownBelt, shoes: brownLoafers, neckwear: plaidTie } },
   { why: 'striped shirt with a solid tie beats a striped shirt with a plaid tie',
-    better: { top: stripeShirt, bottom: greyTrousers, belt: blackBelt, shoes: blackDerbies, neckwear: navyTie },
-    worse:  { top: stripeShirt, bottom: greyTrousers, belt: blackBelt, shoes: blackDerbies, neckwear: plaidTie } },
+    better: { top: stripeShirt, bottom: grayTrousers, belt: blackBelt, shoes: blackDerbies, neckwear: navyTie },
+    worse:  { top: stripeShirt, bottom: grayTrousers, belt: blackBelt, shoes: blackDerbies, neckwear: plaidTie } },
 
   // ---- Formality
   { why: 'dress shirt + tie with trousers, not with joggers',
-    better: { top: dressShirt, neckwear: burgundyTie, bottom: greyTrousers, belt: blackBelt, shoes: blackDerbies },
+    better: { top: dressShirt, neckwear: burgundyTie, bottom: grayTrousers, belt: blackBelt, shoes: blackDerbies },
     worse:  { top: dressShirt, neckwear: burgundyTie, bottom: navyJoggers, shoes: blackDerbies } },
   { why: 'a tie with a t-shirt is wrong; skip the tie',
     better: { top: whiteTee, bottom: darkJeans, belt: brownBelt, shoes: whiteSneakers },
@@ -130,11 +130,11 @@ export const GOLDEN = [
     better: { layer: navyBlazer, top: whiteOxford, bottom: beigeChinos, belt: brownBelt, shoes: brownLoafers },
     worse:  { layer: navyBlazer, top: whiteOxford, bottom: navyJoggers, shoes: brownLoafers } },
   { why: 'running shoes ruin dress trousers; derbies fit',
-    better: { top: lbOxford, bottom: greyTrousers, belt: blackBelt, shoes: blackDerbies },
-    worse:  { top: lbOxford, bottom: greyTrousers, belt: blackBelt, shoes: runners } },
+    better: { top: lbOxford, bottom: grayTrousers, belt: blackBelt, shoes: blackDerbies },
+    worse:  { top: lbOxford, bottom: grayTrousers, belt: blackBelt, shoes: runners } },
   { why: 'baseball cap does not go with blazer + tie',
-    better: { layer: navyBlazer, top: dressShirt, neckwear: burgundyTie, bottom: greyTrousers, belt: blackBelt, shoes: blackDerbies },
-    worse:  { layer: navyBlazer, top: dressShirt, neckwear: burgundyTie, bottom: greyTrousers, belt: blackBelt, shoes: blackDerbies, headwear: cap } },
+    better: { layer: navyBlazer, top: dressShirt, neckwear: burgundyTie, bottom: grayTrousers, belt: blackBelt, shoes: blackDerbies },
+    worse:  { layer: navyBlazer, top: dressShirt, neckwear: burgundyTie, bottom: grayTrousers, belt: blackBelt, shoes: blackDerbies, headwear: cap } },
   { why: 'puffer over a suit-and-tie look is worse than an overcoat (cold)',
     ctx: { weather: 'cold' },
     better: { layer: overcoat, top: dressShirt, neckwear: navyTie, bottom: charcoalTrousers, belt: blackBelt, shoes: blackOxfords },
@@ -153,7 +153,7 @@ export const GOLDEN = [
     worse:  { top: graphicTee, bottom: darkJeans, belt: brownBelt, shoes: whiteSneakers } },
   { why: 'lounging: joggers + tee beats a suit',
     ctx: { occasion: 'lounge' },
-    better: { top: greyTee, bottom: navyJoggers, shoes: whiteSneakers },
+    better: { top: grayTee, bottom: navyJoggers, shoes: whiteSneakers },
     worse:  { layer: navyBlazer, top: dressShirt, neckwear: navyTie, bottom: charcoalTrousers, belt: blackDressBelt, shoes: blackOxfords } },
 
   // ---- Weather
@@ -167,10 +167,10 @@ export const GOLDEN = [
     worse:  { layer: puffer, top: navySweater, bottom: darkJeans, belt: brownBelt, shoes: brownBoots } },
   { why: 'rain: rain jacket + leather boots beats suede boots and no jacket',
     ctx: { weather: 'mild', rain: true },
-    better: { layer: rainJacket, top: greyTee, bottom: darkJeans, belt: brownBelt, shoes: brownBoots },
-    worse:  { top: greyTee, bottom: darkJeans, belt: brownBelt, shoes: suedeBoots } },
+    better: { layer: rainJacket, top: grayTee, bottom: darkJeans, belt: brownBelt, shoes: brownBoots },
+    worse:  { top: grayTee, bottom: darkJeans, belt: brownBelt, shoes: suedeBoots } },
   { why: 'sandals with dress trousers in the cold is wrong',
     ctx: { weather: 'cold' },
-    better: { layer: overcoat, top: navySweater, bottom: greyTrousers, belt: blackBelt, shoes: blackDerbies },
-    worse:  { layer: overcoat, top: navySweater, bottom: greyTrousers, belt: blackBelt, shoes: sandals } },
+    better: { layer: overcoat, top: navySweater, bottom: grayTrousers, belt: blackBelt, shoes: blackDerbies },
+    worse:  { layer: overcoat, top: navySweater, bottom: grayTrousers, belt: blackBelt, shoes: sandals } },
 ];

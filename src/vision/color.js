@@ -1,7 +1,7 @@
-// Colour naming, dominant-colour extraction and pattern guessing. Pure (no DOM): Node 22 + browsers.
+// Color naming, dominant-color extraction and pattern guessing. Pure (no DOM): Node 22 + browsers.
 import { COLOR_FAMILIES } from '../model.js';
 
-// ---------- colour science ----------
+// ---------- color science ----------
 const SRGB_LIN = new Float32Array(256);
 for (let i = 0; i < 256; i++) {
   const c = i / 255;
@@ -65,7 +65,7 @@ const hexToRgb = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16
 const SWATCH_HEX = {
   black: ['#1c1c1e', '#111111', '#232325', '#0b0b0d', '#1a1a1a', '#262626', '#16181c'],
   charcoal: ['#3a3d42', '#444444', '#4a4a4a', '#36454f', '#3d3d3d', '#2f3236', '#50525a'],
-  grey: ['#8e9196', '#9a9a9a', '#808080', '#b0b0b0', '#a8aaad', '#6f7378', '#c4c5c7', '#74777c'],
+  gray: ['#8e9196', '#9a9a9a', '#808080', '#b0b0b0', '#a8aaad', '#6f7378', '#c4c5c7', '#74777c'],
   white: ['#f5f5f2', '#ffffff', '#fafafa', '#ececec', '#f0efe9', '#e6e6e6'],
   cream: ['#efe6d2', '#f3ecd8', '#f5efe0', '#ebe0c8', '#f0e9d6', '#fffff0', '#e9dfc7'],
   beige: ['#d8c3a0', '#c3b091', '#c9b99a', '#b8a88a', '#e0cfae', '#c8a97e', '#a89878', '#d2b48c', '#c19a6b', '#bcae92'],
@@ -93,31 +93,31 @@ for (const fam of Object.keys(COLOR_FAMILIES)) {
   const list = new Set([COLOR_FAMILIES[fam].hex, ...(SWATCH_HEX[fam] || [])]);
   for (const h of list) { const [r, g, b] = hexToRgb(h); SWATCHES.push({ fam, lab: rgbToLab(r, g, b) }); }
 }
-const NEUTRAL_LADDER = ['black', 'charcoal', 'grey', 'white'];
+const NEUTRAL_LADDER = ['black', 'charcoal', 'gray', 'white'];
 const LOUD = new Set(Object.keys(COLOR_FAMILIES).filter((k) => !COLOR_FAMILIES[k].neutral));
 
 function familyOfLab(lab) {
   const [L, a, b] = lab;
   const C = Math.hypot(a, b);
-  if (C < 5.5) {                       // essentially achromatic: grey ladder by lightness
-    return L < 19 ? 'black' : L < 43 ? 'charcoal' : L < 88 ? 'grey' : 'white';
+  if (C < 5.5) {                       // essentially achromatic: gray ladder by lightness
+    return L < 19 ? 'black' : L < 43 ? 'charcoal' : L < 88 ? 'gray' : 'white';
   }
   // shadow tolerance: a dimmer cloth keeps its hue, so also test a lightened version of dark inputs
   let best = null, bestD = Infinity;
-  const loudOk = C >= 11;              // pale/desaturated colours never become "loud" families
+  const loudOk = C >= 11;              // pale/desaturated colors never become "loud" families
   for (const s of SWATCHES) {
     if (!loudOk && LOUD.has(s.fam)) continue;
     const d = deltaE2000(lab, s.lab);
     if (d < bestD) { bestD = d; best = s.fam; }
   }
-  return best || 'grey';
+  return best || 'gray';
 }
 
-/** Map one sRGB colour to the closest COLOR_FAMILIES key. */
+/** Map one sRGB color to the closest COLOR_FAMILIES key. */
 export function nameColor(rgb) {
-  if (!Array.isArray(rgb) && !ArrayBuffer.isView(rgb)) return 'grey';
+  if (!Array.isArray(rgb) && !ArrayBuffer.isView(rgb)) return 'gray';
   const [r, g, b] = rgb;
-  if (!Number.isFinite(+r) && !Number.isFinite(+g) && !Number.isFinite(+b)) return 'grey';
+  if (!Number.isFinite(+r) && !Number.isFinite(+g) && !Number.isFinite(+b)) return 'gray';
   return familyOfLab(rgbToLab(+r || 0, +g || 0, +b || 0));
 }
 
@@ -133,7 +133,7 @@ function mulberry32(seed) {
   };
 }
 
-const GREY = () => [{ hex: COLOR_FAMILIES.grey.hex, family: 'grey', weight: 1 }];
+const GRAY = () => [{ hex: COLOR_FAMILIES.gray.hex, family: 'gray', weight: 1 }];
 const validImage = (im) => im && im.width > 0 && im.height > 0 && im.data && im.data.length >= im.width * im.height * 4;
 
 /** Collect sample pixels (downsampled), optionally filtered by mask. Returns arrays of rgb + coords. */
@@ -199,10 +199,10 @@ function borderUniformity(im, bg) {
 }
 
 /**
- * Estimate the colour cast of a photo from its border ring (the sheet/floor the clothes lie on) and return an RGB
+ * Estimate the color cast of a photo from its border ring (the sheet/floor the clothes lie on) and return an RGB
  * the caller can pass as `opts.whitePoint` to extractColors. Call once per PHOTO (full frame), not per crop.
- * Grey-world on the border, deliberately gentle: the per-channel cast is clamped to +-25% and a +-4% dead band is
- * ignored so a legitimately cream/coloured sheet is not "corrected" away. Returns null when there is no usable border.
+ * Gray-world on the border, deliberately gentle: the per-channel cast is clamped to +-25% and a +-4% dead band is
+ * ignored so a legitimately cream/colored sheet is not "corrected" away. Returns null when there is no usable border.
  * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData
  * @returns {[number,number,number]|null}
  */
@@ -220,7 +220,7 @@ export function estimateWhitePoint(imageData) {
   }
 }
 
-/** Per-channel gains that map `wp` to neutral grey of the same mean level; clamped to [0.6, 1.7]; null = no correction. */
+/** Per-channel gains that map `wp` to neutral gray of the same mean level; clamped to [0.6, 1.7]; null = no correction. */
 export function whiteGains(wp) {
   if (!Array.isArray(wp) && !ArrayBuffer.isView(wp)) return null;
   const v = [+wp[0], +wp[1], +wp[2]];
@@ -236,9 +236,9 @@ export function whiteGains(wp) {
  * @param {object} [opts]
  * @param {Uint8Array} [opts.mask]  per-pixel 0/1 mask of the item (preferred)
  * @param {number} [opts.maxColors=3]  1..4; NaN/0/negative fall back to 3, larger values are capped at 4
- * @param {boolean} [opts.ignoreBackground=true]  without a mask: drop pixels close to a UNIFORM border colour
+ * @param {boolean} [opts.ignoreBackground=true]  without a mask: drop pixels close to a UNIFORM border color
  * @param {number[]} [opts.whitePoint]  RGB the caller believes is neutral (e.g. estimateWhitePoint(fullPhoto) or the
- *   sheet median); channels are rescaled so it becomes grey (gains clamped to 0.6..1.7). Output hex values are corrected.
+ *   sheet median); channels are rescaled so it becomes gray (gains clamped to 0.6..1.7). Output hex values are corrected.
  * @param {boolean} [opts.autoWhiteBalance=false]  shorthand for whitePoint = estimateWhitePoint(imageData); only
  *   meaningful when imageData is a full photo with a visible background, not a tight crop.
  * @returns {{hex:string,family:string,weight:number}[]}
@@ -248,10 +248,10 @@ export function extractColors(imageData, opts = {}) {
   const mcRaw = opts && Number.isFinite(opts.maxColors) && opts.maxColors >= 1 ? Math.floor(opts.maxColors) : 3;
   const maxColors = Math.min(4, mcRaw);
   try {
-    if (!validImage(imageData)) return GREY();
+    if (!validImage(imageData)) return GRAY();
     const useMask = mask && mask.length >= imageData.width * imageData.height ? mask : null;
     const smp = samplePixels(imageData, useMask);
-    if (smp.n === 0) return GREY();
+    if (smp.n === 0) return GRAY();
     let wp = opts && opts.whitePoint ? opts.whitePoint : (opts && opts.autoWhiteBalance ? estimateWhitePoint(imageData) : null);
     const gains = wp ? whiteGains(wp) : null;
     if (gains) for (let i = 0; i < smp.rgb.length; i += 3) {
@@ -357,7 +357,7 @@ export function extractColors(imageData, opts = {}) {
       weight: c.n / sumN,
     }));
   } catch (e) {
-    return GREY();
+    return GRAY();
   }
 }
 
@@ -421,7 +421,7 @@ export function guessPattern(imageData, opts = {}) {
       }
     }
     if (!valid || std < 14 || strong / valid < 0.03) return 'solid';
-    // orientation concentration: energy in best bin (+/- neighbour)
+    // orientation concentration: energy in best bin (+/- neighbor)
     let top = 0, topBin = 0;
     for (let b = 0; b < BINS; b++) {
       const e = hist[b] + 0.5 * (hist[(b + 1) % BINS] + hist[(b + BINS - 1) % BINS]);
@@ -440,7 +440,7 @@ export function guessPattern(imageData, opts = {}) {
     if (share1 > 0.78 && coherence > 0.6 && edgeFrac > 0.05) return 'stripe';
     if (share1 + share2 > 0.7 && share2 > 0.22 && edgeFrac > 0.08 && pure > 0.6) return 'check';   // straight orthogonal lines
     if (bigCols >= 5 && edgeFrac > 0.2) return 'print';
-    // isotropic blobs (edges in all directions) in <= 3 colours with strong contrast: polka dots
+    // isotropic blobs (edges in all directions) in <= 3 colors with strong contrast: polka dots
     if (bigCols <= 3 && pure < 0.6 && std > 40 && edgeFrac > 0.12 && edgeFrac < 0.45 && topColFrac > 0.4) return 'polka';
     if (std > 22 && edgeFrac > 0.15) return 'textured';
     return 'solid';

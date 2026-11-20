@@ -34,7 +34,7 @@ export const WEIGHTS = {
     coldAccessory: 3, hotAccessory: -5, coldShorts: -10, rainLayer: 9, noRainLayer: -6, rainSuede: -8,
     coldSandals: -14, freezingSandals: -22, coldCanvas: -5, coldBoots: 5, coldLeatherShoes: 3 },
   polish: 3,           // standout extra, outside posCap: dressy layer + collared top + leather shoes, all dressed alike
-  // Personal colouring: a nudge for near-face colours only (x NEAR_FACE weight); total is clamped to +-cap.
+  // Personal coloring: a nudge for near-face colors only (x NEAR_FACE weight); total is clamped to +-cap.
   complexion: { cap: 10, undertoneGood: 6, undertoneBad: -4, neutralGood: 2, starkBlack: -4, starkWhite: -2, starkPair: -3,
     highContrastBW: 2, lowContrastSoft: 2, paleWash: -3, deepRich: 3, deepWhite: 2 },
   feedback: { likedOutfit: 20, dislikedOutfit: -30, likedPair: 4, dislikedPair: -6, pairCap: 12 },
@@ -54,7 +54,7 @@ const list = (a) => (a.length <= 1 ? a.join('') : `${a.slice(0, -1).join(', ')} 
 const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
 
 const LOUD = new Set(['yellow', 'orange', 'red', 'pink', 'purple', 'green', 'blue']);
-const TONAL_OK = new Set(['black', 'white', 'cream', 'charcoal']); // grey / beige tone-on-tone just blurs together
+const TONAL_OK = new Set(['black', 'white', 'cream', 'charcoal']); // gray / beige tone-on-tone just blurs together
 const MID_PATTERNS = new Set(['stripe', 'check', 'polka']);
 const BUSY = new Set(BUSY_PATTERNS);
 const BROWNS = new Set(['brown', 'dark-brown', 'tan']);
@@ -87,12 +87,12 @@ export function resolveOccasion(ctx) {
 function OC_PH(key, occ) { return OCC_PHRASE[key] || String(occ.label || key).toLowerCase(); }
 
 const GOOD_PAIRS = new Set([
-  'navy|beige', 'navy|white', 'navy|grey', 'white|denim', 'olive|white', 'olive|beige', 'olive|navy',
-  'grey|black', 'light-blue|navy', 'light-blue|beige', 'burgundy|grey', 'burgundy|navy', 'rust|denim',
-  'white|beige', 'white|charcoal', 'white|black', 'beige|brown', 'mustard|navy', 'pink|navy', 'pink|grey', 'cream|brown', 'forest|beige', 'lavender|grey', 'teal|beige',
+  'navy|beige', 'navy|white', 'navy|gray', 'white|denim', 'olive|white', 'olive|beige', 'olive|navy',
+  'gray|black', 'light-blue|navy', 'light-blue|beige', 'burgundy|gray', 'burgundy|navy', 'rust|denim',
+  'white|beige', 'white|charcoal', 'white|black', 'beige|brown', 'mustard|navy', 'pink|navy', 'pink|gray', 'cream|brown', 'forest|beige', 'lavender|gray', 'teal|beige',
 ].map((k) => { const [a, b] = k.split('|'); return pairKey(a, b); }));
 
-/** Colour families that matter on one item: the primary plus any colour with >= 25% weight. */
+/** Color families that matter on one item: the primary plus any color with >= 25% weight. */
 export function significantFamilies(item) {
   const out = [];
   const cs = Array.isArray(item?.colors) ? item.colors : [];
@@ -101,12 +101,12 @@ export function significantFamilies(item) {
     if (!c || !COLOR_FAMILIES[c.family]) continue;
     if (out.length === 0 || num(c.weight, 0) >= 0.25) if (!out.includes(c.family)) out.push(c.family);
   }
-  if (!out.length) out.push('grey');
+  if (!out.length) out.push('gray');
   return out;
 }
 export const familyOf = (item) => significantFamilies(item)[0];
 
-// CIELAB lightness of a hex colour (cached).
+// CIELAB lightness of a hex color (cached).
 const lCache = new Map();
 function hexL(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
@@ -145,7 +145,7 @@ export function prepare(items, ctx) {
   return P;
 }
 
-// ---------- colour ----------
+// ---------- color ----------
 export function colorRules(P) {
   const out = [];
   const pieces = P.pieces;
@@ -159,16 +159,16 @@ export function colorRules(P) {
     }
   }
   if (accents.length === 0) {
-    out.push(R(`${cap(list(all.slice(0, 3).map(pretty)))}: easy neutral colours that always go together.`, W.color.neutralSafe, 'color-neutral'));
+    out.push(R(`${cap(list(all.slice(0, 3).map(pretty)))}: easy neutral colors that always go together.`, W.color.neutralSafe, 'color-neutral'));
   } else if (accents.length === 1) {
     const partner = all.some((f) => f !== accents[0] && GOOD_PAIRS.has(pairKey(f, accents[0])));
-    out.push(R(`${cap(pretty(accents[0]))} is your one pop of colour, balanced by neutrals.`, partner ? W.color.onePop : W.color.onePop - 2, 'color-accent'));
+    out.push(R(`${cap(pretty(accents[0]))} is your one pop of color, balanced by neutrals.`, partner ? W.color.onePop : W.color.onePop - 2, 'color-accent'));
   } else if (accents.length === 2) {
     if (!GOOD_PAIRS.has(pairKey(accents[0], accents[1]))) {
-      out.push(R(`${cap(pretty(accents[0]))} and ${pretty(accents[1])} are two bold colours competing for attention.`, W.color.twoAccents, 'color-risky'));
+      out.push(R(`${cap(pretty(accents[0]))} and ${pretty(accents[1])} are two bold colors competing for attention.`, W.color.twoAccents, 'color-risky'));
     }
   } else {
-    out.push(R(`${accents.length} different bright colours (${list(accents.map(pretty))}) fight each other.`, W.color.manyAccents, 'color-clash'));
+    out.push(R(`${accents.length} different bright colors (${list(accents.map(pretty))}) fight each other.`, W.color.manyAccents, 'color-clash'));
   }
 
   let good = 0;
@@ -252,7 +252,7 @@ export function patternRules(P) {
   if (patterned.length === 1) {
     out.push(R(`Just one pattern (${nm(patterned[0])}), so the outfit stays easy on the eye.`, W.pattern.single, 'pattern-ok'));
   }
-  // statement pieces: busy pattern or loud primary colour
+  // statement pieces: busy pattern or loud primary color
   const statements = pieces.filter((p) => BUSY.has(patternOf(p)) || LOUD.has(familyOf(p)));
   if (statements.length >= 2) {
     out.push(R(`${statements.length} eye-catching pieces (${list(statements.map(nm))}): let just one be the star.`,
@@ -325,7 +325,7 @@ export function occasionRules(P) {
   }
   if (allIn && checked.length) out.push(R(`Dress level fits ${phrase} well.`, Wo.fits, 'occasion-ok'));
 
-  // colour and kind preferences (primary colour of every piece; near-face pieces count most when avoided)
+  // color and kind preferences (primary color of every piece; near-face pieces count most when avoided)
   const pieces = [P.top, P.layer, P.neckwear, P.headwear, P.bottom, P.shoes].filter(Boolean);
   let pref = 0; let wantK = 0; let avoidC = 0; let muted = 0;
   const seenPref = new Set();
@@ -346,7 +346,7 @@ export function occasionRules(P) {
       out.push(R(`${cap(nm(i))} is a good call for ${phrase}.`, Wo.wantKind, 'occasion-kind-ok'));
     }
     if (occ.muted && muted > Wo.mutedCap && i.slot !== 'shoes') {
-      if (LOUD_FAMS.has(fam) && !avoid.has(fam)) { muted += Wo.mutedLoud; out.push(R(`${cap(pretty(fam))} is too loud for ${phrase}; quieter colours are more respectful.`, Wo.mutedLoud, 'occasion-muted')); }
+      if (LOUD_FAMS.has(fam) && !avoid.has(fam)) { muted += Wo.mutedLoud; out.push(R(`${cap(pretty(fam))} is too loud for ${phrase}; quieter colors are more respectful.`, Wo.mutedLoud, 'occasion-muted')); }
       else if (BUSY.has(patternOf(i))) { muted += Wo.mutedBusy; out.push(R(`${cap(nm(i))} is too busy a pattern for ${phrase}.`, Wo.mutedBusy, 'occasion-muted')); }
     }
   }
@@ -536,10 +536,10 @@ export function polishRules(P) {
   return [R(`${cap(nm(layer))}, ${nm(top)} and ${nm(shoes)}: properly put together.`, W.polish, 'polish')];
 }
 
-// ---------- personal colouring ----------
+// ---------- personal coloring ----------
 const WARM_FAMS = new Set(['olive', 'rust', 'beige', 'cream', 'mustard', 'brown', 'orange', 'forest', 'yellow']);
-const COOL_FAMS = new Set(['navy', 'burgundy', 'white', 'grey', 'blue', 'light-blue', 'pink', 'lavender', 'purple', 'teal']);
-const SOFT_FAMS = new Set(['charcoal', 'grey', 'cream', 'beige', 'navy', 'denim', 'olive', 'light-blue']);
+const COOL_FAMS = new Set(['navy', 'burgundy', 'white', 'gray', 'blue', 'light-blue', 'pink', 'lavender', 'purple', 'teal']);
+const SOFT_FAMS = new Set(['charcoal', 'gray', 'cream', 'beige', 'navy', 'denim', 'olive', 'light-blue']);
 const PALE_FAMS = new Set(['beige', 'cream', 'yellow']);
 const RICH_FAMS = new Set(['burgundy', 'forest', 'rust', 'red', 'purple', 'teal', 'mustard', 'blue', 'green', 'orange']);
 
@@ -563,7 +563,7 @@ export function complexionRules(P) {
       if (cool) add(`${name} suits your cool undertone.`, Wc.undertoneGood * w, 'complexion-good');
       else if (warm) add(`${name} can look a little flat against your cool undertone.`, Wc.undertoneBad * w, 'complexion-off');
     } else if (pr.undertone === 'neutral' && (warm || cool)) {
-      add(`${name} works well with your colouring.`, Wc.neutralGood * w, 'complexion-good');
+      add(`${name} works well with your coloring.`, Wc.neutralGood * w, 'complexion-good');
     }
     if (pr.contrast === 'low') {
       if (fam === 'black') add('Pure black is a bit stark next to your face; charcoal is softer.', Wc.starkBlack * w, 'complexion-off');
@@ -573,9 +573,9 @@ export function complexionRules(P) {
       add(`${name} makes a bold frame for your strong contrast.`, Wc.highContrastBW * w, 'complexion-good');
     }
     if (pr.depth === 'light' && PALE_FAMS.has(fam) && pr.contrast !== 'high') {
-      add(`Pale ${pretty(fam)} can wash out fair colouring; a bit more colour lifts it.`, Wc.paleWash * w, 'complexion-off');
+      add(`Pale ${pretty(fam)} can wash out fair coloring; a bit more color lifts it.`, Wc.paleWash * w, 'complexion-off');
     } else if (pr.depth === 'deep') {
-      if (RICH_FAMS.has(fam)) add(`Rich ${pretty(fam)} looks great with your deep colouring.`, Wc.deepRich * w, 'complexion-good');
+      if (RICH_FAMS.has(fam)) add(`Rich ${pretty(fam)} looks great with your deep coloring.`, Wc.deepRich * w, 'complexion-good');
       else if (fam === 'white') add('Crisp white stands out beautifully against your skin.', Wc.deepWhite * w, 'complexion-good');
     }
   }

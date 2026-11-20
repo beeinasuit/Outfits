@@ -14,7 +14,7 @@ export function verdict(score) {
   if (score >= 75) return { label: 'LOOKING SHARP', short: 'Looking sharp', tone: 'cobalt' };
   if (score >= 60) return { label: 'SOLID', short: 'Solid', tone: 'sun' };
   if (score >= 45) return { label: 'BOLD MOVE', short: 'Bold move', tone: 'tomato' };
-  return { label: 'HMM…', short: 'Hmm', tone: 'grey' };
+  return { label: 'HMM…', short: 'Hmm', tone: 'gray' };
 }
 
 const CONFETTI_COLORS = ['#ff5a3c', '#2f4bff', '#ffc933', '#3fd6a0', '#ff8fb1', '#fffaf0'];

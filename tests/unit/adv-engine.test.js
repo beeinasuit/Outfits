@@ -1,5 +1,5 @@
 // Adversarial engine tests (sections A1-A4 of tests/ADVERSARIAL.md + extra skeptical-stylist checks "X*").
-// Tests encode EXPECTED behaviour. Failures are findings. Every random test prints its seed.
+// Tests encode EXPECTED behavior. Failures are findings. Every random test prints its seed.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { performance } from 'node:perf_hooks';
@@ -175,7 +175,7 @@ test('A2.6c with diversity:false results are strictly sorted', () => {
   }
   none(c, 'unsorted without diversity');
 });
-test('A2.7a valid locks honoured in every result', () => {
+test('A2.7a valid locks honored in every result', () => {
   const c = collector();
   let withLocks = 0;
   for (const t of trials()) {
@@ -432,7 +432,7 @@ test('A3.7 an outfit worn yesterday ranks lower than the same outfit unworn', ()
       }
     }
   }
-  none(c, 'recent wear not penalised');
+  none(c, 'recent wear not penalized');
 });
 test('A3.7b outfit worn yesterday is explained in reasons ("You wore ... yesterday")', () => {
   const w = realisticWardrobes().standard;
@@ -456,7 +456,7 @@ function sane(out, label) {
 }
 const good = () => [mk('t1', 'top', 't-shirt', 'white'), mk('b1', 'bottom', 'jeans', 'denim'), mk('s1', 'shoes', 'sneakers', 'white')];
 const HOSTILE = {
-  'missing colours': [{ id: 'x1', slot: 'top', kind: 't-shirt' }, { id: 'x2', slot: 'bottom', kind: 'jeans', beltLoops: true }],
+  'missing colors': [{ id: 'x1', slot: 'top', kind: 't-shirt' }, { id: 'x2', slot: 'bottom', kind: 'jeans', beltLoops: true }],
   'colors:[null]': [{ id: 'x1', slot: 'top', colors: [null] }, { id: 'x2', slot: 'bottom', colors: [null], beltLoops: true }, { id: 'x3', slot: 'shoes', colors: [null] }],
   'unknown family ultraviolet': [{ id: 'x1', slot: 'top', colors: [{ hex: '#f0f', family: 'ultraviolet', weight: 1 }] }, { id: 'x2', slot: 'bottom', colors: [{ hex: '#000', family: 'ultraviolet', weight: 1 }] }],
   'formality NaN/99/-3': [{ ...mk('x1', 'top', 't-shirt', 'white'), formality: NaN }, { ...mk('x2', 'bottom', 'jeans', 'denim'), formality: 99 }, { ...mk('x3', 'shoes', 'sneakers', 'white'), formality: -3 }, { ...mk('x4', 'layer', 'blazer', 'navy'), formality: Infinity }],
@@ -589,7 +589,7 @@ test('X1b distinct score values per top-20 >= 6 (meter resolution)', () => {
   none(c, 'score granularity');
 });
 test('X1c the most basic outfit (tee + jeans + sneakers) is not a CERTIFIED FIT, and a random pairing is usually < 75', () => {
-  const basic = scoreOutfit({ top: mk('a', 'top', 't-shirt', 'grey'), bottom: mk('b', 'bottom', 'jeans', 'denim'), shoes: mk('c', 'shoes', 'sneakers', 'white') });
+  const basic = scoreOutfit({ top: mk('a', 'top', 't-shirt', 'gray'), bottom: mk('b', 'bottom', 'jeans', 'denim'), shoes: mk('c', 'shoes', 'sneakers', 'white') });
   assert.ok(basic.score < 90, `tee+jeans+sneakers = ${basic.score}`);
   // random (non-curated) outfits from realistic wardrobes
   let hi = 0, n = 0; const r = mulberry32(777);
@@ -608,10 +608,10 @@ test('X1c the most basic outfit (tee + jeans + sneakers) is not a CERTIFIED FIT,
 test('X1d hard-clash outfits land in HMM (<45); stacked mistakes never look good', () => {
   const tie = mk('tie', 'neckwear', 'tie', 'yellow'); const cap = mk('cap', 'headwear', 'baseball cap', 'orange');
   const cases = {
-    'tie+graphic tee+joggers+running shoes+cap': { top: mk('t', 'top', 'graphic tee', 'black', { pattern: 'graphic' }), neckwear: tie, bottom: mk('b', 'bottom', 'joggers', 'grey'), shoes: mk('s', 'shoes', 'running shoes', 'grey'), headwear: cap },
+    'tie+graphic tee+joggers+running shoes+cap': { top: mk('t', 'top', 'graphic tee', 'black', { pattern: 'graphic' }), neckwear: tie, bottom: mk('b', 'bottom', 'joggers', 'gray'), shoes: mk('s', 'shoes', 'running shoes', 'gray'), headwear: cap },
     'red top, green pants, orange hat, pink tie': { top: mk('t', 'top', 't-shirt', 'red'), bottom: mk('b', 'bottom', 'chinos', 'green'), headwear: cap, neckwear: mk('n', 'neckwear', 'tie', 'pink'), shoes: mk('s', 'shoes', 'sneakers', 'white') },
     'plaid + camo + floral blazer-less mess': { top: mk('t', 'top', 'flannel', 'red', { pattern: 'plaid' }), bottom: mk('b', 'bottom', 'cargo pants', 'olive', { pattern: 'camo' }), layer: mk('l', 'layer', 'overshirt', 'pink', { pattern: 'floral' }), shoes: mk('s', 'shoes', 'sandals', 'brown', { leather: 'brown' }) },
-    'suit + sandals + beanie + shorts': { layer: mk('l', 'layer', 'suit jacket', 'charcoal'), top: mk('t', 'top', 'dress shirt', 'white'), bottom: mk('b', 'bottom', 'shorts', 'beige'), shoes: mk('s', 'shoes', 'sandals', 'brown', { leather: 'brown' }), headwear: mk('h', 'headwear', 'beanie', 'grey'), neckwear: mk('n', 'neckwear', 'bow tie', 'red') },
+    'suit + sandals + beanie + shorts': { layer: mk('l', 'layer', 'suit jacket', 'charcoal'), top: mk('t', 'top', 'dress shirt', 'white'), bottom: mk('b', 'bottom', 'shorts', 'beige'), shoes: mk('s', 'shoes', 'sandals', 'brown', { leather: 'brown' }), headwear: mk('h', 'headwear', 'beanie', 'gray'), neckwear: mk('n', 'neckwear', 'bow tie', 'red') },
   };
   const c = collector();
   for (const [k, o] of Object.entries(cases)) { const s = scoreOutfit(o, {}); log(`CLASH "${k}" = ${s.score}`); if (s.score >= 45) c.add(`"${k}" scored ${s.score}: ${s.reasons.map((r) => `${r.text}(${r.delta})`).join(' | ')}`); }
@@ -639,7 +639,7 @@ function stylistViolations(o, ctx, occRules = true) {
   if (bl && sl && ((bl === 'black') !== (sl === 'black')) && ['black', 'brown', 'dark-brown', 'tan'].includes(bl) && ['black', 'brown', 'dark-brown', 'tan'].includes(sl)) v.push(`belt ${bl} vs shoes ${sl}`);
   const busy = [top, bottom, layer].filter((i) => i && BUSY_PATTERNS.includes(i.pattern));
   if (busy.length >= 2) v.push('two busy patterns');
-  if (loud.size >= 3) v.push(`3+ loud colours (${[...loud]})`);
+  if (loud.size >= 3) v.push(`3+ loud colors (${[...loud]})`);
   if (Math.abs(top.formality - bottom.formality) >= 3) v.push(`top/bottom formality gap ${top.formality}/${bottom.formality}`);
   if (headwear && ['baseball cap', 'beanie', 'bucket hat'].includes(headwear.kind) && (['blazer', 'suit jacket'].includes(layer?.kind) || neckwear)) v.push('casual hat with blazer/tie');
   if (top.kind === 'graphic tee' && (bottom.formality >= 4 || shoes?.formality >= 4)) v.push('graphic tee with formal bottom/shoes');
@@ -734,7 +734,7 @@ test('X4b duplicate twins: wardrobe with 3 identical white tees does not fill th
   const sig = (o) => Object.entries(o.items).map(([s, i]) => `${s}:${i.kind}:${famOf(i)}:${i.pattern}`).sort().join('|');
   const seen = new Map(); let dup = 0;
   for (const o of out) { const k = sig(o); if (seen.has(k)) dup++; seen.set(k, 1); }
-  assert.equal(dup, 0, `${dup} of the top 10 outfits are visual duplicates (same kinds/colours, different ids)`);
+  assert.equal(dup, 0, `${dup} of the top 10 outfits are visual duplicates (same kinds/colors, different ids)`);
 });
 const TAG_NEEDS = {
   'belt-': (o) => !!o.items.belt, 'leather-': (o) => !!o.items.belt, 'tie-': (o) => !!o.items.neckwear, 'bowtie-': (o) => o.items.neckwear?.kind === 'bow tie',
@@ -790,7 +790,7 @@ test('X6 reason text hygiene: no undefined/NaN/null/raw tags/double spaces; sent
       if (/undefined|NaN|\bnull\b|\[object|Infinity/.test(r.text)) c.add(`${name} garbage in "${r.text}"`);
       if (r.text.includes(r.tag) || TAGS.test(r.text)) c.add(`${name} raw tag in "${r.text}"`);
       if (/ {2,}| ,|\.\./.test(r.text)) c.add(`${name} spacing/punct in "${r.text}"`);
-      if (!/^[A-Z0-9]/.test(r.text)) c.add(`${name} not capitalised "${r.text}"`);
+      if (!/^[A-Z0-9]/.test(r.text)) c.add(`${name} not capitalized "${r.text}"`);
       if (!/[.!?]$/.test(r.text)) c.add(`${name} no end punctuation "${r.text}"`);
       if (r.text.length > 110) c.add(`${name} ${r.text.length} chars: "${r.text}"`);
       if (/\bA [aeiou]/.test(r.text) || /\bAn [^aeiou\s]/.test(r.text)) c.add(`${name} a/an: "${r.text}"`);
@@ -822,7 +822,7 @@ test('X5c reasons add up: squash(70 + sum(deltas)) matches the score when nothin
   }
   none(c, 'reasons do not explain score');
 });
-test('X7 gapAnalysis never recommends something the user already owns (same slot+kind+colour family)', () => {
+test('X7 gapAnalysis never recommends something the user already owns (same slot+kind+color family)', () => {
   const c = collector(); const unavail = collector();
   const check = (label, items) => {
     const gaps = gapAnalysis(items, { today: TODAY });
@@ -872,7 +872,7 @@ test('X7d gapAnalysis for a wardrobe with no bottoms suggests bottoms', () => {
   assert.ok(noBottoms.some((g) => g.slot === 'bottom'), `no bottoms owned but suggestions are: ${noBottoms.map((g) => g.text).join(' | ')}`);
 });
 test('X8 belt: loopless-only wardrobe gets no belts, no belt penalty and equal score with/without belts owned', () => {
-  const base = [mk('t', 'top', 't-shirt', 'grey'), mk('j', 'bottom', 'joggers', 'navy'), mk('s', 'shoes', 'sneakers', 'white')];
+  const base = [mk('t', 'top', 't-shirt', 'gray'), mk('j', 'bottom', 'joggers', 'navy'), mk('s', 'shoes', 'sneakers', 'white')];
   const withBelt = [...base, mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown' })];
   const a = buildOutfits(base, { today: TODAY }); const b = buildOutfits(withBelt, { today: TODAY });
   assert.equal(b[0].items.belt, undefined);
@@ -880,10 +880,10 @@ test('X8 belt: loopless-only wardrobe gets no belts, no belt penalty and equal s
   assert.ok(!b[0].reasons.some((r) => /belt/i.test(r.text)), b[0].reasons.map((r) => r.text).join('|'));
   const s1 = scoreOutfit({ top: base[0], bottom: base[1], shoes: base[2] }, { beltAvailable: true }).score;
   const s2 = scoreOutfit({ top: base[0], bottom: base[1], shoes: base[2] }, { beltAvailable: false }).score;
-  assert.equal(s1, s2, 'beltAvailable context penalises loopless bottoms');
+  assert.equal(s1, s2, 'beltAvailable context penalizes loopless bottoms');
 });
 test('X8b belt in laundry: loops + only belt unavailable => no belt, and no "add a belt" penalty/reason', () => {
-  const w = [mk('t', 'top', 't-shirt', 'grey'), mk('j', 'bottom', 'jeans', 'denim'), mk('s', 'shoes', 'sneakers', 'white'), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown', available: false })];
+  const w = [mk('t', 'top', 't-shirt', 'gray'), mk('j', 'bottom', 'jeans', 'denim'), mk('s', 'shoes', 'sneakers', 'white'), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown', available: false })];
   const noBelt = buildOutfits(w.slice(0, 3), { today: TODAY })[0];
   const laundry = buildOutfits(w, { today: TODAY })[0];
   assert.equal(laundry.items.belt, undefined);
@@ -897,24 +897,24 @@ test('X8c belt is always included for loop bottoms even when it is the "wrong" o
   assert.ok(out[0].reasons.some((r) => r.tag === 'leather-clash'), 'mismatch should be called out');
 });
 test('X8d locked belt with a loopless-only wardrobe returns []; locked belt prefers loop bottoms', () => {
-  const w = [mk('t', 'top', 't-shirt', 'grey'), mk('j', 'bottom', 'joggers', 'navy'), mk('s', 'shoes', 'sneakers', 'white'), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown' })];
+  const w = [mk('t', 'top', 't-shirt', 'gray'), mk('j', 'bottom', 'joggers', 'navy'), mk('s', 'shoes', 'sneakers', 'white'), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown' })];
   assert.deepEqual(buildOutfits(w, { locks: { belt: 'bt' }, today: TODAY }), []);
   const w2 = [...w, mk('c', 'bottom', 'chinos', 'beige')];
   const out = buildOutfits(w2, { locks: { belt: 'bt' }, today: TODAY });
   assert.ok(out.length > 0 && out.every((o) => o.items.bottom.id === 'c' && o.items.belt.id === 'bt'));
 });
 test('X8e locked loopless bottom never gets a belt even if a belt is locked/owned', () => {
-  const w = [mk('t', 'top', 't-shirt', 'grey'), mk('j', 'bottom', 'joggers', 'navy'), mk('c', 'bottom', 'chinos', 'beige'), mk('s', 'shoes', 'sneakers', 'white'), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown' })];
+  const w = [mk('t', 'top', 't-shirt', 'gray'), mk('j', 'bottom', 'joggers', 'navy'), mk('c', 'bottom', 'chinos', 'beige'), mk('s', 'shoes', 'sneakers', 'white'), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown' })];
   const out = buildOutfits(w, { locks: { bottom: 'j' }, today: TODAY });
   assert.ok(out.length > 0 && out.every((o) => !o.items.belt && o.items.bottom.id === 'j'));
 });
-test('X9 locks honoured even when "wrong" (sandals + suit), and the result is graded honestly', () => {
+test('X9 locks honored even when "wrong" (sandals + suit), and the result is graded honestly', () => {
   const w = realisticWardrobes().work.concat([mk('sand', 'shoes', 'sandals', 'brown', { leather: 'brown' })]);
   const out = buildOutfits(w, { locks: { shoes: 'sand' }, today: TODAY, occasion: 'formal' });
   assert.ok(out.length && out.every((o) => o.items.shoes.id === 'sand'));
   assert.ok(out[0].score < 75, `formal outfit with locked sandals scored ${out[0].score}`);
 });
-test('X10 exclude is honoured and reshuffle-style exclusion of the previous #1 gives a different outfit', () => {
+test('X10 exclude is honored and reshuffle-style exclusion of the previous #1 gives a different outfit', () => {
   const w = realisticWardrobes().standard;
   const first = buildOutfits(w, { today: TODAY })[0];
   const ex = { top: [first.items.top.id], shoes: [first.items.shoes.id] };
@@ -922,7 +922,7 @@ test('X10 exclude is honoured and reshuffle-style exclusion of the previous #1 g
   assert.ok(out.length > 0);
   for (const o of out) { assert.notEqual(o.items.top.id, first.items.top.id); assert.notEqual(o.items.shoes?.id, first.items.shoes.id); }
 });
-test('X10b exclude vs lock on the same id: lock wins and is honoured (or both ignored) without crashing', () => {
+test('X10b exclude vs lock on the same id: lock wins and is honored (or both ignored) without crashing', () => {
   const w = realisticWardrobes().standard;
   const id = w.find((i) => i.slot === 'top').id;
   const out = buildOutfits(w, { today: TODAY, locks: { top: id }, exclude: { top: [id] } });
@@ -946,7 +946,7 @@ test('X11b rain: with rain and an owned rain jacket, every top-5 outfit wears it
     for (const o of buildOutfits(w, { today: TODAY, weather: 'mild', rain: true }).slice(0, 5)) if (!o.items.layer?.rain) c.add(`${name}: no rain jacket in ${names(o)}`);
   }
   none(c, 'rain');
-  const w = [mk('t', 'top', 't-shirt', 'grey'), mk('b', 'bottom', 'jeans', 'denim'), mk('suede', 'shoes', 'chelsea boots', 'beige', { material: 'suede', leather: 'tan' }), mk('lea', 'shoes', 'boots', 'brown', { leather: 'brown' }), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown' })];
+  const w = [mk('t', 'top', 't-shirt', 'gray'), mk('b', 'bottom', 'jeans', 'denim'), mk('suede', 'shoes', 'chelsea boots', 'beige', { material: 'suede', leather: 'tan' }), mk('lea', 'shoes', 'boots', 'brown', { leather: 'brown' }), mk('bt', 'belt', 'leather belt', 'brown', { leather: 'brown' })];
   assert.equal(buildOutfits(w, { today: TODAY, rain: true })[0].items.shoes.id, 'lea', 'suede boots chosen in the rain');
 });
 test('X12 hot weather: top-5 are short-sleeve-ish (no sweater/hoodie/turtleneck top); cold: no tank/graphic-only look', () => {
@@ -968,7 +968,7 @@ test('X13b future-dated and malformed worn dates are ignored (no penalty)', () =
   const dirty = clean.map((i) => ({ ...i, worn: ['2027-01-01', 'garbage', '', '2026-11-21'] }));
   assert.equal(buildOutfits(dirty, { today: TODAY })[0].score, buildOutfits(clean, { today: TODAY })[0].score);
 });
-test('X13c recentDays:0 disables penalty; recent wear 2 days ago penalised less than yesterday', () => {
+test('X13c recentDays:0 disables penalty; recent wear 2 days ago penalized less than yesterday', () => {
   const clean = good();
   const y = clean.map((i) => (i.slot === 'top' ? { ...i, worn: ['2026-11-19'] } : i));
   const d2 = clean.map((i) => (i.slot === 'top' ? { ...i, worn: ['2026-11-18'] } : i));
@@ -984,14 +984,14 @@ test('X14 empty / singleton edge wardrobes give [] and the sentinel shapes the U
   assert.ok(!o[0].items.shoes && !o[0].items.belt);
   assert.ok(o[0].score >= 0);
 });
-test('X15 colour-blind-safe sanity: all-neutral wardrobe never produces a colour-clash reason', () => {
+test('X15 color-blind-safe sanity: all-neutral wardrobe never produces a color-clash reason', () => {
   const c = collector();
   const r = mulberry32(8080);
-  const neutrals = ['black', 'charcoal', 'grey', 'white', 'cream', 'beige', 'navy', 'denim', 'olive'];
+  const neutrals = ['black', 'charcoal', 'gray', 'white', 'cream', 'beige', 'navy', 'denim', 'olive'];
   const items = [];
   for (let i = 0; i < 60; i++) items.push(randomItem(r, `n${i}`, { slot: pick(r, ['top', 'bottom', 'shoes', 'layer', 'belt']), availableP: 1 }));
-  const neutralised = items.map((i) => { const f = pick(r, neutrals); return { ...i, pattern: 'solid', colors: [{ hex: COLOR_FAMILIES[f].hex, family: f, weight: 1 }] }; });
-  for (const o of buildOutfits(neutralised, { today: TODAY })) for (const rr of o.reasons) if (/clash|loud|competing|fight/.test(rr.tag + rr.text) && !/Brown and black|Navy and black/.test(rr.text)) c.add(`${names(o)}: ${rr.text}`);
+  const neutralized = items.map((i) => { const f = pick(r, neutrals); return { ...i, pattern: 'solid', colors: [{ hex: COLOR_FAMILIES[f].hex, family: f, weight: 1 }] }; });
+  for (const o of buildOutfits(neutralized, { today: TODAY })) for (const rr of o.reasons) if (/clash|loud|competing|fight/.test(rr.tag + rr.text) && !/Brown and black|Navy and black/.test(rr.text)) c.add(`${names(o)}: ${rr.text}`);
   none(c, 'neutral clash');
 });
 test('X16 score monotonic in obviously-worse swaps within the same wardrobe (random): replacing shoes by running shoes under dress pants never raises the score', () => {
@@ -1016,7 +1016,7 @@ test('X17 a wardrobe full of gym/lounge clothes cannot score as SHARP/CERTIFIED 
   }
   none(c, 'casual outfits graded SHARP for a dressy occasion');
 });
-test('X18 weather rule coverage: sandals in cold/freezing and shorts in freezing are penalised', () => {
+test('X18 weather rule coverage: sandals in cold/freezing and shorts in freezing are penalized', () => {
   const base = { top: mk('t', 'top', 'sweater', 'navy'), bottom: mk('b', 'bottom', 'jeans', 'denim'), layer: mk('l', 'layer', 'puffer', 'black') };
   for (const weather of ['cold', 'freezing']) {
     const boots = scoreOutfit({ ...base, shoes: mk('s1', 'shoes', 'boots', 'brown', { leather: 'brown' }) }, { weather }).score;
@@ -1024,8 +1024,8 @@ test('X18 weather rule coverage: sandals in cold/freezing and shorts in freezing
     assert.ok(sandals < boots - 5, `${weather}: sandals ${sandals} vs boots ${boots}`);
   }
 });
-test('X19 a heavy coat (puffer/overcoat) with sandals or shorts is penalised even with no weather context', () => {
-  const base = { top: mk('t', 'top', 't-shirt', 'grey'), bottom: mk('b', 'bottom', 'cargo pants', 'olive'), layer: mk('l', 'layer', 'puffer', 'black') };
+test('X19 a heavy coat (puffer/overcoat) with sandals or shorts is penalized even with no weather context', () => {
+  const base = { top: mk('t', 'top', 't-shirt', 'gray'), bottom: mk('b', 'bottom', 'cargo pants', 'olive'), layer: mk('l', 'layer', 'puffer', 'black') };
   const sneakers = scoreOutfit({ ...base, shoes: mk('s1', 'shoes', 'sneakers', 'white') }).score;
   const sandals = scoreOutfit({ ...base, shoes: mk('s2', 'shoes', 'sandals', 'brown', { leather: 'brown' }) }).score;
   assert.ok(sandals < sneakers - 5, `puffer+sandals ${sandals} vs puffer+sneakers ${sneakers}`);

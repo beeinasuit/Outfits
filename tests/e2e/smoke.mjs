@@ -119,7 +119,7 @@ try {
   await page.locator('dialog.sheet .slot-btn', { hasText: 'Belt' }).click();
   await page.locator('dialog.sheet .swatch[aria-label="Tan"], dialog.sheet .swatch[aria-label="Brown"]').first().click();
   await page.waitForTimeout(400);
-  await page.screenshot({ path: `${shots}/09-add-by-colour.png` });
+  await page.screenshot({ path: `${shots}/09-add-by-color.png` });
   await page.getByRole('button', { name: 'Add to closet' }).click();
   await page.waitForSelector('.rail-sec');
   const countAfter = await page.evaluate(async () => (await import('./src/ui/data.js')).data.items.length);

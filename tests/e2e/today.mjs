@@ -114,12 +114,12 @@ try {
   let o = await overflow(page);
   check('no horizontal overflow @390', o.sw <= o.cw && o.bw <= o.cw, JSON.stringify(o));
   check('default state is clean: no per-piece swap/lock/remove buttons', (await page.locator('.fm-swap, .fm-lock, .fm-x').count()) === 0 && (await page.locator('.t-bar:not([hidden])').count()) === 0);
-  check('pieces are labelled buttons', await page.evaluate(() => [...document.querySelectorAll('.fm-board .fm-piece[data-item]')].every((b) => b.tagName === 'BUTTON' && /tap to change/.test(b.getAttribute('aria-label')))));
+  check('pieces are labeled buttons', await page.evaluate(() => [...document.querySelectorAll('.fm-board .fm-piece[data-item]')].every((b) => b.tagName === 'BUTTON' && /tap to change/.test(b.getAttribute('aria-label')))));
   check('first-time hint is shown', /Tap any piece/.test(await page.locator('.t-hint').textContent()) && await page.locator('.t-hint').isVisible());
   const beltBox = await page.locator('.fm-piece[data-slot="belt"]').boundingBox();
   check('belt is drawn wide and visible across the waist', !beltBox || (beltBox.width > 120 && beltBox.height >= 20), JSON.stringify(beltBox));
   await selectPiece(page, 'shoes');
-  check('selecting a piece lifts it and shows a labelled toolbar (Change, Lock; no Remove for required slots)', (await page.locator('.fm-piece.is-selected[data-slot="shoes"]').count()) === 1 && (await page.locator('.t-bar [data-act="change"]').innerText()) === 'Change' && (await page.locator('.t-bar [data-act="remove"]').count()) === 0 && /Shoes/.test(await page.locator('.t-bar-name').textContent()));
+  check('selecting a piece lifts it and shows a labeled toolbar (Change, Lock; no Remove for required slots)', (await page.locator('.fm-piece.is-selected[data-slot="shoes"]').count()) === 1 && (await page.locator('.t-bar [data-act="change"]').innerText()) === 'Change' && (await page.locator('.t-bar [data-act="remove"]').count()) === 0 && /Shoes/.test(await page.locator('.t-bar-name').textContent()));
   await page.waitForTimeout(350);
   check('toolbar buttons are >= 44px and inside the viewport', await page.evaluate(() => [...document.querySelectorAll('.t-bar button')].every((b) => { const r = b.getBoundingClientRect(); return r.height >= 43.5 && r.width >= 44 && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight; })));
   await page.screenshot({ path: `${shots}/01b-selected.png` });
@@ -166,7 +166,7 @@ try {
   await page.waitForSelector('dialog.sheet .sw-row');
   await page.waitForTimeout(700);
   await page.screenshot({ path: `${shots}/04-swap-suggest.png` });
-  check('swap sheet is the topmost thing at its centre and cards are laid out', await page.evaluate(() => { const d = document.querySelector('dialog.sheet'); const r = d.getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); const row = document.querySelector('.sw-row'); const rr = row.getBoundingClientRect(); const nm = row.querySelector('b').getBoundingClientRect(); return d.contains(el) && rr.width > 250 && nm.width > 80; }));
+  check('swap sheet is the topmost thing at its center and cards are laid out', await page.evaluate(() => { const d = document.querySelector('dialog.sheet'); const r = d.getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); const row = document.querySelector('.sw-row'); const rr = row.getBoundingClientRect(); const nm = row.querySelector('b').getBoundingClientRect(); return d.contains(el) && rr.width > 250 && nm.width > 80; }));
   const hasDeltaBadges = await page.locator('.sw-delta').count();
   check('Suggest lists candidates with delta badges and a current marker', (await page.locator('.sw-row').count()) >= 2 && hasDeltaBadges >= 1 && (await page.locator('.sw-row.is-current .sw-tag').count()) === 1);
   const pickIdx = await page.evaluate(() => { const rows = [...document.querySelectorAll('.sw-row')]; return rows.findIndex((r) => !r.classList.contains('is-current') && !r.querySelector('.sw-delta.flat')); });

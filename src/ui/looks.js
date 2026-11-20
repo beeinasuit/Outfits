@@ -130,7 +130,7 @@ export function mount(root, { navigate }) {
   function hexFor(g) {
     const LEATH = { black: '#1c1c1e', 'dark-brown': '#4a3322', brown: '#6b4a2f', tan: '#b98a55', burgundy: '#6d1f2f', white: '#f5f5f2' };
     if (g.leather && LEATH[g.leather]) return LEATH[g.leather];
-    return (COLOR_FAMILIES[g.family] || COLOR_FAMILIES.grey).hex;
+    return (COLOR_FAMILIES[g.family] || COLOR_FAMILIES.gray).hex;
   }
 
   render();

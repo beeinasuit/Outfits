@@ -1,7 +1,7 @@
 // Taste learning (see ARCHITECTURE.md "Taste learning"). Pure, deterministic, no deps; Node + browser.
 // Learns per-feature weights from battles / likes / dislikes / wears. Items are snapshots, so features are
 // derived from attributes only (never ids).
-import { SLOTS, COLOR_FAMILIES, FORMALITY, BUSY_PATTERNS } from '../model.js';
+import { SLOTS, COLOR_FAMILIES, FORMALITY, BUSY_PATTERNS, canonFamily } from '../model.js';
 
 const PRIOR_K = 4;          // Bayesian shrinkage: weight = sum / (mass + k)
 const MIN_EVIDENCE = 5;     // total events before taste influences anything
@@ -25,10 +25,10 @@ function lightnessOf(item) {
   const c = item?.colors?.[0];
   const l = hexLightness(c?.hex);
   if (l != null) return l;
-  return hexLightness(COLOR_FAMILIES[c?.family]?.hex);
+  return hexLightness(COLOR_FAMILIES[canonFamily(c?.family)]?.hex);
 }
 function familyOf(item) {
-  const f = item?.colors?.[0]?.family;
+  const f = canonFamily(item?.colors?.[0]?.family);
   return typeof f === 'string' && COLOR_FAMILIES[f] ? f : null;
 }
 
@@ -182,7 +182,7 @@ export function tasteDelta(items, taste) {
     const p = phrase(c.k);
     const d = Math.round(clamp(c.w * 3, -MAX_DELTA, MAX_DELTA) * 10) / 10;
     reasons.push(c.w > 0
-      ? { text: `You tend to pick ${p} — it's a favourite`, delta: d, tag: 'taste-like' }
+      ? { text: `You tend to pick ${p} — it's a favorite`, delta: d, tag: 'taste-like' }
       : { text: `You usually skip ${p}`, delta: d, tag: 'taste-dislike' });
   }
   return { delta, reasons };

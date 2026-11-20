@@ -1,4 +1,4 @@
-// Flat SVG illustrations for every KIND, filled with an item's colours + pattern.
+// Flat SVG illustrations for every KIND, filled with an item's colors + pattern.
 // illustrate(item) -> svg markup string (viewBox 0 0 100 100). Pure: no DOM needed.
 import { COLOR_FAMILIES } from '../model.js';
 
@@ -178,9 +178,9 @@ function patternDefs(id, pattern, pc, p) {
  */
 export function illustrate(item, { title = '' } = {}) {
   const slot = MAKERS[item.slot] ? item.slot : 'top';
-  const safe = (c) => ({ ...c, hex: /^#[0-9a-f]{6}$/i.test(c?.hex || '') ? c.hex : COLOR_FAMILIES.grey.hex });
-  const colors = (Array.isArray(item.colors) && item.colors.length ? item.colors.filter(Boolean).map(safe) : [{ hex: COLOR_FAMILIES.grey.hex }]);
-  if (!colors.length) colors.push({ hex: COLOR_FAMILIES.grey.hex });
+  const safe = (c) => ({ ...c, hex: /^#[0-9a-f]{6}$/i.test(c?.hex || '') ? c.hex : COLOR_FAMILIES.gray.hex });
+  const colors = (Array.isArray(item.colors) && item.colors.length ? item.colors.filter(Boolean).map(safe) : [{ hex: COLOR_FAMILIES.gray.hex }]);
+  if (!colors.length) colors.push({ hex: COLOR_FAMILIES.gray.hex });
   const p = colors[0].hex;
   const dark = lum(p) < 0.35;
   const s = colors[1]?.hex || shade(p, lum(p) > 0.55 ? -0.3 : 0.35);
@@ -197,7 +197,7 @@ export function illustrate(item, { title = '' } = {}) {
   return `<svg class="illo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escAttr(title)}" preserveAspectRatio="xMidYMid meet"><defs>${patFill || ''}${clip}</defs>${bodies}${overlay}${det}${hi}</svg>`;
 }
 
-/** Default picker icon per slot (neutral colour). */
+/** Default picker icon per slot (neutral color). */
 const SLOT_ICON_KIND = { headwear: 'baseball cap', layer: 'blazer', top: 't-shirt', neckwear: 'tie', belt: 'leather belt', bottom: 'jeans', shoes: 'sneakers', extra: 'watch' };
 export function slotIllustration(slot, hex = '#ffc933') {
   return illustrate({ slot, kind: SLOT_ICON_KIND[slot], colors: [{ hex }], pattern: 'solid', beltLoops: true });

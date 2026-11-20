@@ -1,4 +1,4 @@
-// Adversarial vision tests (section B of tests/ADVERSARIAL.md + extras). Tests encode EXPECTED behaviour.
+// Adversarial vision tests (section B of tests/ADVERSARIAL.md + extras). Tests encode EXPECTED behavior.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -84,9 +84,9 @@ test('B1c low contrast: black jeans on dark floor (reported)', () => {
   const r = scenario('black-on-dark-floor', mk, { seeds: 8 });
   assert.ok(r.countAcc >= 0.5, `black jeans on dark floor found in only ${(r.countAcc * 100).toFixed(0)}% of runs`);
 });
-test('B1d low contrast: grey tee on grey carpet at dL~10 with noise sigma 6', () => {
+test('B1d low contrast: gray tee on gray carpet at dL~10 with noise sigma 6', () => {
   const mk = (seed) => render({ width: 1024, height: 768, bg: [120, 120, 122], items: [{ shape: 'shirt', x: 300, y: 150, w: 420, h: 460, color: [142, 142, 144] }], noise: 6, seed });
-  const r = scenario('grey-on-grey (dL~9, noisy)', mk, { seeds: 8 });
+  const r = scenario('gray-on-gray (dL~9, noisy)', mk, { seeds: 8 });
   assert.ok(r.countAcc >= 0.5, `${(r.countAcc * 100).toFixed(0)}%`);
 });
 
@@ -140,14 +140,14 @@ test('B3e JPEG-like blockiness (+-8) and heavy noise (sigma 12)', () => {
 });
 
 // ---------------------------------------------------------------------------------------------
-// B4. white balance and colour accuracy
+// B4. white balance and color accuracy
 // ---------------------------------------------------------------------------------------------
 const src = readFileSync(new URL('./vision-color.test.js', import.meta.url), 'utf8');
 const TABLE = [...src.matchAll(/\['(#[0-9a-f]{6})', '([a-z-]+)', '([^']+)'\]/g)].map((m) => [m[1], m[2], m[3]]);
 const tint = (rgb, [kr, kg, kb]) => [Math.min(255, rgb[0] * kr), Math.min(255, rgb[1] * kg), Math.min(255, rgb[2] * kb)].map(Math.round);
 const WB = { neutral: [1, 1, 1], 'warm indoor (+R -B 15%)': [1.15, 1, 0.85], 'cool shade (-R +B 15%)': [0.85, 1, 1.15], 'mild warm (+8%)': [1.08, 1, 0.92], 'mild cool (+8%)': [0.92, 1, 1.08] };
 for (const [label, k] of Object.entries(WB)) {
-  test(`B4 nameColor on the ${TABLE.length}-colour table under ${label}`, () => {
+  test(`B4 nameColor on the ${TABLE.length}-color table under ${label}`, () => {
     assert.ok(TABLE.length >= 40, `table parse found ${TABLE.length}`);
     const miss = [];
     for (const [hex, fam, name] of TABLE) { const got = nameColor(tint(hexRgb(hex), k)); if (got !== fam) miss.push(`${name}: ${fam} -> ${got}`); }
@@ -170,7 +170,7 @@ test('B4b extractColors on noisy solid swatches under +-15% white balance keeps 
     assert.ok(ok / TABLE.length >= 0.65, `${label}: ${ok}/${TABLE.length}`);
   }
 });
-test('B4c colour accuracy per item inside a segmented scene (mask-aware), with and without warm/cool white balance', () => {
+test('B4c color accuracy per item inside a segmented scene (mask-aware), with and without warm/cool white balance', () => {
   const cols = [[31, 42, 68], [196, 60, 50], [60, 90, 60], [200, 160, 60], [235, 235, 232]];
   const expected = cols.map(nameColor);
   for (const [label, wb] of [['neutral', [1, 1, 1]], ['warm', [1.12, 1, 0.88]], ['cool', [0.88, 1, 1.12]]]) {
@@ -186,7 +186,7 @@ test('B4c colour accuracy per item inside a segmented scene (mask-aware), with a
       if (got === expected[i]) ok++;
       else log(`  item ${i} under ${label}: expected ${expected[i]} got ${got}`);
     }
-    log(`SCENE colour accuracy ${label} WB: ${ok}/5`);
+    log(`SCENE color accuracy ${label} WB: ${ok}/5`);
     assert.ok(ok >= (label === 'neutral' ? 5 : 3), `${label}: ${ok}/5 correct`);
   }
 });
@@ -261,7 +261,7 @@ test('B5e a single large item on the sheet gives exactly one box', () => {
 // ---------------------------------------------------------------------------------------------
 // B6. geometry: touching, rotated, tiny, belt, many
 // ---------------------------------------------------------------------------------------------
-test('B6a touching items with different colours (0 px gap) are split into 2', { todo: 'Known limitation (documented): touching items merge; splitting by colour would cut two-tone garments in half.' }, () => {
+test('B6a touching items with different colors (0 px gap) are split into 2', { todo: 'Known limitation (documented): touching items merge; splitting by color would cut two-tone garments in half.' }, () => {
   const r = scenario('touching 0px gap', (seed) => render({ width: 1024, height: 768, items: [{ shape: 'rect', x: 150, y: 150, w: 330, h: 450, color: [31, 42, 68] }, { shape: 'rect', x: 480, y: 150, w: 330, h: 450, color: [196, 60, 50] }], noise: 3, seed }), { seeds: 6 });
   assert.ok(r.countAcc >= 0.8, `count accuracy ${(r.countAcc * 100).toFixed(0)}% detected=[${r.detected}]`);
 });
@@ -350,7 +350,7 @@ test('B6m realistic size sweep: 320x240, 640x480, 1280x720, 1920x1080 all find 5
   }
   none(c, 'size sweep');
 });
-test('B6n random flat-lays (seeded): 3-8 items, random rotation/size/colour, count accuracy >= 75% and no crash', () => {
+test('B6n random flat-lays (seeded): 3-8 items, random rotation/size/color, count accuracy >= 75% and no crash', () => {
   const c = collector(); let ok = 0; const N = 40; const ious = [];
   for (let i = 0; i < N; i++) {
     const seed = 3000 + i; const R = rng(seed);
@@ -386,7 +386,7 @@ const validColors = (cs, label) => {
   }
   assert.ok(Math.abs(cs.reduce((s, c) => s + c.weight, 0) - 1) < 0.1, `${label}: weights sum ${cs.reduce((s, c) => s + c.weight, 0)}`);
 };
-test('B7a extractColors hostile images/options always returns 1..maxColors valid colours', () => {
+test('B7a extractColors hostile images/options always returns 1..maxColors valid colors', () => {
   const imgs = { '0x0': { width: 0, height: 0, data: new Uint8ClampedArray(0) }, '1x1': solid(1, 1, [200, 30, 30]), 'transparent': solid(50, 50, [10, 10, 200], 0), 'null': null, 'noData': { width: 5, height: 5 }, 'short data': { width: 50, height: 50, data: new Uint8ClampedArray(10) }, 'NaN dims': { width: NaN, height: NaN, data: new Uint8ClampedArray(16) }, 'noise': addNoise(solid(60, 60, [128, 128, 128]), 90, 4), 'black': solid(30, 30, [0, 0, 0]), 'white': solid(30, 30, [255, 255, 255]), '1xN': solid(1, 500, [30, 200, 30]) };
   const optss = [{}, { maxColors: 1 }, { maxColors: 0 }, { maxColors: -2 }, { maxColors: NaN }, { maxColors: 50 }, { ignoreBackground: false }, { mask: new Uint8Array(3) }, { mask: new Uint8Array(100000) }, { mask: new Uint8Array(100000).fill(1) }, { mask: 'abc' }];
   const c = collector();
@@ -395,7 +395,7 @@ test('B7a extractColors hostile images/options always returns 1..maxColors valid
     let cs; try { cs = extractColors(im, o); } catch (e) { c.add(`${label} threw ${e.message}`); continue; }
     try { validColors(cs, label); } catch (e) { c.add(e.message); continue; }
     const mc = Number.isFinite(o.maxColors) && o.maxColors >= 1 ? Math.floor(o.maxColors) : 3;
-    if (o.maxColors !== undefined && Number.isFinite(o.maxColors) && cs.length > Math.max(1, Math.min(4, mc))) c.add(`${label} -> ${cs.length} colours`);
+    if (o.maxColors !== undefined && Number.isFinite(o.maxColors) && cs.length > Math.max(1, Math.min(4, mc))) c.add(`${label} -> ${cs.length} colors`);
   }
   none(c, 'extractColors hostile');
 });
@@ -424,19 +424,19 @@ test('B7e extractColors on a light item on a light sheet (white tee on cream) ke
   const cs = extractColors(im);
   assert.ok(['white', 'cream'].includes(cs[0].family), `dominant ${JSON.stringify(cs)}`);
 });
-test('B7f nameColor: grey ramp and near-neutral saturation edge (no hallucinated colours for neutral greys)', () => {
+test('B7f nameColor: gray ramp and near-neutral saturation edge (no hallucinated colors for neutral grays)', () => {
   const c = collector();
   for (let v = 0; v <= 255; v += 5) {
     const f = nameColor([v, v, v]);
-    if (!['black', 'charcoal', 'grey', 'white'].includes(f)) c.add(`grey ${v} -> ${f}`);
+    if (!['black', 'charcoal', 'gray', 'white'].includes(f)) c.add(`gray ${v} -> ${f}`);
   }
-  for (const rgb of [[120, 122, 124], [128, 126, 124], [60, 62, 64], [200, 201, 203]]) { const f = nameColor(rgb); if (!['black', 'charcoal', 'grey', 'white', 'cream'].includes(f)) c.add(`${rgb} -> ${f}`); }
-  none(c, 'grey ramp');
+  for (const rgb of [[120, 122, 124], [128, 126, 124], [60, 62, 64], [200, 201, 203]]) { const f = nameColor(rgb); if (!['black', 'charcoal', 'gray', 'white', 'cream'].includes(f)) c.add(`${rgb} -> ${f}`); }
+  none(c, 'gray ramp');
 });
-test('B7g nameColor monotonic lightness: darker version of a colour never gets a lighter-family name (white>cream>...>black chain for greys)', () => {
-  const order = ['black', 'charcoal', 'grey', 'white'];
+test('B7g nameColor monotonic lightness: darker version of a color never gets a lighter-family name (white>cream>...>black chain for grays)', () => {
+  const order = ['black', 'charcoal', 'gray', 'white'];
   let last = -1;
-  for (let v = 0; v <= 255; v += 3) { const i = order.indexOf(nameColor([v, v, v])); if (i < 0) continue; assert.ok(i >= last, `grey ramp non-monotonic at ${v}`); last = i; }
+  for (let v = 0; v <= 255; v += 3) { const i = order.indexOf(nameColor([v, v, v])); if (i < 0) continue; assert.ok(i >= last, `gray ramp non-monotonic at ${v}`); last = i; }
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -444,7 +444,7 @@ test('B7g nameColor monotonic lightness: darker version of a colour never gets a
 // ---------------------------------------------------------------------------------------------
 test('B8a guessPattern: noisy solids / heathered / denim texture are solid or textured, never stripe/check/print', () => {
   const c = collector();
-  for (const [label, rgb, sig] of [['navy solid', [31, 42, 68], 2], ['white tee noisy', [240, 240, 238], 6], ['heather grey', [142, 145, 150], 10], ['denim', [74, 98, 134], 14], ['black jeans noisy', [30, 30, 32], 8], ['jpeg-ish', [196, 60, 50], 12]]) {
+  for (const [label, rgb, sig] of [['navy solid', [31, 42, 68], 2], ['white tee noisy', [240, 240, 238], 6], ['heather gray', [142, 145, 150], 10], ['denim', [74, 98, 134], 14], ['black jeans noisy', [30, 30, 32], 8], ['jpeg-ish', [196, 60, 50], 12]]) {
     const p = guessPattern(addNoise(solid(120, 120, rgb), sig, 5));
     if (!['solid', 'textured'].includes(p)) c.add(`${label} (sigma ${sig}) -> ${p}`);
   }
@@ -470,7 +470,7 @@ test('B8d guessPattern: checks (small 6px, big 30px), and a mask hides the backg
   const p = guessPattern(im, { mask }); if (!['solid', 'textured'].includes(p)) c.add(`solid item on striped sheet with mask -> ${p}`);
   none(c, 'check/mask');
 });
-test('B8e guessPattern: multi-colour prints are not called solid/stripe/check', () => {
+test('B8e guessPattern: multi-color prints are not called solid/stripe/check', () => {
   const p = guessPattern(print(160, 160));
   assert.ok(['print', 'floral', 'graphic', 'plaid', 'camo'].includes(p) || p === 'textured', `print -> ${p}`);
   assert.notEqual(p, 'solid');

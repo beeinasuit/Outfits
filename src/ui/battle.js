@@ -81,7 +81,7 @@ function nextPair(ctx) {
 const SOURCE_NOTE = {
   top: 'Two strong looks with different tops and bottoms.',
   app: 'My top pick against a wildcard.',
-  liked: 'Two looks you already liked. Time to pick a favourite.',
+  liked: 'Two looks you already liked. Time to pick a favorite.',
   any: 'A fresh pairing.',
 };
 

@@ -1,8 +1,8 @@
-// Helpers shared by Snap and Your colours: turn a small-resolution segmentation mask into a full-resolution one
+// Helpers shared by Snap and Your colors: turn a small-resolution segmentation mask into a full-resolution one
 // and build transparent cutouts. Browser-only (uses canvas helpers via dynamic import by callers).
 
 /**
- * Nearest-neighbour upscale of a box-sized mask.
+ * Nearest-neighbor upscale of a box-sized mask.
  * @param {{x:number,y:number,w:number,h:number,mask:Uint8Array}} det  detection in small-image coords
  * @param {number} kx  canvas.width / smallImage.width
  * @param {number} ky  canvas.height / smallImage.height

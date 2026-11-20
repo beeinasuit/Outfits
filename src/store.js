@@ -185,7 +185,7 @@ export async function exportBackup() {
   return new Blob([JSON.stringify(payload)], { type: 'application/json' });
 }
 
-/** Validate + normalise a parsed backup. Throws Error with a friendly message. */
+/** Validate + normalize a parsed backup. Throws Error with a friendly message. */
 export function parseBackup(text) {
   let data;
   try { data = JSON.parse(text); } catch { throw new Error('That file is not valid JSON, so it can’t be a Fit Machine backup.'); }

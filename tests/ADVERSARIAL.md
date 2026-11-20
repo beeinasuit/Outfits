@@ -18,7 +18,7 @@ For every outfit returned by `buildOutfits`:
 4. **Belt rule:** bottom has loops and an available belt exists → belt present. Bottom has no loops → no belt.
 5. Neckwear only with a collared top.
 6. Keys are unique; `length <= limit`; results sorted by score descending (or documented diversity order).
-7. Valid locks are honoured in every result; invalid locks (unknown id, unavailable, wrong slot) are ignored, not fatal.
+7. Valid locks are honored in every result; invalid locks (unknown id, unavailable, wrong slot) are ignored, not fatal.
 8. Determinism: same input → identical output (deep-equal), and shuffling the wardrobe array doesn't change the set of results.
 9. `scoreOutfit` is independent of object key order.
 10. Runtime: 300 items < 300 ms, 1000 items < 2 s.
@@ -33,7 +33,7 @@ For every outfit returned by `buildOutfits`:
 - Recently worn items (yesterday) rank lower than the same outfit without them.
 
 ### A4. Hostile input
-Items missing colours, `colors: [null]`, unknown family `ultraviolet`, `formality: NaN/99/-3`, `slot: 'cape'`, duplicate ids,
+Items missing colors, `colors: [null]`, unknown family `ultraviolet`, `formality: NaN/99/-3`, `slot: 'cape'`, duplicate ids,
 same id in two slots, `worn: ['garbage']`, 2 000 items, locks on every slot, `exclude` everything, `limit: 0/-1/1e9`.
 Requirement: never throws; returns sensible output or `[]`.
 
@@ -42,10 +42,10 @@ Synthetic scenes that model real phone photos:
 - low contrast: white shirt on white sheet, black jeans on dark floor (must not crash; report detection rate)
 - patterned/wood-grain background, striped sheet
 - strong vignette, one-sided window light, hard drop shadows
-- warm indoor white balance (+R −B tint ~ 15%) and cool shade (−R +B): colour family accuracy on the 40-hex table under each
+- warm indoor white balance (+R −B tint ~ 15%) and cool shade (−R +B): color family accuracy on the 40-hex table under each
 - JPEG-like blockiness + noise, 4000×3000 input (must downsample, < 1.5 s), 1×1, 0×0, all-transparent
 - touching items, rotated items (45°), tiny items (socks ~1% of frame), a belt (long + thin), 15 items (cap at maxItems)
-Report: per-scenario count accuracy, box IoU vs ground truth, colour accuracy, timings.
+Report: per-scenario count accuracy, box IoU vs ground truth, color accuracy, timings.
 
 ## C. Storage & backup (browser, Playwright, `tests/e2e/adv-store.mjs`)
 - Export → clear → import(replace) round-trips items, photos, feedback, settings exactly.
@@ -60,7 +60,7 @@ Report: per-scenario count accuracy, box IoU vs ground truth, colour accuracy, t
 - Delete every item mid-session; empty closet on every screen; closet with only tops; with 200 items (scroll perf).
 - Very long names (80 chars), emoji, RTL text — no overflow at 320px.
 - Back/forward through every route; deep-link to each hash route on cold load.
-- Upload: a non-image file, a 0-byte file, a 6000×4000 JPEG, a PNG with transparency, cancelling the picker.
+- Upload: a non-image file, a 0-byte file, a 6000×4000 JPEG, a PNG with transparency, canceling the picker.
 - Snap review: delete all boxes then Next; add a box of 0 size; drag a box off-screen.
 - Offline: load once, go offline, reload → app shell works and data is intact.
 - `prefers-reduced-motion` → no long animations; dark mode → screenshot every screen, check contrast of text vs background.

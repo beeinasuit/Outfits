@@ -24,11 +24,11 @@ test('golden set: every margin >= 3 (ties within 12)', () => {
 test('calibration: excellent 88-97, plain 72-82, clashes and wrong occasions < 50', () => {
   const excellent = [GOLDEN[3].better, GOLDEN[6].better, GOLDEN[7].better];
   for (const o of excellent) { const s = scoreOutfit(o).score; assert.ok(s >= 88 && s <= 97, `excellent ${s}`); }
-  for (const top of ['grey', 'white', 'navy', 'black']) {
+  for (const top of ['gray', 'white', 'navy', 'black']) {
     const s = scoreOutfit({ top: mk('a', 'top', 't-shirt', top), bottom: mk('b', 'bottom', 'jeans', 'denim'), shoes: mk('c', 'shoes', 'sneakers', 'white') }).score;
     assert.ok(s >= 72 && s <= 82, `plain ${top} ${s}`);
   }
-  const gym = { top: mk('a', 'top', 'hoodie', 'grey'), bottom: mk('b', 'bottom', 'joggers', 'grey'), shoes: mk('c', 'shoes', 'running shoes', 'grey') };
+  const gym = { top: mk('a', 'top', 'hoodie', 'gray'), bottom: mk('b', 'bottom', 'joggers', 'gray'), shoes: mk('c', 'shoes', 'running shoes', 'gray') };
   assert.ok(scoreOutfit(gym, { occasion: 'work' }).score < 50);
   const suit = { layer: mk('l', 'layer', 'suit jacket', 'charcoal'), top: mk('t', 'top', 'dress shirt', 'white'), bottom: mk('b', 'bottom', 'suit trousers', 'charcoal'),
     shoes: mk('s', 'shoes', 'sandals', 'brown', { leather: 'brown' }) };
@@ -38,7 +38,7 @@ test('calibration: excellent 88-97, plain 72-82, clashes and wrong occasions < 5
 });
 
 test('context bites: wrong occasion / weather moves an outfit down a band', () => {
-  const plain = { top: mk('a', 'top', 't-shirt', 'grey'), bottom: mk('b', 'bottom', 'jeans', 'denim'), shoes: mk('c', 'shoes', 'sneakers', 'white') };
+  const plain = { top: mk('a', 'top', 't-shirt', 'gray'), bottom: mk('b', 'bottom', 'jeans', 'denim'), shoes: mk('c', 'shoes', 'sneakers', 'white') };
   const base = scoreOutfit(plain).score;
   assert.ok(base - scoreOutfit(plain, { occasion: 'work' }).score >= 15);
   assert.ok(base - scoreOutfit(plain, { weather: 'freezing' }).score >= 15);
@@ -117,7 +117,7 @@ test('footwear / weather coherence', () => {
     assert.ok(scoreOutfit({ ...base, shoes: sandals }, { weather }).score < b - 15);
     assert.ok(scoreOutfit({ ...base, shoes: canvas }, { weather }).score < b);
   }
-  const heavy = { top: mk('t', 'top', 't-shirt', 'grey'), bottom: mk('b', 'bottom', 'cargo pants', 'olive'), layer: mk('l', 'layer', 'puffer', 'black') };
+  const heavy = { top: mk('t', 'top', 't-shirt', 'gray'), bottom: mk('b', 'bottom', 'cargo pants', 'olive'), layer: mk('l', 'layer', 'puffer', 'black') };
   assert.ok(scoreOutfit({ ...heavy, shoes: sandals }).score < scoreOutfit({ ...heavy, shoes: canvas }).score - 10);
   const shortsHeavy = scoreOutfit({ ...heavy, bottom: mk('sh', 'bottom', 'shorts', 'beige'), shoes: canvas }).score;
   assert.ok(shortsHeavy < scoreOutfit({ ...heavy, shoes: canvas }).score - 5);
@@ -125,7 +125,7 @@ test('footwear / weather coherence', () => {
   assert.ok(formalSandals < 50);
 });
 
-test('reasons never praise and criticise the same thing; positives are capped', () => {
+test('reasons never praise and criticize the same thing; positives are capped', () => {
   const r = sc({ ...outfit('white-oxford', 'navy-chinos', 'brown-boots'), belt: W['black-belt'] });
   assert.ok(tags(r).includes('leather-clash'));
   assert.ok(!tags(r).includes('color-neutral') && !tags(r).includes('leather-match'));
@@ -162,7 +162,7 @@ test('complexion: no effect without a profile / disabled / garbage', () => {
   for (const bad of [{ enabled: true, undertone: 'purple', depth: 7, contrast: {} }, 'warm', [], 42, { enabled: 'yes' }]) assert.equal(sc(o, { profile: bad }).score, base);
 });
 
-test('complexion: warm favours rust/olive over burgundy/pink and cool the reverse; neutral never penalises', () => {
+test('complexion: warm favors rust/olive over burgundy/pink and cool the reverse; neutral never penalizes', () => {
   for (const [warmFam, coolFam] of [['rust', 'burgundy'], ['olive', 'pink']]) {
     const w = { profile: prof({ undertone: 'warm' }) }; const c = { profile: prof({ undertone: 'cool' }) };
     assert.ok(sc(near(warmFam), w).score > sc(near(coolFam), w).score);
@@ -183,7 +183,7 @@ test('complexion: low contrast dislikes stark black/white near the face, high co
   assert.ok(low.reasons.some((r) => /stark/.test(r.text)));
   const high = sc(stark, { profile: prof({ contrast: 'high' }) });
   assert.ok(high.score >= sc(stark).score && !high.reasons.some((r) => r.tag === 'complexion-off'));
-  const pants = { top: mk('t', 'top', 't-shirt', 'grey'), bottom: mk('b', 'bottom', 'jeans', 'black'), shoes: mk('s', 'shoes', 'sneakers', 'black') };
+  const pants = { top: mk('t', 'top', 't-shirt', 'gray'), bottom: mk('b', 'bottom', 'jeans', 'black'), shoes: mk('s', 'shoes', 'sneakers', 'black') };
   for (const p of [{ undertone: 'warm', contrast: 'low' }, { undertone: 'cool', depth: 'deep' }]) {
     const a = sc(pants, { profile: prof(p) }); const b = sc(pants);
     assert.ok(!a.reasons.some((r) => r.tag.startsWith('complexion')) || true);
@@ -205,7 +205,7 @@ test('complexion: bounded to +-10 in total', () => {
 // ---------------- occasions ----------------
 const occWardrobe = () => [
   mk('wh', 'top', 'dress shirt', 'white'), mk('lb', 'top', 'dress shirt', 'light-blue'), mk('nv', 'top', 'dress shirt', 'navy'), mk('rd', 'top', 'dress shirt', 'red'),
-  mk('cr', 'top', 'dress shirt', 'cream'), mk('hd', 'top', 'hoodie', 'grey'), mk('tee', 'top', 't-shirt', 'white'), mk('pk', 'top', 'polo', 'pink'),
+  mk('cr', 'top', 'dress shirt', 'cream'), mk('hd', 'top', 'hoodie', 'gray'), mk('tee', 'top', 't-shirt', 'white'), mk('pk', 'top', 'polo', 'pink'),
   mk('dp', 'bottom', 'dress pants', 'charcoal'), mk('dp2', 'bottom', 'dress pants', 'navy'), mk('jn', 'bottom', 'jeans', 'denim'), mk('sh', 'bottom', 'shorts', 'beige'),
   mk('ox', 'shoes', 'oxfords', 'black', { leather: 'black' }), mk('sn', 'shoes', 'sneakers', 'white'),
   mk('bb', 'belt', 'dress belt', 'black', { leather: 'black' }),
@@ -213,24 +213,24 @@ const occWardrobe = () => [
 ];
 const top5 = (occasion, extra = {}) => buildOutfits(occWardrobe(), { today: TODAY, occasion, ...extra }).slice(0, 5);
 
-test('occasions: funeral has no bright colours; wedding no white/cream top or jeans; church no shorts/hoodie', () => {
+test('occasions: funeral has no bright colors; wedding no white/cream top or jeans; church no shorts/hoodie', () => {
   const bright = new Set(['red', 'orange', 'yellow', 'pink', 'purple', 'lavender', 'light-blue', 'mustard', 'green', 'teal']);
   for (const o of top5('funeral')) for (const i of Object.values(o.items)) assert.ok(!bright.has(i.colors[0].family), i.id);
   for (const o of top5('wedding')) { assert.ok(!['white', 'cream'].includes(o.items.top.colors[0].family)); assert.notEqual(o.items.bottom.kind, 'jeans'); }
   for (const o of top5('church')) { assert.ok(!['shorts', 'athletic shorts'].includes(o.items.bottom.kind)); assert.notEqual(o.items.top.kind, 'hoodie'); }
 });
 
-test('occasions: interview adds a blazer, never a hat; wantLayer missing is penalised', () => {
+test('occasions: interview adds a blazer, never a hat; wantLayer missing is penalized', () => {
   for (const o of top5('interview')) { assert.ok(o.items.layer, 'layer'); assert.ok(!o.items.headwear); }
-  const bare = scoreOutfit({ top: W['white-dress-shirt'], bottom: W['grey-dress-pants'], shoes: W['black-oxfords'], belt: W['black-belt'] }, { occasion: 'interview' });
-  const withBlazer = scoreOutfit({ top: W['white-dress-shirt'], bottom: W['grey-dress-pants'], shoes: W['black-oxfords'], belt: W['black-belt'], layer: W['navy-blazer'] }, { occasion: 'interview' });
+  const bare = scoreOutfit({ top: W['white-dress-shirt'], bottom: W['gray-dress-pants'], shoes: W['black-oxfords'], belt: W['black-belt'] }, { occasion: 'interview' });
+  const withBlazer = scoreOutfit({ top: W['white-dress-shirt'], bottom: W['gray-dress-pants'], shoes: W['black-oxfords'], belt: W['black-belt'], layer: W['navy-blazer'] }, { occasion: 'interview' });
   assert.ok(withBlazer.score > bare.score);
-  const hat = scoreOutfit({ top: W['white-dress-shirt'], bottom: W['grey-dress-pants'], shoes: W['black-oxfords'], belt: W['black-belt'], layer: W['navy-blazer'], headwear: W['navy-cap'] }, { occasion: 'interview' });
+  const hat = scoreOutfit({ top: W['white-dress-shirt'], bottom: W['gray-dress-pants'], shoes: W['black-oxfords'], belt: W['black-belt'], layer: W['navy-blazer'], headwear: W['navy-cap'] }, { occasion: 'interview' });
   assert.ok(hat.score < withBlazer.score);
 });
 
 test('occasions: custom ctx.occasionDef works; garbage occasionDef is ignored; weekend still works', () => {
-  const tee = { top: W['grey-hoodie'], bottom: W['grey-joggers'], shoes: W['running-shoes'] };
+  const tee = { top: W['gray-hoodie'], bottom: W['gray-joggers'], shoes: W['running-shoes'] };
   const custom = { label: 'Gala dinner', min: 5, max: 5, avoidKinds: ['hoodie'], noHeadwear: true };
   const a = scoreOutfit(tee, { occasionDef: custom, maxReasons: 20 });
   assert.ok(a.score < scoreOutfit(tee).score - 20);

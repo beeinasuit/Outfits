@@ -20,8 +20,8 @@ index.html              app shell
 manifest.webmanifest    PWA manifest
 sw.js                   service worker (offline cache of the shell)
 icons/                  app icons (SVG + PNG)
-src/model.js            SHARED CONTRACT: slots, kinds, colour families, Item/Outfit typedefs, makeItem()
-src/engine/rules.js     colour/pattern/formality/accessory rules -> Reasons
+src/model.js            SHARED CONTRACT: slots, kinds, color families, Item/Outfit typedefs, makeItem()
+src/engine/rules.js     color/pattern/formality/accessory rules -> Reasons
 src/engine/score.js     scoreOutfit(outfit, ctx)
 src/engine/build.js     buildOutfits(items, opts), gapAnalysis(items, opts)
 src/vision/color.js     extractColors(imageData, opts), nameColor(rgb)
@@ -74,7 +74,7 @@ export function buildOutfits(items, opts = {})
  *    limit?: number = 20,
  *    locks?: Object<string, string>,      // slot -> item id that MUST be used
  *    exclude?: Object<string, string[]>,  // slot -> item ids to skip (e.g. reshuffle)
- *    recentDays?: number = 3,             // items worn within N days are penalised
+ *    recentDays?: number = 3,             // items worn within N days are penalized
  *    today?: string,                      // YYYY-MM-DD, for deterministic tests
  *    diversity?: boolean = true,          // avoid returning 20 outfits that differ only by belt
  *  }
@@ -89,7 +89,7 @@ export function gapAnalysis(items, opts = {})
 
 Staged search (never a full cartesian product):
 1. score every available top × bottom pair on core rules, keep the best N (N ≈ 40);
-2. for each, choose shoes, then a belt **iff `bottom.beltLoops`** (belt is skipped, never penalised, when there are no loops;
+2. for each, choose shoes, then a belt **iff `bottom.beltLoops`** (belt is skipped, never penalized, when there are no loops;
    if the bottom has loops and the user owns a compatible belt, a belt is always included);
 3. add a layer when weather/occasion calls for it or it raises the score; neckwear only with a collared top at
    formality ≥ 3; headwear only in casual contexts or cold weather;
@@ -108,7 +108,7 @@ locks pointing at missing/unavailable ids (ignore the lock).
  * @returns {Color[]}  dominant first, weights sum to ~1, 1..maxColors entries, never empty
  */
 export function extractColors(imageData, opts = {})
-/** Map one sRGB colour to the closest COLOR_FAMILIES key (perceptual, CIELAB/ΔE). */
+/** Map one sRGB color to the closest COLOR_FAMILIES key (perceptual, CIELAB/ΔE). */
 export function nameColor([r, g, b])
 /** Heuristic pattern guess from pixel variance/edges: 'solid' | 'stripe' | 'check' | 'textured' | 'print'. */
 export function guessPattern(imageData, opts = {})
@@ -118,7 +118,7 @@ export function guessPattern(imageData, opts = {})
 
 ```js
 /**
- * Split a flat-lay photo into item boxes by modelling the background from the border pixels.
+ * Split a flat-lay photo into item boxes by modeling the background from the border pixels.
  * @param {{width,height,data}} imageData
  * @param {{ minAreaFrac?: number = 0.01, maxItems?: number = 12, padding?: number = 0.03 }} opts
  * @returns {Array<{ x:number, y:number, w:number, h:number, area:number, mask?: Uint8Array }>}
@@ -161,7 +161,7 @@ Outfits → `listItems` → `buildOutfits(items, {occasion, weather, locks, feed
 
 ## Version 2 (not now)
 
-A tiny serverless proxy holding the API key, calling Claude Haiku 5.5 to label crops (kind, pattern, colours, leather tone).
+A tiny serverless proxy holding the API key, calling Claude Haiku 5.5 to label crops (kind, pattern, colors, leather tone).
 The review form already has every field the AI would fill, so v2 only adds an "auto-fill" step.
 
 ## Laundry
@@ -203,15 +203,15 @@ export function cutoutCanvas(sourceCanvas, box, mask, { feather = 2 } = {})
 Store `item.cutoutId` (photo store key of a transparent WebP/PNG) alongside `photoId`. `canvasToBlob` must keep alpha
 (WebP keeps alpha; the JPEG fallback must not be used for cutouts — fall back to PNG).
 
-## Personal colouring (complexion)
+## Personal coloring (complexion)
 
 Optional `settings.profile` (`Profile` / `makeProfile` in model.js). Passed to the engine as `ctx.profile`
 (ScoreContext gains `profile?: Profile`). Only used when `profile.enabled`.
 
 - **Selfie**: taken inside an oval guide; the head-and-shoulders cutout is shown at the top of the outfit board so the
-  user sees the colours next to their own face. Never leaves the device; excluded from backups unless opted in.
-- **Drape test** (UI): the selfie cutout is shown over pairs of colour backgrounds (gold vs silver, rust vs burgundy,
-  cream vs pure white, black vs charcoal, camel vs grey, coral vs fuchsia-pink); ~6 taps "which looks better?" decide
+  user sees the colors next to their own face. Never leaves the device; excluded from backups unless opted in.
+- **Drape test** (UI): the selfie cutout is shown over pairs of color backgrounds (gold vs silver, rust vs burgundy,
+  cream vs pure white, black vs charcoal, camel vs gray, coral vs fuchsia-pink); ~6 taps "which looks better?" decide
   undertone and contrast. A skin sample gives an initial guess for depth/undertone. User can also set them manually.
 
 ### `src/vision/skin.js` (pure)
@@ -227,18 +227,18 @@ export function guessContrast(imageData, ellipse, skinLab)   // -> 'low'|'medium
 
 ### Engine complexion rules (`src/engine/rules.js`)
 Weighted by `NEAR_FACE`; magnitude modest (a great complexion match ≈ +6, a poor one ≈ −6; never more than ±10 total),
-only for colours near the face. Friendly reasons ("Rust warms up your complexion", "Pure black is a bit stark next to your
+only for colors near the face. Friendly reasons ("Rust warms up your complexion", "Pure black is a bit stark next to your
 face — charcoal is softer"). Heuristics: warm ↔ olive, rust, camel/beige, cream, mustard, warm brown, coral, forest;
-cool ↔ navy, burgundy, crisp white, grey, blue, pink, lavender, emerald/teal; neutral: mild bonus to both, no penalties.
+cool ↔ navy, burgundy, crisp white, gray, blue, pink, lavender, emerald/teal; neutral: mild bonus to both, no penalties.
 High contrast handles black/white and bold pairings (+); low contrast is flattered by tonal/muted (+) and overpowered by
 stark black-and-white (−). Very light depth: pale beige/cream/pastel yellow near the face can wash out (mild −) unless
-contrast is high. Deep depth: rich saturated colours and crisp white (+).
+contrast is high. Deep depth: rich saturated colors and crisp white (+).
 
 ## Occasions
 
 The occasion picker is how the user asks "what do I wear to X?". Each occasion in `OCCASIONS` (model.js) is data:
-a formality window plus optional colour/kind preferences that the engine applies generically
-(`preferFamilies` +, `avoidFamilies` −, `avoidKinds` −−, `wantKinds` +, `wantLayer`, `muted` = penalise loud colours and
+a formality window plus optional color/kind preferences that the engine applies generically
+(`preferFamilies` +, `avoidFamilies` −, `avoidKinds` −−, `wantKinds` +, `wantLayer`, `muted` = penalize loud colors and
 busy patterns, `noHeadwear`). Users can add their own occasions (label, emoji, formality range) — stored in
 `settings.customOccasions`, same shape, passed to the engine via `ctx.occasionDef`.
 
@@ -264,12 +264,12 @@ Learns the user's preferences from events, not just exact outfits:
  * @returns {Taste}  per-feature weights in [-1, 1] with evidence counts */
 export function learnTaste(events, { now = Date.now(), halfLifeDays = 60 } = {})
 /** Score adjustment for an outfit: bounded to ±8 total, 0 when evidence is thin.
- * @returns {{ delta:number, reasons: Reason[] }} reasons like "You tend to pick olive — it's a favourite" */
+ * @returns {{ delta:number, reasons: Reason[] }} reasons like "You tend to pick olive — it's a favorite" */
 export function tasteDelta(items, taste)
 /** Human-readable summary for Settings: top likes / dislikes with strength. */
 export function describeTaste(taste)
 ```
-Features: colour family per slot group (near-face / lower / feet), kind, pattern, formality relative to the occasion,
+Features: color family per slot group (near-face / lower / feet), kind, pattern, formality relative to the occasion,
 layering habit, contrast level (light-over-dark vs tonal). Battle = pairwise (winner features +, loser −); like/wear
 = +, dislike = −; wear is weaker than an explicit vote. Recency-weighted. `scoreOutfit` applies `tasteDelta` when
 `ctx.taste` is set. The store keeps an append-only `events` log (capped ~5 000) and settings shows `describeTaste`
@@ -279,7 +279,7 @@ with a reset.
 
 - `data` = { items, feedback, records, settings, events, taste, ready }; `subscribe(fn)` / `emit(what)`.
 - `getContext()` → `{ occasion, occasionDef, weather, rain, feedback, note, profile, taste }` — pass straight to the engine.
-- `allOccasions()` built-ins + `settings.customOccasions` (normalised with `makeOccasion`).
+- `allOccasions()` built-ins + `settings.customOccasions` (normalized with `makeOccasion`).
 - `recordEvent({type:'battle', winner, loser})` / like / dislike / wear (snapshots stored in the `events` IDB store,
   capped at 5 000; `data.taste` re-learned on every event). `resetTaste()`.
 - `setFeedback(outfit, 'like'|'dislike'|null)` also records a like/dislike event.

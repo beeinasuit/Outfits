@@ -10,7 +10,7 @@
 //   5. iterative connected components, merge overlapping boxes and tiny fragments next to big items
 //   6. pad, clamp, sort row-major, cap, build per-box masks at full resolution
 //
-// Known limitations: items that touch each other merge into one box; an item whose colour is within a few
+// Known limitations: items that touch each other merge into one box; an item whose color is within a few
 // delta-E of the sheet (white shirt on a white sheet) is only partly found; strongly textured/patterned
 // backgrounds raise the tolerance and can swallow low-contrast items.
 import { rgbToLab } from './color.js';
@@ -130,7 +130,7 @@ function dilate(src, w, h, r, tmp, out) {
 
 
 /**
- * Background as a mixture of colour clusters (k-means, k<=4, on border-ring Lab samples).
+ * Background as a mixture of color clusters (k-means, k<=4, on border-ring Lab samples).
  * Returns {cl, isBg(L,a,b)}; a pixel is background when it is inside any cluster's radius, on the line between two
  * clusters (anti-aliased stripe edge), or a darker same-hue version of a cluster (shadow).
  */
@@ -280,7 +280,7 @@ function segment(im, opts) {
   const tolC = Math.max(5, 3.5 * Math.max(fA.sigma, fB.sigma));
 
   // 2b. periodic / patterned backgrounds (striped sheet, checks, wood): the plane model leaves many border outliers in
-  //     several separate runs along the ring. Then model the background as a mixture of colour clusters instead.
+  //     several separate runs along the ring. Then model the background as a mixture of color clusters instead.
   let mixture = null;
   {
     const ring = [];                       // outer line of the frame in walk order
@@ -379,7 +379,7 @@ function segment(im, opts) {
   const T1 = new Uint8Array(N), T2 = new Uint8Array(N);
   erode(M, w, h, 1, T1, T2); dilate(T2, w, h, 1, T1, M);           // open 3x3
   // close 5x5, but only across pixels that deviate somewhat from the background model: a gap that is clearly
-  // sheet-coloured (two items laid a few px apart) stays open, a faint stripe inside a striped shirt is bridged.
+  // sheet-colored (two items laid a few px apart) stays open, a faint stripe inside a striped shirt is bridged.
   {
     const Mo = M.slice();
     dilate(M, w, h, 2, T1, T2); erode(T2, w, h, 2, T1, M);
@@ -515,7 +515,7 @@ function segment(im, opts) {
     return { x: X0, y: Y0, w: bw, h: bh, area: cnt, mask };
   });
 
-  // sort top-left -> bottom-right: rows by centre-y with tolerance, then by x
+  // sort top-left -> bottom-right: rows by center-y with tolerance, then by x
   out.sort((a, b) => (a.y + a.h / 2) - (b.y + b.h / 2));
   const rows = [];
   for (const it of out) {
@@ -531,7 +531,7 @@ function segment(im, opts) {
 /**
  * Turn a blocky box-sized segmentation mask into a smooth alpha channel for a cutout.
  * Pure (Node-testable). Interior stays 255, exterior 0, the edge is a ~`feather` px ramp. Pixels in the edge band whose
- * colour is close to the background (median colour of the non-mask pixels in the crop) are made more transparent, which
+ * color is close to the background (median color of the non-mask pixels in the crop) are made more transparent, which
  * trims the halo that low-resolution masks leave around the item.
  * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData  RGBA crop, same size as the mask
  * @param {Uint8Array} mask  w*h 0/1
@@ -562,7 +562,7 @@ export function refineMaskAlpha(imageData, mask, opts = {}) {
       a[y * w + x] = s / (2 * r + 1);
     }
   }
-  // background colour from pixels clearly outside the mask
+  // background color from pixels clearly outside the mask
   const d = imageData.data;
   const R = [], G = [], B = [];
   for (let i = 0; i < N; i += 1) {
