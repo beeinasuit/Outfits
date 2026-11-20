@@ -9,6 +9,7 @@ import { toast, sheet } from './overlay.js';
 import { buildItemForm, newDraft, draftToItem } from './itemform.js';
 import { data, saveItem, realCount, setSetting, emit } from './data.js';
 import * as store from '../store.js';
+import { upscaleMask, resampleMask, maskIsUseful } from './maskutil.js';
 
 const MIN = 0.04;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -22,6 +23,23 @@ async function vision() {
     visionMods = { ...img, ...seg, ...col };
   }
   return visionMods;
+}
+
+function cropMask(v, crop) {
+  const id = v.canvasImageData(crop, 200);
+  const bs = v.segmentItems(id, { padding: 0, maxItems: 6 }) || [];
+  let best = null;
+  for (const b of bs) if (b.mask && (!best || b.area > best.area)) best = b;
+  if (!best) return null;
+  return upscaleMask({ x: best.x, y: best.y, w: best.w, h: best.h, mask: best.mask }, crop.width / id.width, crop.height / id.height, { x: 0, y: 0, w: crop.width, h: crop.height });
+}
+
+function thumbOf(canvas, alpha) {
+  const k = Math.min(1, 240 / Math.max(canvas.width, canvas.height));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(canvas.width * k)); c.height = Math.max(1, Math.round(canvas.height * k));
+  c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
+  return alpha ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', 0.7);
 }
 
 function resetFlow() {
@@ -48,7 +66,7 @@ export function mount(root, { navigate }) {
       camInput, libInput,
       h('aside', { class: 'tip-card' }, tipArt,
         h('div', {}, h('h3', {}, 'Flat-lay trick'),
-          h('ul', {}, h('li', {}, 'Plain background (a bed sheet is perfect)'), h('li', {}, 'Items spread out and not touching'), h('li', {}, 'Shoot straight down from above'), h('li', {}, 'Daylight, no harsh shadows')))),
+          h('ul', {}, h('li', {}, 'Plain background (a bed sheet is perfect)'), h('li', {}, 'Leave a small gap between items: touching pieces merge into one'), h('li', {}, 'Shoot straight down from above'), h('li', {}, 'Daylight, no harsh shadows')))),
       h('div', { class: 'center' }, h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => addNoPhoto(), html: `${icon('plus', { size: 18 })} No photo? Add by colour` })),
       S.error ? h('p', { class: 'error-note', role: 'alert' }, S.error) : null);
   }
@@ -83,11 +101,18 @@ export function mount(root, { navigate }) {
       let boxes = [];
       try { boxes = v.segmentItems(small, {}) || []; } catch (e) { console.warn('segment failed', e); }
       const note = boxes.length ? '' : 'I couldn’t spot separate items, so I boxed the whole photo. Drag the box or add more.';
-      const norm = boxes.map((b, i) => ({ id: i + 1, x: clamp(b.x / small.width, 0, 1), y: clamp(b.y / small.height, 0, 1), w: clamp(b.w / small.width, MIN, 1), h: clamp(b.h / small.height, MIN, 1) }));
+      const norm = boxes.map((b, i) => {
+        const n = { id: i + 1, x: clamp(b.x / small.width, 0, 1), y: clamp(b.y / small.height, 0, 1), w: clamp(b.w / small.width, MIN, 1), h: clamp(b.h / small.height, MIN, 1) };
+        if (b.mask) { n._det = { x: b.x, y: b.y, w: b.w, h: b.h, mask: b.mask }; n._sig = { x: n.x, y: n.y, w: n.w, h: n.h }; }
+        return n;
+      });
+      // white balance is estimated ONCE per photo (from the whole frame's border), then applied to every crop
+      let whitePoint = null;
+      try { whitePoint = v.estimateWhitePoint(small) || null; } catch (e) { console.warn('white point failed', e); }
       if (!norm.length) norm.push({ id: 1, x: 0.05, y: 0.05, w: 0.9, h: 0.9 });
       const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.85));
       if (S.photo && S.photo.url) URL.revokeObjectURL(S.photo.url);
-      S.photo = { canvas, url: URL.createObjectURL(blob), boxes: norm, note, nextId: norm.length + 1 };
+      S.photo = { canvas, url: URL.createObjectURL(blob), boxes: norm, note, nextId: norm.length + 1, whitePoint, sw: small.width, sh: small.height };
       if (!alive) return;
       go('boxes');
     } catch (e) {
@@ -200,13 +225,30 @@ export function mount(root, { navigate }) {
         const px = { x: Math.round(b.x * P.canvas.width), y: Math.round(b.y * P.canvas.height), w: Math.max(8, Math.round(b.w * P.canvas.width)), h: Math.max(8, Math.round(b.h * P.canvas.height)) };
         const crop = v.cropCanvas(P.canvas, px);
         const id = v.canvasImageData(crop, 128);
+        const cbox = { x: px.x, y: px.y, w: crop.width, h: crop.height };
+        // mask: the photo-wide detection if the box is untouched, else re-segment the crop itself
+        let maskPx = null;
+        try {
+          const same = b._sig && Math.abs(b._sig.x - b.x) < 1e-6 && Math.abs(b._sig.y - b.y) < 1e-6 && Math.abs(b._sig.w - b.w) < 1e-6 && Math.abs(b._sig.h - b.h) < 1e-6;
+          if (same && b._det) maskPx = upscaleMask(b._det, P.canvas.width / P.sw, P.canvas.height / P.sh, cbox);
+          if (!maskIsUseful(maskPx)) maskPx = cropMask(v, crop);
+          if (!maskIsUseful(maskPx)) maskPx = null;
+        } catch (e) { console.warn('mask failed', e); maskPx = null; }
         let colors = [], pattern = 'solid';
-        try { colors = (v.extractColors(id, { maxColors: 3 }) || []).slice(0, 3); } catch (e) { console.warn(e); }
+        const copts = { maxColors: 3 };
+        if (P.whitePoint) copts.whitePoint = P.whitePoint;
+        try {
+          if (maskPx) copts.mask = resampleMask(maskPx, crop.width, crop.height, id.width, id.height);
+          colors = (v.extractColors(id, copts) || []).slice(0, 3);
+        } catch (e) { console.warn(e); }
+        if (!colors.length) { try { colors = (v.extractColors(id, { maxColors: 3 }) || []).slice(0, 3); } catch (e) { console.warn(e); } }
         try { pattern = v.guessPattern(id) || 'solid'; } catch (e) { console.warn(e); }
+        let cutout = null;
+        if (maskPx) { try { cutout = v.cutoutCanvas(P.canvas, cbox, maskPx); } catch (e) { console.warn('cutout failed', e); } }
         const ratio = px.w / px.h;
         const slot = ratio > 2.6 ? 'belt' : ratio < 0.34 ? 'neckwear' : 'top';
         const d = newDraft({ slot, colors, pattern });
-        d._crop = crop; d._thumb = crop.toDataURL('image/jpeg', 0.7);
+        d._crop = crop; d._cutout = cutout; d._thumb = thumbOf(cutout || crop, !!cutout);
         S.drafts.push(d);
       }
     } catch (e) {
@@ -227,7 +269,7 @@ export function mount(root, { navigate }) {
     const form = buildItemForm(d, { idPrefix: `r${S.cur}` });
     const dots = h('div', { class: 'dots', role: 'tablist', 'aria-label': 'Items' }, S.drafts.map((x, i) => h('button', { class: 'dot-btn', type: 'button', role: 'tab', 'aria-selected': String(i === S.cur), 'aria-label': `Item ${i + 1}`, onclick: () => { S.cur = i; render(); } })));
     const card = h('article', { class: 'rcard', 'aria-label': `Item ${S.cur + 1} of ${total}` },
-      h('div', { class: 'rcard-top' }, h('img', { class: 'crop', src: d._thumb, alt: `Cropped photo of item ${S.cur + 1}` }),
+      h('div', { class: 'rcard-top' }, h('img', { class: 'crop' + (d._cutout ? ' cut' : ''), src: d._thumb, alt: d._cutout ? `Cutout of item ${S.cur + 1}` : `Cropped photo of item ${S.cur + 1}` }),
         h('div', {}, h('b', { class: 'rcard-n' }, `Item ${S.cur + 1} of ${total}`), h('small', {}, 'Check what I guessed, fix anything off.'),
           h('button', { class: 'btn btn-small btn-danger-ghost', type: 'button', onclick: () => { S.drafts.splice(S.cur, 1); if (!S.drafts.length) { resetFlow(); go('start'); } else render(); } }, 'Skip this one'))),
       form);
@@ -246,9 +288,12 @@ export function mount(root, { navigate }) {
     try {
       const v = await vision();
       for (const d of ds) {
-        let photoId = null;
+        let photoId = null, cutoutId = null;
         try { const blob = await v.canvasToBlob(d._crop, { maxDim: 600, type: 'image/webp', quality: 0.8 }); photoId = await store.putPhoto(blob); } catch (e) { console.warn('photo save failed', e); }
-        await saveItem(draftToItem(d, { photoId }), { silent: true });
+        if (d._cutout) {
+          try { const cb = await v.canvasToBlob(d._cutout, { maxDim: 600, type: 'image/webp', quality: 0.85, alpha: true }); cutoutId = await store.putPhoto(cb); } catch (e) { console.warn('cutout save failed', e); }
+        }
+        await saveItem(draftToItem(d, { photoId, cutoutId }), { silent: true });
       }
     } catch (e) {
       console.warn(e); S.error = 'Couldn’t save everything. Check your storage space and try again.'; go('review'); toast('Couldn’t save. Storage may be full.', { tone: 'warn' }); return;

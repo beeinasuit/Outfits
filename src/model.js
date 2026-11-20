@@ -339,21 +339,30 @@ export function todayISO(d = new Date()) {
  * Unknown/missing fields get safe defaults. Never throws on odd input; clamps numbers.
  */
 export function makeItem(partial = {}) {
+  if (!partial || typeof partial !== 'object') partial = {};
   const slot = SLOTS.includes(partial.slot) ? partial.slot : 'top';
   const kinds = KINDS[slot];
-  const kind = partial.kind && kinds[partial.kind] ? partial.kind : Object.keys(kinds)[0];
+  const kind = typeof partial.kind === 'string' && Object.hasOwn(kinds, partial.kind) ? partial.kind : Object.keys(kinds)[0];
   const d = kinds[kind];
   const clamp = (v, lo, hi, dflt) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, Math.round(v))) : dflt);
   const material = MATERIALS.includes(partial.material) ? partial.material : (d.material || 'fabric');
   const isLeather = material === 'leather' || material === 'suede';
   const colors = Array.isArray(partial.colors) && partial.colors.length
-    ? partial.colors.filter((c) => c && COLOR_FAMILIES[c.family]).slice(0, 4)
+    ? partial.colors
+        .filter((c) => c && typeof c === 'object' && Object.hasOwn(COLOR_FAMILIES, c.family))
+        .map((c) => ({
+          hex: /^#[0-9a-f]{6}$/i.test(c.hex) ? c.hex.toLowerCase() : COLOR_FAMILIES[c.family].hex,
+          family: c.family,
+          weight: Number.isFinite(c.weight) ? Math.min(1, Math.max(0, c.weight)) : 1,
+        }))
+        .slice(0, 4)
     : [];
   return {
-    id: partial.id || newId(),
+    id: typeof partial.id === 'string' && /^[\w.-]{1,64}$/.test(partial.id) ? partial.id : newId(),
     slot,
     kind,
-    name: (partial.name || '').trim() || defaultName(kind, colors),
+    name: (typeof partial.name === 'string' || typeof partial.name === 'number' ? String(partial.name) : '')
+      .replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 80) || defaultName(kind, colors),
     colors: colors.length ? colors : [{ hex: COLOR_FAMILIES.grey.hex, family: 'grey', weight: 1 }],
     pattern: PATTERNS.includes(partial.pattern) ? partial.pattern : 'solid',
     formality: clamp(partial.formality, 1, 5, d.formality ?? 2),
@@ -364,10 +373,10 @@ export function makeItem(partial = {}) {
     leather: isLeather ? (LEATHER_TONES.includes(partial.leather) ? partial.leather : 'brown') : null,
     rain: typeof partial.rain === 'boolean' ? partial.rain : !!d.rain,
     available: partial.available !== false,
-    photoId: partial.photoId || null,
-    cutoutId: partial.cutoutId || null,
-    worn: Array.isArray(partial.worn) ? partial.worn.filter((s) => typeof s === 'string') : [],
-    lastWashed: typeof partial.lastWashed === 'string' ? partial.lastWashed : null,
+    photoId: typeof partial.photoId === 'string' ? partial.photoId : null,
+    cutoutId: typeof partial.cutoutId === 'string' ? partial.cutoutId : null,
+    worn: Array.isArray(partial.worn) ? [...new Set(partial.worn.filter((d) => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d)))].sort() : [],
+    lastWashed: typeof partial.lastWashed === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(partial.lastWashed) ? partial.lastWashed : null,
     wearsBeforeWash: clamp(partial.wearsBeforeWash, 0, 30, defaultWearsBeforeWash(slot, kind)),
     createdAt: Number.isFinite(partial.createdAt) ? partial.createdAt : Date.now(),
   };

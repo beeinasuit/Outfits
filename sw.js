@@ -1,14 +1,16 @@
 // Fit Machine service worker: precache the shell, network-first with cache fallback, offline after first load.
 // Bump CACHE_VERSION whenever shell files change.
-const CACHE_VERSION = 'fit-machine-v2';
+const CACHE_VERSION = 'fit-machine-v3';
 const SHELL = [
-  './', 'index.html', 'manifest.webmanifest', 'styles/app.css',
+  './', 'index.html', 'manifest.webmanifest', 'styles/app.css', 'styles/today.css', 'styles/extra.css',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
   'src/app.js', 'src/model.js', 'src/store.js',
-  'src/engine/rules.js', 'src/engine/score.js', 'src/engine/build.js',
-  'src/vision/color.js', 'src/vision/segment.js', 'src/vision/image.js',
+  'src/engine/rules.js', 'src/engine/score.js', 'src/engine/build.js', 'src/engine/taste.js',
+  'src/vision/color.js', 'src/vision/segment.js', 'src/vision/image.js', 'src/vision/skin.js',
   'src/ui/closet.js', 'src/ui/data.js', 'src/ui/dom.js', 'src/ui/fx.js', 'src/ui/icons.js', 'src/ui/illustrations.js', 'src/ui/itemart.js',
-  'src/ui/itemform.js', 'src/ui/looks.js', 'src/ui/onboarding.js', 'src/ui/overlay.js', 'src/ui/settings.js', 'src/ui/snap.js', 'src/ui/today.js', 'src/ui/battle.js', 'src/ui/plan.js', 'src/ui/profile.js', 'styles/today.css', 'styles/extra.css',
+  'src/ui/itemform.js', 'src/ui/looks.js', 'src/ui/onboarding.js', 'src/ui/overlay.js', 'src/ui/settings.js', 'src/ui/snap.js',
+  'src/ui/today.js', 'src/ui/board.js', 'src/ui/swap.js', 'src/ui/glowup.js', 'src/ui/battle.js', 'src/ui/occasions.js',
+  'src/ui/plan.js', 'src/ui/profile.js', 'src/ui/maskutil.js', 'src/ui/lazyboard.js',
 ];
 
 self.addEventListener('install', (event) => {

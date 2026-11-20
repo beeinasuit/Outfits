@@ -1,5 +1,5 @@
 // LOOKBOOK screen: best outfits for an occasion + weather, liked outfits, wardrobe gaps.
-import { SLOTS, SLOT_LABELS, OCCASIONS, WEATHER, COLOR_FAMILIES, todayISO } from '../model.js';
+import { SLOTS, SLOT_LABELS, WEATHER, COLOR_FAMILIES, todayISO, makeProfile } from '../model.js';
 import { buildOutfits, gapAnalysis } from '../engine/build.js';
 import { scoreOutfit } from '../engine/score.js';
 import { h, clear } from './dom.js';
@@ -8,6 +8,7 @@ import { mascot, illustrate } from './illustrations.js';
 import { itemArt } from './itemart.js';
 import { buzz, verdict, confetti } from './fx.js';
 import { toast, sheet } from './overlay.js';
+import { loadA, boardNode } from './lazyboard.js';
 import { data, getContext, setSetting, setFeedback, logWorn, wornToday, loadDemo } from './data.js';
 
 const SHOWN = SLOTS.filter((s) => s !== 'extra');
@@ -15,9 +16,11 @@ const SHOWN = SLOTS.filter((s) => s !== 'extra');
 export function mount(root, { navigate }) {
   let alive = true;
   let token = 0;
+  let A = null; // { renderBoard, occasionPicker }
+  let profile = null;
 
   function mini(outfit) {
-    return h('div', { class: 'mini', 'aria-hidden': 'true' }, SHOWN.map((s) => outfit.items[s]).filter(Boolean).map((it) => itemArt(it, { cls: 'tile', title: false })));
+    return boardNode(A.renderBoard, outfit.items, { size: 'card', interactive: false, profile });
   }
 
   function card(outfit, i) {
@@ -47,6 +50,7 @@ export function mount(root, { navigate }) {
     const dis = h('button', { class: 'round-btn', type: 'button', 'aria-label': 'Not for me', html: icon('down', { size: 24 }), 'aria-pressed': String(data.feedback[outfit.key] === 'dislike') });
     const wear = h('button', { class: 'btn btn-mint', type: 'button' }, wornToday(outfit) ? 'Worn today' : 'Wearing it!');
     const content = h('div', { class: 'detail' },
+      h('div', { class: 'detail-board' }, boardNode(A.renderBoard, outfit.items, { size: 'full', interactive: false, profile })),
       h('div', { class: 'detail-head' }, h('div', { class: 'stamp show instant static tone-' + v.tone }, v.label), h('span', { class: 'detail-score' }, h('b', {}, String(outfit.score)), '/100')),
       list, stickers,
       h('div', { class: 'row gap between' }, dis, wear, like));
@@ -69,12 +73,18 @@ export function mount(root, { navigate }) {
           h('button', { class: 'btn btn-ghost', type: 'button', onclick: async () => { await loadDemo(); toast('Sample closet loaded.'); } }, 'Try a sample closet'))));
       return;
     }
+    A = await loadA();
+    if (my !== token || !alive) return;
     const occ = data.settings.occasion || 'any';
+    profile = makeProfile(data.settings.profile || {}); if (!profile.enabled && !profile.cutoutId) profile = null;
     const wx = data.settings.weather || 'none';
     const chip = (label, on, fn, ico) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(on), onclick: () => { buzz(5); fn(); } }, ico ? h('span', { html: icon(ico, { size: 15 }) }) : null, label);
     const note = h('span', { class: 'ctx-note', 'aria-live': 'polite' });
     root.append(h('div', { class: 'page-head' }, h('h2', { class: 'page-title' }, 'The Lookbook'), h('span', { class: 'page-sub' }, 'Your best combinations')));
-    root.append(h('fieldset', { class: 'fld' }, h('legend', {}, 'Occasion'), h('div', { class: 'chips scroll' }, Object.entries(OCCASIONS).map(([k, o]) => chip(o.label, occ === k, () => setSetting({ occasion: k }))))));
+    root.append(h('div', { class: 'look-entries' },
+      h('a', { class: 'entry-card battle', href: '#/battle', 'data-goto': 'battle' }, h('span', { class: 'entry-emoji', 'aria-hidden': 'true' }, '🥊'), h('span', {}, h('b', {}, 'Outfit battle'), h('small', {}, 'Pick winners, teach the machine'))),
+      h('a', { class: 'entry-card plan', href: '#/plan', 'data-goto': 'plan' }, h('span', { class: 'entry-emoji', 'aria-hidden': 'true' }, '🗓️'), h('span', {}, h('b', {}, 'Plan the week'), h('small', {}, 'Seven days, no repeats')))));
+    root.append(h('fieldset', { class: 'fld' }, h('legend', {}, 'Occasion'), A.occasionPicker({ value: occ, onChange: (k) => setSetting({ occasion: k }) })));
     root.append(h('fieldset', { class: 'fld' }, h('legend', {}, 'Weather'), h('div', { class: 'chips scroll' },
       chip('Any', wx === 'none', () => setSetting({ weather: 'none' })), chip('Auto', wx === 'auto', () => setSetting({ weather: 'auto' }), 'target'),
       Object.entries(WEATHER).map(([k, w]) => chip(w.label, wx === k, () => setSetting({ weather: k })))), note));

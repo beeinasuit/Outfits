@@ -5,6 +5,9 @@ import { COLOR_FAMILIES } from '../model.js';
 const INK = '#17141f';
 let uid = 0;
 
+function escAttr(v) {
+  return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 function hexRgb(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
   const n = m ? parseInt(m[1], 16) : 0x888888;
@@ -175,7 +178,9 @@ function patternDefs(id, pattern, pc, p) {
  */
 export function illustrate(item, { title = '' } = {}) {
   const slot = MAKERS[item.slot] ? item.slot : 'top';
-  const colors = (item.colors && item.colors.length ? item.colors : [{ hex: COLOR_FAMILIES.grey.hex }]);
+  const safe = (c) => ({ ...c, hex: /^#[0-9a-f]{6}$/i.test(c?.hex || '') ? c.hex : COLOR_FAMILIES.grey.hex });
+  const colors = (Array.isArray(item.colors) && item.colors.length ? item.colors.filter(Boolean).map(safe) : [{ hex: COLOR_FAMILIES.grey.hex }]);
+  if (!colors.length) colors.push({ hex: COLOR_FAMILIES.grey.hex });
   const p = colors[0].hex;
   const dark = lum(p) < 0.35;
   const s = colors[1]?.hex || shade(p, lum(p) > 0.55 ? -0.3 : 0.35);
@@ -189,7 +194,7 @@ export function illustrate(item, { title = '' } = {}) {
   const bodies = body.map((d) => path(d, p, S)).join('');
   const overlay = pat ? `<g clip-path="url(#${id}c)"><rect width="100" height="100" fill="url(#${id}f)"/></g>${body.map((d) => path(d, 'none', S)).join('')}` : '';
   const hi = `<path d="${body[0]}" fill="none" stroke="#fff" stroke-opacity=".0"/>`;
-  return `<svg class="illo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${title}" preserveAspectRatio="xMidYMid meet"><defs>${patFill || ''}${clip}</defs>${bodies}${overlay}${det}${hi}</svg>`;
+  return `<svg class="illo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escAttr(title)}" preserveAspectRatio="xMidYMid meet"><defs>${patFill || ''}${clip}</defs>${bodies}${overlay}${det}${hi}</svg>`;
 }
 
 /** Default picker icon per slot (neutral colour). */

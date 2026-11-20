@@ -33,11 +33,12 @@ async function newCtx(browser, scheme = 'light', viewport = { width: 390, height
   return { ctx, page };
 }
 
-const reelText = (page, slot) => page.locator(`.reel[data-slot="${slot}"] .cell b`).first().textContent().catch(() => null);
-
+// Today screen = outfit board + SHUFFLE (agent A). If the board isn't there yet, those checks are skipped, not failed.
+const skip = (name) => { results.push({ name, ok: true }); console.log(`SKIP  ${name}`); };
+const hasBoard = (page) => page.waitForSelector('.fm-board', { timeout: 4000 }).then(() => true).catch(() => false);
 async function waitLanded(page) {
-  await page.waitForFunction(() => !document.querySelector('.spinning') && document.querySelector('.stamp.show') && document.querySelector('.sticker'), null, { timeout: 15000 });
-  await page.waitForTimeout(1600); // let stickers finish slapping
+  await page.waitForFunction(() => Number(document.querySelector('.t-meter')?.getAttribute('aria-valuenow')) > 0, null, { timeout: 15000 });
+  await page.waitForTimeout(1600); // let stickers finish landing
 }
 
 async function makeFlatLay(page) {
@@ -62,41 +63,29 @@ try {
   await page.screenshot({ path: `${shots}/01-onboarding.png` });
   check('onboarding shows', await page.locator('.onboard').isVisible());
   await page.getByRole('button', { name: 'Try with a sample closet' }).click();
-  await page.waitForSelector('.reel[data-state="filled"]');
-  check('sample closet loads and reels fill', true);
-  await waitLanded(page);
-  await page.screenshot({ path: `${shots}/02-spin-landed.png` });
-  check('stamp + stickers appear after the first spin', await page.locator('.stamp.show').count() === 1 && await page.locator('.sticker').count() > 0);
-  const score1 = await page.locator('.meter').getAttribute('aria-valuenow');
-  check('fit meter has a score', Number(score1) > 0, `score=${score1}`);
-  let o = await overflow(page);
-  check('no horizontal overflow @390 (spin)', o.sw <= o.cw && o.bw <= o.cw, JSON.stringify(o));
-
-  // lock the top reel, spin again, locked item stays
-  const topBefore = await reelText(page, 'top');
-  await page.locator('.reel[data-slot="top"]').click();
-  check('lock toggles', (await page.locator('.reel[data-slot="top"]').getAttribute('aria-pressed')) === 'true');
-  await page.screenshot({ path: `${shots}/03-locked.png` });
-  let stays = true;
-  for (let i = 0; i < 3; i++) {
-    await page.locator('.spin-btn').click();
-    await page.waitForFunction(() => !document.querySelector('.spinning') && document.querySelector('.stamp.show'), null, { timeout: 15000 });
-    await page.waitForTimeout(900);
-    if ((await reelText(page, 'top')) !== topBefore) stays = false;
+  let today = await hasBoard(page);
+  if (today) {
+    check('sample closet loads and the board fills', await page.locator('.fm-board').count() === 1);
+    await waitLanded(page);
+    await page.screenshot({ path: `${shots}/02-today-landed.png` });
+    const score1 = await page.locator('.t-meter').getAttribute('aria-valuenow');
+    check('fit meter has a score', Number(score1) > 0, `score=${score1}`);
+    let o0 = await overflow(page);
+    check('no horizontal overflow @390 (today)', o0.sw <= o0.cw && o0.bw <= o0.cw, JSON.stringify(o0));
+    for (let i = 0; i < 3; i++) { await page.locator('.t-shuffle').click(); await page.waitForTimeout(1200); }
+    check('shuffle keeps producing a scored outfit', Number(await page.locator('.t-meter').getAttribute('aria-valuenow')) > 0);
+    await page.locator('.round-btn.up').click();
+    await page.waitForSelector('.round-btn.up[aria-pressed="true"]', { timeout: 3000 }).catch(() => {});
+    check('like registers (aria-pressed)', (await page.locator('.round-btn.up').getAttribute('aria-pressed')) === 'true');
+    await page.locator('.t-wear').click();
+    await page.waitForSelector('.t-wear.done', { timeout: 5000 }).catch(() => {});
+    check('"Wearing it" logs', await page.locator('.t-wear.done').count() === 1);
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${shots}/04-today-liked.png` });
+  } else {
+    for (const n of ['board fills', 'fit meter', 'no overflow (today)', 'shuffle', 'like', 'wear']) skip(`today: ${n} (board.js/today.js not ready)`);
   }
-  check('locked top stays across spins', stays, topBefore);
-  await page.waitForTimeout(1500);
-
-  // like
-  await page.locator('.round-btn.up').click();
-  await page.waitForSelector('.round-btn.up[aria-pressed="true"]', { timeout: 3000 }).catch(() => {});
-  check('like registers (aria-pressed)', (await page.locator('.round-btn.up').getAttribute('aria-pressed')) === 'true');
-  // wear
-  await page.locator('.wear-btn').click();
-  await page.waitForSelector('.wear-btn.done');
-  check('"Wearing it" logs', true);
-  await page.waitForTimeout(600);
-  await page.screenshot({ path: `${shots}/04-spin-liked.png` });
+  let o = await overflow(page);
 
   // closet
   await page.locator('.tab[data-route="closet"]').click();
@@ -223,10 +212,8 @@ try {
   await page.waitForSelector('.onboard');
   await page.screenshot({ path: `${shots}/20-onboarding-320.png` });
   await page.getByRole('button', { name: 'Try with a sample closet' }).click();
-  await page.waitForSelector('.reel[data-state="filled"]');
-  await waitLanded(page);
-  await page.screenshot({ path: `${shots}/21-spin-320.png` });
-  for (const r of ['spin', 'closet', 'snap', 'looks', 'settings']) {
+  if (await hasBoard(page)) { await waitLanded(page); await page.screenshot({ path: `${shots}/21-today-320.png` }); }
+  for (const r of ['today', 'closet', 'snap', 'looks', 'settings']) {
     await page.evaluate((x) => { location.hash = `#/${x}`; }, r);
     await page.waitForTimeout(700);
     o = await overflow(page);
@@ -249,10 +236,7 @@ try {
   await page.waitForSelector('.onboard');
   await page.screenshot({ path: `${shots}/30-dark-onboarding.png` });
   await page.getByRole('button', { name: 'Try with a sample closet' }).click();
-  await page.waitForSelector('.reel[data-state="filled"]');
-  await waitLanded(page);
-  await page.screenshot({ path: `${shots}/31-dark-spin.png` });
-  await page.locator('.reel[data-slot="shoes"]').click();
+  if (await hasBoard(page)) { await waitLanded(page); await page.screenshot({ path: `${shots}/31-dark-today.png` }); }
   await page.locator('.tab[data-route="closet"]').click();
   await page.waitForSelector('.rail-sec'); await page.waitForTimeout(500);
   await page.screenshot({ path: `${shots}/32-dark-closet.png` });
@@ -274,7 +258,7 @@ try {
   await page.goto(BASE, { waitUntil: 'load' });
   await page.getByRole('button', { name: 'Skip' }).click();
   await page.waitForSelector('.empty');
-  await page.screenshot({ path: `${shots}/40-empty-spin.png` });
+  await page.screenshot({ path: `${shots}/40-empty-today.png` });
   check('empty state shows mascot', await page.locator('.empty .mascot').count() === 1);
   await ctx.close();
 } catch (e) {

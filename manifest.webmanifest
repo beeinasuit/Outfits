@@ -1,9 +1,9 @@
 {
   "name": "Fit Machine",
   "short_name": "Fit Machine",
-  "description": "The outfit slot machine: spin for outfits that actually look good together.",
+  "description": "Outfits from your real clothes, matched to each other and to you. Private and offline.",
   "id": "./",
-  "start_url": "./#/spin",
+  "start_url": "./#/today",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

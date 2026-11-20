@@ -76,6 +76,7 @@ export async function deleteItem(id) {
   const it = await kv.get('items', id).catch(() => null);
   await kv.del('items', id);
   if (it && it.photoId) await deletePhoto(it.photoId).catch(() => {});
+  if (it && it.cutoutId) await deletePhoto(it.cutoutId).catch(() => {});
 }
 
 // ---- photos ----
@@ -216,8 +217,21 @@ export function parseBackup(text) {
 
 export async function importBackup(file, { mode: how = 'merge' } = {}) {
   const text = typeof file === 'string' ? file : await file.text();
-  const b = parseBackup(text);
-  if (how === 'replace') await clearAll();
+  const b = parseBackup(text); // throws friendly errors before anything is touched
+  let snapshot = null;
+  if (how === 'replace') {
+    snapshot = await (await exportBackup()).text(); // safety net: restore this if the import fails midway
+    await clearAll();
+  }
+  try {
+    return await applyBackup(b, how);
+  } catch (e) {
+    if (snapshot) { try { await clearAll(); await applyBackup(parseBackup(snapshot), 'replace'); } catch { /* best effort */ } }
+    throw new Error('Restore failed partway, so nothing was changed. ' + (e?.name === 'QuotaExceededError' ? 'Your phone is out of storage space.' : 'The backup may be damaged.'));
+  }
+}
+
+async function applyBackup(b, how) {
   let photoCount = 0;
   for (const [id, url] of Object.entries(b.photos)) {
     try { revokePhotoURL(id); await putPhoto(dataURLToBlob(url), id); photoCount++; } catch { /* skip bad photo */ }

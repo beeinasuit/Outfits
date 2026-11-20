@@ -28,8 +28,8 @@ export function navigate(name) {
 
 function routeName() {
   const m = /^#\/([a-z]+)/.exec(location.hash);
-  if (m && ALIASES[m[1]]) return ALIASES[m[1]];
-  return m && ROUTES[m[1]] ? m[1] : 'today';
+  if (m && Object.hasOwn(ALIASES, m[1])) return ALIASES[m[1]];
+  return m && Object.hasOwn(ROUTES, m[1]) ? m[1] : 'today';
 }
 
 function render() {
@@ -62,12 +62,21 @@ async function boot() {
   showStorageBanner();
   subscribe((what) => { if (current && current.update) current.update(what); });
   window.addEventListener('hashchange', render);
+  // Surface storage/other async failures instead of failing silently.
+  let lastErr = 0;
+  window.addEventListener('unhandledrejection', (e) => {
+    console.warn(e.reason);
+    if (Date.now() - lastErr < 3000) return;
+    lastErr = Date.now();
+    const quota = e.reason && (e.reason.name === 'QuotaExceededError' || /quota/i.test(String(e.reason.message)));
+    toast(quota ? 'Your phone is out of storage space, so that change wasn’t saved.' : 'Something didn’t save. Try that again?', { tone: 'bad' });
+  });
   if (!location.hash) history.replaceState(null, '', '#/today');
   render();
   if (!data.settings.onboarded) {
     showOnboarding({
       onDone: () => setSetting({ onboarded: true }),
-      onSample: async () => { await loadDemo(); toast('Sample closet loaded. Pull the lever!'); },
+      onSample: async () => { await loadDemo(); toast('Sample closet loaded. Hit Shuffle!'); },
     });
   }
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {

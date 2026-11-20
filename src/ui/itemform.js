@@ -1,5 +1,5 @@
 // Shared item editor form: used by the Snap review cards, the closet edit sheet and "add without photo".
-import { SLOTS, SLOT_LABELS, KINDS, PATTERNS, FORMALITY, LEATHER_TONES, COLOR_FAMILIES, makeItem } from '../model.js';
+import { SLOTS, SLOT_LABELS, KINDS, PATTERNS, FORMALITY, LEATHER_TONES, COLOR_FAMILIES, makeItem, defaultWearsBeforeWash } from '../model.js';
 import { h, clear, cap } from './dom.js';
 import { icon } from './icons.js';
 import { slotIllustration } from './illustrations.js';
@@ -20,6 +20,7 @@ export function applyKindDefaults(d) {
   d.material = defs.material || 'fabric';
   d.leather = d.material === 'leather' || d.material === 'suede' ? (d.leather || 'brown') : null;
   d.rain = !!defs.rain;
+  if (!d._wwCustom) d.wearsBeforeWash = defaultWearsBeforeWash(d.slot, d.kind);
   return d;
 }
 
@@ -32,7 +33,8 @@ export function newDraft(over = {}) {
 
 export function itemToDraft(it) {
   return { id: it.id, slot: it.slot, kind: it.kind, name: it.name, colors: it.colors.map((c) => ({ ...c })), pattern: it.pattern, formality: it.formality, warmth: it.warmth,
-    beltLoops: it.beltLoops, collared: it.collared, material: it.material, leather: it.leather, rain: it.rain };
+    beltLoops: it.beltLoops, collared: it.collared, material: it.material, leather: it.leather, rain: it.rain,
+    wearsBeforeWash: it.wearsBeforeWash, _wwCustom: it.wearsBeforeWash !== defaultWearsBeforeWash(it.slot, it.kind) };
 }
 
 export const draftToItem = (d, extra = {}) => makeItem({ ...d, ...extra });
@@ -60,7 +62,7 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
     for (const s of PICKER_SLOTS) {
       slotBox.append(h('button', { class: 'slot-btn', type: 'button', 'aria-pressed': String(d.slot === s), onclick: () => {
         if (d.slot === s) return;
-        buzz(8); d.slot = s; d.kind = Object.keys(KINDS[s])[0]; applyKindDefaults(d); renderKinds(); renderExtras(); syncFormality(); renderSlot(); changed();
+        buzz(8); d.slot = s; d.kind = Object.keys(KINDS[s])[0]; applyKindDefaults(d); renderKinds(); renderExtras(); syncAll(); renderSlot(); changed();
       } }, h('span', { class: 'slot-ico', html: slotIllustration(s) }), h('span', { class: 'slot-name' }, SLOT_LABELS[s])));
     }
   };
@@ -70,7 +72,7 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
   const renderKinds = () => {
     clear(kindBox);
     for (const k of Object.keys(KINDS[d.slot])) {
-      kindBox.append(chip(cap(k), d.kind === k, () => { d.kind = k; applyKindDefaults(d); renderKinds(); renderExtras(); syncFormality(); changed(); }));
+      kindBox.append(chip(cap(k), d.kind === k, () => { d.kind = k; applyKindDefaults(d); renderKinds(); renderExtras(); syncAll(); changed(); }));
     }
   };
 
@@ -140,6 +142,25 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
     }
   };
 
+  // --- wears before wash (laundry)
+  const wwBox = h('div', { class: 'ww' });
+  const wwVal = h('output', { class: 'ww-val', 'aria-live': 'polite' });
+  const wwHint = h('small', { class: 'hint ww-hint' });
+  const syncWW = () => {
+    const def = defaultWearsBeforeWash(d.slot, d.kind);
+    const v = d.wearsBeforeWash ?? def;
+    wwVal.textContent = v === 0 ? 'Never' : `${v} wear${v === 1 ? '' : 's'}`;
+    wwHint.textContent = `0 = never goes to the hamper on its own. Usual for ${d.kind === 'socks' ? 'socks' : d.kind}: ${def === 0 ? 'never' : def}.`;
+    wwDec.disabled = v <= 0; wwInc.disabled = v >= 30;
+  };
+  const stepWW = (k) => { d.wearsBeforeWash = Math.max(0, Math.min(30, (d.wearsBeforeWash ?? defaultWearsBeforeWash(d.slot, d.kind)) + k)); d._wwCustom = true; buzz(6); syncWW(); changed(); };
+  const wwDec = h('button', { class: 'icon-btn ww-btn', type: 'button', 'aria-label': 'One fewer wear before wash', html: icon('minus'), onclick: () => stepWW(-1) });
+  const wwInc = h('button', { class: 'icon-btn ww-btn', type: 'button', 'aria-label': 'One more wear before wash', html: icon('plus'), onclick: () => stepWW(1) });
+  wwBox.append(wwDec, wwVal, wwInc);
+  const baseApply = syncFormality;
+  const syncAll = () => { baseApply(); syncWW(); };
+  syncWW();
+
   // --- name
   const nameId = `${idPrefix}-name`;
   const nameInput = h('input', { class: 'text-input', id: nameId, type: 'text', maxlength: 40, autocomplete: 'off', value: d.name || '' });
@@ -158,6 +179,7 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
     h('div', { class: 'fld' }, h('label', { class: 'legend', for: fid }, 'Dress level'), fRange, fLabel,
       h('div', { class: 'range-ticks', 'aria-hidden': 'true' }, Object.values(FORMALITY).map((t) => h('span', {}, t)))),
     extras,
+    h('fieldset', { class: 'fld' }, h('legend', {}, 'Wears before wash'), wwBox, wwHint),
     h('div', { class: 'fld' }, h('label', { class: 'legend', for: nameId }, 'Name'), nameInput),
   );
   root.refreshColors = renderColors;

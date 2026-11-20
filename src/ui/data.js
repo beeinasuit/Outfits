@@ -48,12 +48,14 @@ export async function removeItem(id) {
   const it = data.items.find((x) => x.id === id);
   if (!it) return null;
   const blob = it.photoId ? await store.getPhotoBlob(it.photoId) : null;
+  const cut = it.cutoutId ? await store.getPhotoBlob(it.cutoutId) : null;
   await store.deleteItem(id);
   data.items = data.items.filter((x) => x.id !== id);
   emit('items');
   // returns an undo function
   return async () => {
     if (it.photoId && blob) await store.putPhoto(blob, it.photoId);
+    if (it.cutoutId && cut) await store.putPhoto(cut, it.cutoutId);
     await saveItem(it);
   };
 }

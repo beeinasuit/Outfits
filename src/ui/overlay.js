@@ -39,6 +39,7 @@ export function sheet({ title, content, onClose, wide = false, label }) {
   const close = (result) => {
     if (closed) return;
     closed = true;
+    window.removeEventListener('hashchange', onNav);
     try { dlg.close(); } catch { /* ignore */ }
     dlg.remove();
     document.documentElement.classList.remove('lock-scroll');
@@ -46,6 +47,9 @@ export function sheet({ title, content, onClose, wide = false, label }) {
     onClose && onClose(result);
   };
   dlg.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+  // Navigating away (back button, tab) closes the sheet instead of leaving it floating over another screen.
+  const onNav = () => close();
+  window.addEventListener('hashchange', onNav, { once: true });
   dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
   document.body.append(dlg);
   document.documentElement.classList.add('lock-scroll');
