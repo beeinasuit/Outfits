@@ -1,7 +1,8 @@
 // Style rules. Every rule returns Reason objects { text, delta, tag }.
 // All tunable weights live in WEIGHTS below. Pure, DOM-free, deterministic.
 
-import { COLOR_FAMILIES, BUSY_PATTERNS, OCCASIONS, WEATHER, NEAR_FACE, makeProfile, outfitKey } from '../model.js';
+import { tasteDelta } from './taste.js';
+import { COLOR_FAMILIES, BUSY_PATTERNS, OCCASIONS, WEATHER, NEAR_FACE, makeProfile, makeOccasion, outfitKey } from '../model.js';
 
 export const WEIGHTS = {
   // Calibration: base is a "nothing earned, nothing wrong" outfit. Positives are EARNED (small, specific) and
@@ -19,7 +20,10 @@ export const WEIGHTS = {
   pattern: { twoBusy: -14, extraBusy: -6, busyPlusLines: -5, linesClash: -6, single: 1, graphicFormal: -8 },
   statement: { each: -6 },
   formality: { close: 3, shoesAligned: 2, spread2: -10, spread3: -20, shoes2: -9, shoes3: -14 },
-  occasion: { perLevel: -6, cap: -36, fits: 4, casualKind: -14 },
+  occasion: { perLevel: -6, cap: -36, fits: 4, avoidKind: -14,
+    preferFamily: 2, preferCap: 4, wantKind: 2.5, wantCap: 5,
+    avoidFamilyNear: -14, avoidFamilyFar: -5, avoidFamilyCap: -24,
+    mutedLoud: -8, mutedBusy: -6, mutedCap: -16, missingLayer: -8, hat: -12 },
   neckwear: { tieNoCollar: -30, tieTooCasual: -10, bowTieNotFormal: -10, bowTieCasual: -14, tieOk: 2 },
   headwear: { casualHatDressy: -6, casualHatFormal: -10, fedoraSneakers: -6 },
   shoes: { sportyWithDress: -14, sandalsFormal: -14, oxfordJeansTee: -6, oxfordJeansBlazer: 3, shortsDressy: -8, shortsBoots: -5,
@@ -57,10 +61,30 @@ const BROWNS = new Set(['brown', 'dark-brown', 'tan']);
 const TIES = new Set(['tie', 'knit tie', 'bow tie']);
 const CASUAL_HATS = new Set(['baseball cap', 'beanie', 'bucket hat']);
 const DRESSY_LAYERS = new Set(['blazer', 'suit jacket']);
-const SMART_OCCS = new Set(['work', 'date', 'formal']);
 // whatever the item's formality says, these read as gym / lounge wear at a smart occasion
 const CASUAL_KINDS = new Set(['shorts', 'athletic shorts', 'joggers', 'sweatpants', 'hoodie', 'sweatshirt', 'tank top', 'graphic tee', 'running shoes', 'sandals']);
-const OCC_PHRASE = { lounge: 'lounging', weekend: 'the weekend', date: 'date night', work: 'work', formal: 'a formal event' };
+const OCC_PHRASE = { lounge: 'lounging', weekend: 'the weekend', date: 'date night', work: 'work', formal: 'a formal event', wedding: 'a wedding',
+  funeral: 'a funeral', interview: 'a job interview', church: 'church', party: 'a night out', travel: 'a travel day', errands: 'errands',
+  outdoors: 'the outdoors', casual: 'a casual day' };
+const LOUD_FAMS = new Set(['yellow', 'orange', 'red', 'pink', 'purple', 'green', 'blue', 'mustard', 'lavender', 'teal']);
+
+/**
+ * Resolve the occasion of a context: a valid ctx.occasionDef (user-defined) wins, else OCCASIONS[ctx.occasion].
+ * Garbage definitions are ignored. Returns { key, occ, phrase }.
+ */
+export function resolveOccasion(ctx) {
+  const c = ctx || {};
+  const def = c.occasionDef;
+  if (def && typeof def === 'object' && !Array.isArray(def)) {
+    const occ = makeOccasion(def);
+    const label = occ.label.trim().toLowerCase();
+    return { key: 'custom', occ, phrase: label || 'this occasion' };
+  }
+  const key = typeof c.occasion === 'string' && Object.prototype.hasOwnProperty.call(OCCASIONS, c.occasion) ? c.occasion : 'any';
+  const occ = OCCASIONS[key];
+  return { key, occ, phrase: OC_PH(key, occ) };
+}
+function OC_PH(key, occ) { return OCC_PHRASE[key] || String(occ.label || key).toLowerCase(); }
 
 const GOOD_PAIRS = new Set([
   'navy|beige', 'navy|white', 'navy|grey', 'white|denim', 'olive|white', 'olive|beige', 'olive|navy',
@@ -110,9 +134,10 @@ export function prepare(items, ctx) {
   const g = (s) => (it[s] && typeof it[s] === 'object' ? it[s] : null);
   const P = { top: g('top'), bottom: g('bottom'), layer: g('layer'), neckwear: g('neckwear'), headwear: g('headwear'),
     shoes: g('shoes'), belt: g('belt'), extra: g('extra'), items: it, ctx: ctx || {} };
-  const occKey = OCCASIONS[P.ctx.occasion] ? P.ctx.occasion : 'any';
-  P.occKey = occKey;
-  P.occ = OCCASIONS[occKey];
+  const ro = resolveOccasion(P.ctx);
+  P.occKey = ro.key;
+  P.occ = ro.occ;
+  P.occPhrase = ro.phrase;
   const core = [P.top, P.bottom, P.layer, P.shoes].filter(Boolean);
   P.core = core;
   P.of = core.length ? Math.round(core.reduce((s, i) => s + fm(i), 0) / core.length) : 2;
@@ -270,30 +295,64 @@ export function formalityRules(P) {
 export function occasionRules(P) {
   if (P.occKey === 'any') return [];
   const out = [];
-  const { min, max } = P.occ;
-  const phrase = OCC_PHRASE[P.occKey] || P.occ.label.toLowerCase();
+  const occ = P.occ;
+  const { min, max } = occ;
+  const phrase = P.occPhrase;
+  const Wo = W.occasion;
+  const avoidKinds = new Set(occ.avoidKinds || []);
+  if (min >= 3) for (const k of CASUAL_KINDS) avoidKinds.add(k); // gym / lounge wear is wrong at any smart occasion
+  const wantKinds = new Set(occ.wantKinds || []);
+  const prefer = new Set(occ.preferFamilies || []);
+  const avoid = new Set(occ.avoidFamilies || []);
   let total = 0;
   let allIn = true;
   const checked = [P.top, P.bottom, P.layer, P.shoes, P.neckwear && TIES.has(P.neckwear.kind) ? P.neckwear : null].filter(Boolean);
   for (const i of checked) {
     const f = fm(i);
     const d = f < min ? min - f : f > max ? f - max : 0;
-    const casualKind = d === 0 && SMART_OCCS.has(P.occKey) && CASUAL_KINDS.has(i.kind);
-    if (casualKind) {
+    if (avoidKinds.has(i.kind)) {
       allIn = false;
-      const delta = W.occasion.casualKind;
-      if (total + delta >= W.occasion.cap) { total += delta; out.push(R(`${cap(nm(i))} is too casual for ${phrase}.`, delta, 'occasion-off')); }
+      const delta = Wo.avoidKind;
+      if (total + delta >= Wo.cap) { total += delta; out.push(R(`${cap(nm(i))} is not right for ${phrase}.`, delta, 'occasion-avoid')); }
       continue;
     }
     if (d > 0) {
       allIn = false;
-      const delta = W.occasion.perLevel * d;
-      if (total + delta < W.occasion.cap) continue;
+      const delta = Wo.perLevel * d;
+      if (total + delta < Wo.cap) continue;
       total += delta;
       out.push(R(`${cap(nm(i))} is too ${f < min ? 'casual' : 'dressy'} for ${phrase}.`, delta, 'occasion-off'));
     }
   }
-  if (allIn && checked.length) out.push(R(`Dress level fits ${phrase} well.`, W.occasion.fits, 'occasion-ok'));
+  if (allIn && checked.length) out.push(R(`Dress level fits ${phrase} well.`, Wo.fits, 'occasion-ok'));
+
+  // colour and kind preferences (primary colour of every piece; near-face pieces count most when avoided)
+  const pieces = [P.top, P.layer, P.neckwear, P.headwear, P.bottom, P.shoes].filter(Boolean);
+  let pref = 0; let wantK = 0; let avoidC = 0; let muted = 0;
+  const seenPref = new Set();
+  for (const i of pieces) {
+    const fam = familyOf(i);
+    const near = NEAR_FACE[i.slot] || 0;
+    if (avoid.has(fam) && avoidC > Wo.avoidFamilyCap) {
+      const delta = near ? Wo.avoidFamilyNear * near : Wo.avoidFamilyFar;
+      avoidC += delta;
+      out.push(R(`${cap(pretty(fam))} is best avoided for ${phrase}.`, delta, 'occasion-avoid-color'));
+    } else if (prefer.has(fam) && pref < Wo.preferCap && !seenPref.has(fam)) {
+      seenPref.add(fam);
+      pref += Wo.preferFamily;
+      out.push(R(`${cap(pretty(fam))} is a good fit for ${phrase}.`, Wo.preferFamily, 'occasion-prefer'));
+    }
+    if (wantKinds.has(i.kind) && wantK < Wo.wantCap) {
+      wantK += Wo.wantKind;
+      out.push(R(`${cap(nm(i))} is a good call for ${phrase}.`, Wo.wantKind, 'occasion-kind-ok'));
+    }
+    if (occ.muted && muted > Wo.mutedCap && i.slot !== 'shoes') {
+      if (LOUD_FAMS.has(fam) && !avoid.has(fam)) { muted += Wo.mutedLoud; out.push(R(`${cap(pretty(fam))} is too loud for ${phrase}; quieter colours are more respectful.`, Wo.mutedLoud, 'occasion-muted')); }
+      else if (BUSY.has(patternOf(i))) { muted += Wo.mutedBusy; out.push(R(`${cap(nm(i))} is too busy a pattern for ${phrase}.`, Wo.mutedBusy, 'occasion-muted')); }
+    }
+  }
+  if (occ.wantLayer && !P.layer) out.push(R(`A blazer or jacket is expected for ${phrase}.`, Wo.missingLayer, 'occasion-layer'));
+  if (occ.noHeadwear && P.headwear) out.push(R(`Leave the ${P.headwear.kind} at home for ${phrase}.`, Wo.hat, 'occasion-hat'));
   return out;
 }
 
@@ -532,6 +591,17 @@ export function complexionRules(P) {
   return out;
 }
 
+// ---------- learned taste (bounded by the taste module's contract) ----------
+export function tasteRules(P) {
+  if (!P.ctx.taste) return [];
+  let t;
+  try { t = tasteDelta(P.items, P.ctx.taste); } catch (e) { return []; }
+  if (!t || !Number.isFinite(t.delta) || !t.delta) return [];
+  const rs = Array.isArray(t.reasons) ? t.reasons.filter((r) => r && typeof r.text === 'string' && Number.isFinite(r.delta) && r.delta) : [];
+  return rs.length ? rs.map((r) => R(r.text, r.delta, String(r.tag || 'taste').startsWith('taste') ? r.tag : `taste-${r.tag || 'pref'}`))
+    : [R(t.delta > 0 ? 'This looks like your usual style.' : 'This is a bit outside your usual style.', t.delta, 'taste')];
+}
+
 // ---------- feedback ----------
 const hasKey = (set, k) => (set instanceof Set ? set.has(k) : Array.isArray(set) ? set.includes(k) : false);
 const sizeOf = (set) => (set instanceof Set ? set.size : Array.isArray(set) ? set.length : 0);
@@ -577,17 +647,18 @@ const CONFLICTS = {
   'pattern-ok': ['pattern-busy', 'pattern-risky'],
   'belt-casual-ok': ['belt-casual', 'belt-formality'],
   'tie-ok': ['tie-no-collar', 'tie-too-casual'],
-  'occasion-ok': ['occasion-off'],
+  'occasion-ok': ['occasion-off', 'occasion-avoid', 'occasion-avoid-color', 'occasion-muted', 'occasion-layer', 'occasion-hat'],
+  'occasion-prefer': ['occasion-avoid-color', 'occasion-avoid', 'occasion-muted'],
   polish: ['leather-clash', 'leather-near', 'formality-gap', 'formality-clash', 'formality-shoes', 'belt-formality', 'belt-casual', 'color-clash', 'pattern-busy', 'hat-casual', 'weather-footwear', 'weather-hot', 'weather-cold'],
 };
 
-const CAPPED = (r) => !r.tag.startsWith('feedback') && !r.tag.startsWith('complexion') && r.tag !== 'polish' && r.tag !== 'rain-layer';
+const CAPPED = (r) => !r.tag.startsWith('feedback') && !r.tag.startsWith('complexion') && !r.tag.startsWith('taste') && r.tag !== 'polish' && r.tag !== 'rain-layer';
 
 /** Run every rule. Returns the Reasons: conflicts resolved, earned positives capped at WEIGHTS.posCap. */
 export function evaluateRules(P) {
   let rs = [].concat(
     colorRules(P), contrastRules(P), patternRules(P), formalityRules(P), occasionRules(P),
-    neckwearRules(P), headwearRules(P), shoeRules(P), beltRules(P), weatherRules(P), polishRules(P), complexionRules(P), feedbackRules(P),
+    neckwearRules(P), headwearRules(P), shoeRules(P), beltRules(P), weatherRules(P), polishRules(P), complexionRules(P), tasteRules(P), feedbackRules(P),
   );
   const tags = new Set(rs.filter((r) => r.delta < 0).map((r) => r.tag));
   rs = rs.filter((r) => !(r.delta > 0 && CONFLICTS[r.tag] && CONFLICTS[r.tag].some((t) => tags.has(t))));

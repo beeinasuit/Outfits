@@ -2,7 +2,7 @@
 
 import { SLOTS, COLOR_FAMILIES, makeItem, outfitKey, todayISO } from '../model.js';
 import { rawScore, squash, finalizeReasons } from './score.js';
-import { leatherTone, familyOf } from './rules.js';
+import { leatherTone, familyOf, resolveOccasion } from './rules.js';
 
 const PAIR_KEEP = 40;      // top+bottom pairs kept after stage 1
 const SHOE_KEEP = 3;       // shoe options kept per pair
@@ -108,7 +108,7 @@ export function buildOutfits(items, opts = {}) {
   const { pools, locked } = prepareWardrobe(items, { ...o, __penOf: rp.penOf });
   if (!pools.top.length || !pools.bottom.length || limit === 0) return [];
 
-  const ctx = { occasion: o.occasion || 'any', weather: o.weather || null, rain: !!o.rain, feedback: o.feedback, profile: o.profile,
+  const ctx = { occasion: o.occasion || 'any', weather: o.weather || null, rain: !!o.rain, feedback: o.feedback, profile: o.profile, occasionDef: o.occasionDef, taste: o.taste,
     beltAvailable: pools.belt.length > 0 };
   const pairCtx = { ...ctx, weather: null, rain: false, beltAvailable: false };
 
@@ -166,18 +166,19 @@ export function buildOutfits(items, opts = {}) {
   // stage 3: layer / neckwear / headwear
   const w = ctx.weather;
   const cold = w === 'cold' || w === 'freezing';
-  const occ = ctx.occasion;
-  const smart = occ === 'work' || occ === 'date' || occ === 'formal';
+  const { occ } = resolveOccasion(ctx);
+  const smart = occ.min >= 3;
+  const wantLayer = occ.wantLayer === true;
   // without weather or a dressy occasion nobody asked for a coat: heavy coats are out, other layers must clearly earn their place
   const layerPool = w ? pools.layer : pools.layer.filter((l) => (l.warmth || 0) < 3 || l.rain === true);
-  const layerGain = w || smart || ctx.rain ? MIN_GAIN : LAYER_GAIN_FREE;
+  const layerGain = w || smart || wantLayer || ctx.rain ? MIN_GAIN : LAYER_GAIN_FREE;
   for (const c of cands) {
     if (!locked.layer && layerPool.length) tryAdd(c, 'layer', layerPool, layerGain);
     if (!locked.neckwear && pools.neckwear.length) {
       const pool = pools.neckwear.filter((n) => (n.kind === 'scarf' ? cold : smart && c.sel.top.collared === true));
       if (pool.length) tryAdd(c, 'neckwear', pool);
     }
-    if (!locked.headwear && pools.headwear.length && cold) tryAdd(c, 'headwear', pools.headwear);
+    if (!locked.headwear && pools.headwear.length && cold && !occ.noHeadwear) tryAdd(c, 'headwear', pools.headwear);
   }
   function tryAdd(c, slot, pool, gain = MIN_GAIN) {
     const b = best(c.sel, slot, pool, ctx);
@@ -295,7 +296,7 @@ function toItem(c, idx) {
 export function gapAnalysis(items, opts = {}) {
   const o = opts && typeof opts === 'object' ? opts : {};
   const avail = (Array.isArray(items) ? items : []).filter((i) => i && i.id && i.available !== false);
-  const base = { occasion: o.occasion, weather: o.weather, rain: o.rain, feedback: o.feedback, profile: o.profile, today: o.today, recentDays: 0,
+  const base = { occasion: o.occasion, weather: o.weather, rain: o.rain, feedback: o.feedback, profile: o.profile, occasionDef: o.occasionDef, taste: o.taste, today: o.today, recentDays: 0,
     diversity: false, limit: 400 };
   const tops = avail.filter((i) => i.slot === 'top');
   const bottoms = avail.filter((i) => i.slot === 'bottom');
@@ -320,8 +321,12 @@ export function gapAnalysis(items, opts = {}) {
     if (!catalogue.some((c) => c.slot === 'belt' && c.leather === t)) catalogue.push(cand('belt', 'leather belt', LEATHER_FAMILY[t] || 'brown', { leather: t }));
   }
 
-  const owned = (c) => avail.some((i) => i.slot === c.slot && i.kind === c.kind && familyOf(i) === (c.leather ? (LEATHER_FAMILY[c.leather] || 'brown') : c.family)
-    && (!c.leather || leatherTone(i) === c.leather));
+  // "owned" counts the laundry too (you still have it): same slot + kind and the same colour, or for belts/shoes the same leather
+  const everything = (Array.isArray(items) ? items : []).filter((i) => i && i.id);
+  const owned = (c) => (c.slot === 'belt' && c.leather && everything.some((i) => i.slot === 'belt' && leatherTone(i) === c.leather))
+    || everything.some((i) => i.slot === c.slot && i.kind === c.kind
+      && (familyOf(i) === (c.leather ? (LEATHER_FAMILY[c.leather] || 'brown') : c.family) || (c.leather && leatherTone(i) === c.leather)));
+  const noShoes = tops.length > 0 && bottoms.length > 0 && !avail.some((i) => i.slot === 'shoes');
 
   const results = [];
   catalogue.forEach((c, idx) => {
@@ -337,12 +342,14 @@ export function gapAnalysis(items, opts = {}) {
       const isNew = !b || b.score < GOOD || (c.slot === 'belt' && !b.hasBelt && out.items.bottom.beltLoops === true);
       if (isNew) pairsDone.add(k);
     }
-    const unlocks = pairsDone.size;
+    let unlocks = pairsDone.size;
     const isMismatch = c.slot === 'belt' && missing.includes(c.leather);
-    if (unlocks > 0 || isMismatch) results.push({ c, it, unlocks, isMismatch });
+    const required = noShoes && c.slot === 'shoes'; // shoes are a required slot: owning none outranks everything
+    if (required) unlocks = Math.max(unlocks, new Set(outs.filter((x) => x.score >= GOOD).map((x) => `${x.items.top.id}|${x.items.bottom.id}`)).size);
+    if (unlocks > 0 || isMismatch) results.push({ c, it, unlocks, isMismatch, required });
   });
 
-  results.sort((a, b) => (b.isMismatch - a.isMismatch) || (b.unlocks - a.unlocks) || (a.it.name < b.it.name ? -1 : 1));
+  results.sort((a, b) => (b.required - a.required) || (b.isMismatch - a.isMismatch) || (b.unlocks - a.unlocks) || (a.it.name < b.it.name ? -1 : 1));
   return results.filter((r) => r.unlocks > 0 || r.isMismatch).slice(0, 5).map(({ c, it, unlocks, isMismatch }) => {
     const n = unlocks === 1 ? '1 outfit' : `${unlocks} outfits`;
     const plural = /s$/.test(c.kind);
