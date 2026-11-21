@@ -12,11 +12,12 @@ import { mount as closet } from './ui/closet.js';
 import { mount as snap } from './ui/snap.js';
 import { mount as looks } from './ui/looks.js';
 import { mount as settings } from './ui/settings.js';
+import { mount as check } from './ui/check.js';
 import { setSetting } from './ui/data.js';
 
-const ROUTES = { today, closet, snap, looks, settings, battle, plan, profile };
+const ROUTES = { today, closet, snap, looks, settings, battle, plan, profile, check };
 const ALIASES = { spin: 'today' };
-const TITLES = { today: 'Today', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings', battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colors' };
+const TITLES = { today: 'Today', closet: 'Closet', snap: 'Add clothes', looks: 'Lookbook', settings: 'Settings', battle: 'Outfit battle', plan: 'Plan the week', profile: 'Your colors', check: 'Rate my fit' };
 let current = null;
 let currentName = null;
 let first = true;

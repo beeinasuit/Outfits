@@ -4,15 +4,15 @@ import { makeItem, makeProfile, makeOccasion, needsWash, OCCASIONS, COLOR_FAMILI
 import { learnTaste } from '../engine/taste.js';
 import { prefs } from './fx.js';
 
-export const data = { items: [], feedback: {}, records: [], settings: {}, events: [], taste: null, ready: false };
+export const data = { items: [], feedback: {}, records: [], settings: {}, events: [], checks: [], taste: null, ready: false };
 const listeners = new Set();
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 export function emit(what = 'items') { for (const fn of [...listeners]) { try { fn(what); } catch (e) { console.error(e); } } }
 
 export async function load() {
   await store.init();
-  const [items, feedback, records, settings, events] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings(), store.listEvents()]);
-  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings; data.events = events; data.ready = true;
+  const [items, feedback, records, settings, events, checks] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings(), store.listEvents(), store.listChecks()]);
+  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings; data.events = events; data.checks = checks; data.ready = true;
   data.taste = learnTaste(events);
   prefs.haptics = settings.haptics !== false;
   applyTheme();
@@ -61,8 +61,8 @@ export async function removeItem(id) {
 }
 
 export async function reload() {
-  const [items, feedback, records, settings, events] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings(), store.listEvents()]);
-  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings; data.events = events;
+  const [items, feedback, records, settings, events, checks] = await Promise.all([store.listItems(), store.getFeedback(), store.listFeedback(), store.getSettings(), store.listEvents(), store.listChecks()]);
+  data.items = items; data.feedback = feedback; data.records = records; data.settings = settings; data.events = events; data.checks = checks;
   data.taste = learnTaste(events);
   prefs.haptics = settings.haptics !== false;
   applyTheme();
@@ -160,6 +160,29 @@ export async function logWorn(outfit) {
   emit('items');
   return { hampered };
 }
+// ---------- fit checks ----------
+/** Save a fit check (photoBlob optional). Returns the stored record. */
+export async function saveCheck(check, photoBlob = null) {
+  let rec = { ...check };
+  if (photoBlob) rec.photoId = await store.putPhoto(photoBlob);
+  rec = await store.putCheck(rec);
+  data.checks = [rec, ...data.checks.filter((c) => c.id !== rec.id)].sort((a, b) => b.createdAt - a.createdAt);
+  emit('checks');
+  return rec;
+}
+export async function removeCheck(id) {
+  await store.deleteCheck(id);
+  data.checks = data.checks.filter((c) => c.id !== id);
+  emit('checks');
+}
+/** Resolve a check's pieces to item objects (closet items if they still exist, else extras). */
+export function checkItems(check) {
+  const out = {};
+  for (const [slot, id] of Object.entries(check.itemIds || {})) { const it = data.items.find((x) => x.id === id); if (it) out[slot] = it; }
+  for (const [slot, it] of Object.entries(check.extras || {})) if (!out[slot]) out[slot] = it;
+  return out;
+}
+
 export const wornToday = (outfit) => Object.values(outfit.items).filter(Boolean).every((it) => (data.items.find((x) => x.id === it.id) || it).worn.includes(todayISO()));
 
 // ---------- weather ----------
