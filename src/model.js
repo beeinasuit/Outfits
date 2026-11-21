@@ -339,6 +339,35 @@ export function todayISO(d = new Date()) {
  * Build a fully-populated Item from a partial one, applying KINDS defaults.
  * Unknown/missing fields get safe defaults. Never throws on odd input; clamps numbers.
  */
+/**
+ * A fit check: a photo of what the user actually wore, matched to closet items and scored.
+ * itemIds: { slot: closetItemId } for pieces matched to the closet.
+ * extras:  { slot: item } for pieces NOT in the closet (made with makeItem; never saved to the closet).
+ * mood: how the user felt in it ('love' | 'ok' | 'meh' | null).
+ * roast: the roast text shown for a low score (saved so the diary shows the same one).
+ */
+export function makeCheck(c) {
+  if (!c || typeof c !== 'object') return null;
+  const id = typeof c.id === 'string' && /^[\w.-]{1,64}$/.test(c.id) ? c.id : newId();
+  const date = typeof c.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(c.date) ? c.date : todayISO();
+  const itemIds = {}, extras = {};
+  for (const slot of SLOTS) {
+    const v = c.itemIds?.[slot];
+    if (typeof v === 'string' && /^[\w.-]{1,64}$/.test(v)) itemIds[slot] = v;
+    else if (c.extras?.[slot] && typeof c.extras[slot] === 'object') extras[slot] = makeItem({ ...c.extras[slot], slot });
+  }
+  const score = Number.isFinite(c.score) ? Math.max(0, Math.min(100, Math.round(c.score))) : null;
+  return {
+    id, date, createdAt: Number.isFinite(c.createdAt) ? c.createdAt : Date.now(),
+    photoId: typeof c.photoId === 'string' ? c.photoId : null,
+    itemIds, extras, score,
+    occasion: typeof c.occasion === 'string' ? c.occasion.slice(0, 40) : 'any',
+    mood: ['love', 'ok', 'meh'].includes(c.mood) ? c.mood : null,
+    note: typeof c.note === 'string' ? c.note.replace(/[\u0000-\u001f]/g, ' ').slice(0, 200) : '',
+    roast: typeof c.roast === 'string' ? c.roast.replace(/[\u0000-\u0009\u000b-\u001f]/g, ' ').slice(0, 400) : '',
+  };
+}
+
 /** Older saves used the British key 'grey'; map it to the current 'gray'. */
 export const canonFamily = (f) => (f === 'grey' ? 'gray' : f);
 

@@ -44,3 +44,25 @@ export function maskIsUseful(mask) {
   const f = on / mask.length;
   return f > 0.04 && f < 0.985;
 }
+
+/**
+ * Background removal for one standalone crop (a canvas): segments it as a single item and cuts it out.
+ * `v` is the loaded vision module ({canvasImageData, segmentCrop, cutoutCanvas}).
+ * @returns {{cutout:(HTMLCanvasElement|OffscreenCanvas|null), quality:(object|null), confident:boolean}}
+ *   cutout is null when no clean outline was found (the whole crop is the item).
+ */
+export function cutoutFromCrop(v, canvas) {
+  const none = { cutout: null, quality: null, confident: false };
+  try {
+    const id = v.canvasImageData(canvas, 200);
+    const r = v.segmentCrop(id);
+    if (!r || r.full || !r.mask) return { ...none, quality: r ? r.quality : null };
+    const w = canvas.width, h = canvas.height;
+    const mask = resampleMask(r.mask, id.width, id.height, w, h);
+    if (!maskIsUseful(mask)) return { ...none, quality: r.quality };
+    const cutout = v.cutoutCanvas(canvas, { x: 0, y: 0, w, h }, mask);
+    return { cutout, quality: r.quality, confident: !!(r.quality && r.quality.ok && r.quality.fill >= 0.3) };
+  } catch (e) {
+    return none;
+  }
+}

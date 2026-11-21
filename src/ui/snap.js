@@ -11,6 +11,9 @@ import { data, saveItem, realCount, setSetting, emit } from './data.js';
 import * as store from '../store.js';
 import { upscaleMask, resampleMask, maskIsUseful } from './maskutil.js';
 
+const CUT_NOTE_UNSURE = 'I wasn’t sure about this cutout, so I kept your photo. Tap “Background removed” to try it.';
+const CUT_NOTE_NONE = 'I couldn’t find a clean outline here, so I’m keeping your photo.';
+
 const MIN = 0.04;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 // Flow state survives tab switches.
@@ -25,13 +28,13 @@ async function vision() {
   return visionMods;
 }
 
+/** Mask for an edited box: segment the crop itself, as one item. Returns {mask,quality} or null (nothing clean). */
 function cropMask(v, crop) {
   const id = v.canvasImageData(crop, 200);
-  const bs = v.segmentItems(id, { padding: 0, maxItems: 6 }) || [];
-  let best = null;
-  for (const b of bs) if (b.mask && (!best || b.area > best.area)) best = b;
-  if (!best) return null;
-  return upscaleMask({ x: best.x, y: best.y, w: best.w, h: best.h, mask: best.mask }, crop.width / id.width, crop.height / id.height, { x: 0, y: 0, w: crop.width, h: crop.height });
+  const r = v.segmentCrop(id);
+  if (!r || r.full || !r.mask) return null;
+  const mask = resampleMask(r.mask, id.width, id.height, crop.width, crop.height);
+  return maskIsUseful(mask) ? { mask, quality: r.quality } : null;
 }
 
 function thumbOf(canvas, alpha) {
@@ -228,28 +231,37 @@ export function mount(root, { navigate }) {
         const id = v.canvasImageData(crop, 128);
         const cbox = { x: px.x, y: px.y, w: crop.width, h: crop.height };
         // mask: the photo-wide detection if the box is untouched, else re-segment the crop itself
-        let maskPx = null;
+        let maskPx = null, quality = null;
         try {
           const same = b._sig && Math.abs(b._sig.x - b.x) < 1e-6 && Math.abs(b._sig.y - b.y) < 1e-6 && Math.abs(b._sig.w - b.w) < 1e-6 && Math.abs(b._sig.h - b.h) < 1e-6;
-          if (same && b._det) maskPx = upscaleMask(b._det, P.canvas.width / P.sw, P.canvas.height / P.sh, cbox);
-          if (!maskIsUseful(maskPx)) maskPx = cropMask(v, crop);
-          if (!maskIsUseful(maskPx)) maskPx = null;
-        } catch (e) { console.warn('mask failed', e); maskPx = null; }
+          if (same && b._det) {
+            maskPx = upscaleMask(b._det, P.canvas.width / P.sw, P.canvas.height / P.sh, cbox);
+            if (maskPx) quality = v.maskQuality(b._det.mask, b._det.w, b._det.h);
+          }
+          if (!maskIsUseful(maskPx) || !(quality && quality.ok)) {      // none, or a doubtful one: ask the crop itself
+            const r = cropMask(v, crop);
+            if (r && (!maskIsUseful(maskPx) || r.quality.ok)) { maskPx = r.mask; quality = r.quality; }
+          }
+          if (!maskIsUseful(maskPx)) { maskPx = null; quality = null; }
+        } catch (e) { console.warn('mask failed', e); maskPx = null; quality = null; }
+        const ratio = px.w / px.h;
+        const slot = ratio > 2.6 ? 'belt' : ratio < 0.34 ? 'neckwear' : 'top';
+        // confident = a solid, single-piece outline (thin belts and scarves are legitimately low-fill)
+        const confident = !!(maskPx && quality && quality.ok && (quality.fill >= 0.3 || slot !== 'top'));
         let colors = [], pattern = 'solid';
         const copts = { maxColors: 3 };
         if (P.whitePoint) copts.whitePoint = P.whitePoint;
         try {
-          if (maskPx) copts.mask = resampleMask(maskPx, crop.width, crop.height, id.width, id.height);
+          if (maskPx && confident) copts.mask = resampleMask(maskPx, crop.width, crop.height, id.width, id.height);   // a carved mask would skew the colors
           colors = (v.extractColors(id, copts) || []).slice(0, 3);
         } catch (e) { console.warn(e); }
         if (!colors.length) { try { colors = (v.extractColors(id, { maxColors: 3 }) || []).slice(0, 3); } catch (e) { console.warn(e); } }
         try { pattern = v.guessPattern(id) || 'solid'; } catch (e) { console.warn(e); }
         let cutout = null;
         if (maskPx) { try { cutout = v.cutoutCanvas(P.canvas, cbox, maskPx); } catch (e) { console.warn('cutout failed', e); } }
-        const ratio = px.w / px.h;
-        const slot = ratio > 2.6 ? 'belt' : ratio < 0.34 ? 'neckwear' : 'top';
         const d = newDraft({ slot, colors, pattern });
-        d._crop = crop; d._cutout = cutout; d._thumb = thumbOf(cutout || crop, !!cutout);
+        d._crop = crop; d._cutout = cutout; d._cutOk = !!(cutout && confident); d._useCut = d._cutOk;
+        d._thumbPlain = thumbOf(crop, false); d._thumbCut = cutout ? thumbOf(cutout, true) : null;
         S.drafts.push(d);
       }
     } catch (e) {
@@ -261,6 +273,31 @@ export function mount(root, { navigate }) {
     go('review');
   }
 
+  // ---------- review: background removed / original photo ----------
+  /** Live preview image + a two-way toggle (>= 44px targets). Returns {img, el}. */
+  function cutPicker(d) {
+    const has = !!(d._cutout && d._thumbCut);
+    const n = S.cur + 1;
+    const img = h('img', { class: 'crop', alt: '' });
+    const note = h('p', { class: 'cut-note', role: 'status', 'aria-live': 'polite' });
+    const mk = (label, on) => h('button', { class: 'bg-opt', type: 'button', role: 'radio', 'aria-checked': 'false', onclick: () => set(on) },
+      h('span', { class: 'bg-ico', 'aria-hidden': 'true', html: icon('check', { size: 16, sw: 3.4 }) }), label);
+    const bOn = mk('Background removed', true), bOff = mk('Original photo', false);
+    if (!has) { bOn.disabled = true; bOn.title = 'No clean outline found'; }
+    const paint = () => {
+      const on = has && !!d._useCut;
+      img.src = on ? d._thumbCut : d._thumbPlain;
+      img.className = 'crop' + (on ? ' cut' : '');
+      img.alt = on ? `Cutout of item ${n}` : `Cropped photo of item ${n}`;
+      bOn.setAttribute('aria-checked', String(on)); bOff.setAttribute('aria-checked', String(!on));
+      note.textContent = !has ? CUT_NOTE_NONE : !on && !d._cutOk && !d._touched ? CUT_NOTE_UNSURE : on ? 'Edges look off? Tap “Original photo”.' : '';
+    };
+    function set(on) { if (on && !has) return; d._useCut = on; d._touched = true; buzz(8); paint(); }
+    paint();
+    const el = h('div', { class: 'bg-pick' }, h('div', { class: 'bg-seg', role: 'radiogroup', 'aria-label': `Photo style for item ${n}` }, bOn, bOff), note);
+    return { img, el };
+  }
+
   // ---------- review ----------
   function reviewView() {
     const total = S.drafts.length;
@@ -269,10 +306,12 @@ export function mount(root, { navigate }) {
     const saveAll = h('button', { class: 'btn btn-big btn-tomato', type: 'button', onclick: () => saveDrafts() }, `Save all (${total})`);
     const form = buildItemForm(d, { idPrefix: `r${S.cur}` });
     const dots = h('div', { class: 'dots', role: 'tablist', 'aria-label': 'Items' }, S.drafts.map((x, i) => h('button', { class: 'dot-btn', type: 'button', role: 'tab', 'aria-selected': String(i === S.cur), 'aria-label': `Item ${i + 1}`, onclick: () => { S.cur = i; render(); } })));
+    const cutBox = cutPicker(d);
     const card = h('article', { class: 'rcard', 'aria-label': `Item ${S.cur + 1} of ${total}` },
-      h('div', { class: 'rcard-top' }, h('img', { class: 'crop' + (d._cutout ? ' cut' : ''), src: d._thumb, alt: d._cutout ? `Cutout of item ${S.cur + 1}` : `Cropped photo of item ${S.cur + 1}` }),
+      h('div', { class: 'rcard-top' }, cutBox.img,
         h('div', {}, h('b', { class: 'rcard-n' }, `Item ${S.cur + 1} of ${total}`), h('small', {}, 'Check what I guessed, fix anything off.'),
           h('button', { class: 'btn btn-small btn-danger-ghost', type: 'button', onclick: () => { S.drafts.splice(S.cur, 1); if (!S.drafts.length) { resetFlow(); go('start'); } else render(); } }, 'Skip this one'))),
+      cutBox.el,
       form);
     return h('div', { class: 'review' },
       h('div', { class: 'stepper' },
@@ -291,7 +330,7 @@ export function mount(root, { navigate }) {
       for (const d of ds) {
         let photoId = null, cutoutId = null;
         try { const blob = await v.canvasToBlob(d._crop, { maxDim: 600, type: 'image/webp', quality: 0.8 }); photoId = await store.putPhoto(blob); } catch (e) { console.warn('photo save failed', e); }
-        if (d._cutout) {
+        if (d._cutout && d._useCut) {
           try { const cb = await v.canvasToBlob(d._cutout, { maxDim: 600, type: 'image/webp', quality: 0.85, alpha: true }); cutoutId = await store.putPhoto(cb); } catch (e) { console.warn('cutout save failed', e); }
         }
         await saveItem(draftToItem(d, { photoId, cutoutId }), { silent: true });

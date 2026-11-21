@@ -287,3 +287,37 @@ with a reset.
 - `laundryDay()` → number of items that came out of the hamper; `setClean(item, bool)`.
 - Settings keys: `autoHamper`, `useTaste`, `profile` (Profile), `customOccasions`, `plan` ({ 'YYYY-MM-DD': { occasion, slots:{slot:id} } }).
 - Backups include `events`; selfie photos only when `profile.includeSelfieInBackup`.
+
+## Fit check ("Rate what I'm wearing")
+
+The user takes a mirror photo of what they are wearing today. The app works out which closet pieces they have on,
+scores the outfit, tells them how it looks on them (complexion), and keeps a diary of the photos.
+
+**Route:** `#/check` (`src/ui/check.js`). Entry points: a button on Today ("📸 Rate what I'm wearing") and the Lookbook diary.
+
+**Data (owned by Opus, already built):**
+- `model.makeCheck(c)` normalizes `{ id, date, createdAt, photoId, itemIds:{slot:id}, extras:{slot:item}, score, occasion, mood:'love'|'ok'|'meh'|null, note }`
+  plus `roast` (string ≤ 400 chars). Bad scores get roasted (src/engine/roast.js, honest + clean, grounded in real reasons; setting `roast`, default on)..
+  `extras` are pieces the user is wearing that are not in the closet (built with `makeItem`, never added to the closet unless the user taps "Add to closet").
+- `store.listChecks / putCheck / deleteCheck` (IndexedDB store `checks`, DB v3; included in backups with their photos).
+- `data.checks`, `saveCheck(check, photoBlob)`, `removeCheck(id)`, `checkItems(check) -> {slot:item}`; emits `'checks'`.
+
+**Vision (`src/vision/wearing.js`, pure, Node-testable):**
+`analyzeWearing(imageData, { guide }) -> { ok, reason?, person:{x,y,w,h}, bands: { top:{box, colors, pattern}, bottom:{...}, shoes:{...}, layer?:{...} } }`
+- No AI. The user frames themselves inside an on-screen body guide (camera) or drags band handles over an uploaded photo
+  (neck / waist / hem / ankles). `guide` gives those fractions; defaults suit a head-to-toe mirror selfie.
+- Background is modeled from the left/right edges of each band (not the top/bottom of the frame); the person is the
+  central column that differs from it. Colors use `color.js` (`extractColors`, white-balance via `estimateWhitePoint`), pattern via the existing guesser.
+- Never throws; returns `ok:false` with a friendly reason for unusable input (tiny, blank, no person found).
+
+**Matching:** for each band, rank closet items in the matching slot by color distance (ΔE of primary color, then
+secondary colors), pattern agreement, and recency (worn today/yesterday is a small boost — people re-wear).
+Top 3 per slot are shown; the user confirms with one tap or picks another / "Not in my closet" (creates an extra from the band colors and a chosen kind).
+Accessories the camera can't see well (belt, neckwear, headwear) are offered as optional pickers.
+
+**Scoring and feedback:** `scoreOutfit(items, await getContext())` (occasion + complexion + taste apply).
+Show the score, the good reasons, the fixes, a "how it looks on you" line from the complexion rules
+(near-face colors vs `profile`), and the best single swap from the closet via `rankForSlot` ("Swap the sneakers for the brown loafers: +9").
+"Log it": saves the check, and `logWorn` for the matched closet pieces (auto-hamper applies). Mood (😍 / 🙂 / 😕) maps to a like / — / dislike taste event.
+
+**Diary:** Lookbook gets a "Fit checks" strip: photo, date, score; tap opens the detail with delete.

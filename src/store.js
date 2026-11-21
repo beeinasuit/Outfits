@@ -1,19 +1,19 @@
 // Persistence: IndexedDB (items, photos, feedback, settings) with an in-memory fallback.
 // Everything is wrapped in try/catch; if IndexedDB is unavailable (private mode) the app keeps working
 // for the session and shows a warning banner (see `storageInfo()`).
-import { makeItem, newId, todayISO, SLOTS } from './model.js';
+import { makeItem, makeCheck, newId, todayISO, SLOTS } from './model.js';
 
 const DB_NAME = 'fit-machine';
-const DB_VERSION = 2;
-const KEYS = { items: 'id', photos: 'id', feedback: 'key', settings: 'k', events: 'id' };
+const DB_VERSION = 3;
+const KEYS = { items: 'id', photos: 'id', feedback: 'key', settings: 'k', events: 'id', checks: 'id' };
 export const MAX_EVENTS = 5000;
-const DEFAULT_SETTINGS = { onboarded: false, autoHamper: true, useTaste: true, profile: null, customOccasions: {}, plan: {}, occasion: 'any', weather: 'none', theme: 'auto', haptics: true, shake: false, lastBackup: null, remindedAt: 0 };
+const DEFAULT_SETTINGS = { onboarded: false, autoHamper: true, useTaste: true, profile: null, customOccasions: {}, plan: {}, occasion: 'any', weather: 'none', theme: 'auto', roast: true, haptics: true, shake: false, lastBackup: null, remindedAt: 0 };
 
 let db = null;
 let mode = 'idb';
 let reason = '';
 let initPromise = null;
-const mem = { items: new Map(), photos: new Map(), feedback: new Map(), settings: new Map(), events: new Map() };
+const mem = { items: new Map(), photos: new Map(), feedback: new Map(), settings: new Map(), events: new Map(), checks: new Map() };
 const urlCache = new Map();
 
 export function storageInfo() { return { mode, persistent: mode === 'idb', reason }; }
@@ -138,6 +138,17 @@ export async function listEvents() {
 }
 export async function clearEvents() { try { await kv.clear('events'); } catch { /* ignore */ } }
 
+// ---- fit checks (photos of what you actually wore) ----
+export async function listChecks() {
+  try { return (await kv.all('checks')).map(makeCheck).filter(Boolean).sort((a, b) => b.createdAt - a.createdAt); } catch { return []; }
+}
+export async function putCheck(check) { const c = makeCheck(check); if (!c) throw new Error('Invalid fit check'); await kv.put('checks', c); return c; }
+export async function deleteCheck(id) {
+  const c = await kv.get('checks', id);
+  if (c?.photoId) await deletePhoto(c.photoId);
+  await kv.del('checks', id);
+}
+
 // ---- settings ----
 export async function getSettings() {
   try { const out = { ...DEFAULT_SETTINGS }; for (const r of await kv.all('settings')) out[r.k] = r.v; return out; } catch { return { ...DEFAULT_SETTINGS }; }
@@ -170,9 +181,9 @@ function dataURLToBlob(url) {
 export function backupFileName(d = new Date()) { return `fit-machine-backup-${todayISO(d)}.json`; }
 
 export async function exportBackup() {
-  const [items, feedback, settings, photoRecs, events] = await Promise.all([listItems(), listFeedback(), getSettings(), kv.all('photos'), listEvents()]);
+  const [items, feedback, settings, photoRecs, events, checks] = await Promise.all([listItems(), listFeedback(), getSettings(), kv.all('photos'), listEvents(), listChecks()]);
   const photos = {};
-  const wanted = new Set(items.flatMap((i) => [i.photoId, i.cutoutId]).filter(Boolean));
+  const wanted = new Set([...items.flatMap((i) => [i.photoId, i.cutoutId]), ...checks.map((c) => c.photoId)].filter(Boolean));
   const prof = settings.profile;
   if (prof && prof.includeSelfieInBackup) { if (prof.selfieId) wanted.add(prof.selfieId); if (prof.cutoutId) wanted.add(prof.cutoutId); }
   for (const r of photoRecs) {
@@ -181,7 +192,7 @@ export async function exportBackup() {
   }
   const { lastBackup, remindedAt, ...keep } = settings; // eslint-disable-line no-unused-vars
   if (keep.profile && !keep.profile.includeSelfieInBackup) keep.profile = { ...keep.profile, selfieId: null, cutoutId: null };
-  const payload = { app: 'fit-machine', version: 1, exportedAt: new Date().toISOString(), items, feedback, settings: keep, photos, events };
+  const payload = { app: 'fit-machine', version: 1, exportedAt: new Date().toISOString(), items, feedback, settings: keep, photos, events, checks };
   return new Blob([JSON.stringify(payload)], { type: 'application/json' });
 }
 
@@ -212,7 +223,8 @@ export function parseBackup(text) {
   const events = Array.isArray(data.events)
     ? data.events.filter((e) => e && typeof e === 'object' && ['battle', 'like', 'dislike', 'wear'].includes(e.type)).slice(-MAX_EVENTS)
     : [];
-  return { items, feedback, photos, settings, skipped, events };
+  const checks = Array.isArray(data.checks) ? data.checks.map(makeCheck).filter(Boolean) : [];
+  return { items, feedback, photos, settings, skipped, events, checks };
 }
 
 export async function importBackup(file, { mode: how = 'merge' } = {}) {
@@ -239,6 +251,7 @@ async function applyBackup(b, how) {
   for (const it of b.items) await putItem(it);
   for (const r of b.feedback) await kv.put('feedback', r);
   for (const e of b.events) await appendEvent(e);
+  for (const c of b.checks || []) await kv.put('checks', c);
   const { onboarded, ...rest } = b.settings; // eslint-disable-line no-unused-vars
   await putSettings({ ...(how === 'replace' ? rest : {}), onboarded: true });
   return { items: b.items.length, photos: photoCount, skipped: b.skipped };

@@ -147,6 +147,20 @@ try {
   check('review card shows a cutout', await page.locator('.rcard .crop.cut').count() === 1);
   await page.waitForTimeout(300);
   await page.screenshot({ path: `${shots}/05-snap-review-cutout.png` });
+  // background toggle: removed <-> original photo, live preview, big targets
+  const optBox = await page.locator('.rcard .bg-opt').first().boundingBox();
+  check('bg toggle targets are at least 44px', !!optBox && optBox.height >= 44 && optBox.width >= 44, JSON.stringify(optBox));
+  const radio = (n) => page.getByRole('radio', { name: n });
+  check('clean cutout starts on "Background removed"', (await radio('Background removed').getAttribute('aria-checked')) === 'true');
+  await radio('Original photo').click();
+  check('"Original photo" previews the plain crop', await page.locator('.rcard .crop.cut').count() === 0 && (await radio('Original photo').getAttribute('aria-checked')) === 'true');
+  await page.screenshot({ path: `${shots}/05b-snap-review-original.png` });
+  await radio('Background removed').click();
+  check('switching back restores the cutout preview', await page.locator('.rcard .crop.cut').count() === 1);
+  // item 2 is saved with the original photo only
+  await page.getByRole('button', { name: 'Next item' }).click();
+  await radio('Original photo').click();
+  check('item 2 now shows the plain crop', await page.locator('.rcard .crop.cut').count() === 0);
   const before = await D(page, `return m.data.items.length`);
   await page.getByRole('button', { name: /^Save all/ }).click();
   await page.waitForSelector('.rail-sec', { timeout: 20000 });
@@ -165,10 +179,57 @@ try {
     }
     return { n: mine.length, out };`);
   check('snap saved items with photo', sn.n >= 2, `n=${sn.n}`);
-  check('every snapped item has a cutoutId', sn.out.every((o) => o.cut), JSON.stringify(sn.out));
-  check('cutouts are webp/png with real alpha', sn.out.every((o) => /image\/(webp|png)/.test(o.type) && o.transparent && o.opaque), JSON.stringify(sn.out.map((o) => [o.type, o.transparent, o.opaque])));
+  check('snapped items keep their cutout, except the one switched to the original photo', sn.out.filter((o) => o.cut).length === sn.n - 1 && sn.out.filter((o) => !o.cut).length === 1, JSON.stringify(sn.out));
+  const cuts = sn.out.filter((o) => o.cut);
+  check('cutouts are webp/png with real alpha', cuts.length >= 1 && cuts.every((o) => /image\/(webp|png)/.test(o.type) && o.transparent && o.opaque), JSON.stringify(cuts.map((o) => [o.type, o.transparent, o.opaque])));
   check('items count grew', (await D(page, `return m.data.items.length`)) > before);
   await page.screenshot({ path: `${shots}/06-closet-after-snap.png` });
+
+  // ---- closet edit sheet: Background removed on/off, later
+  const cutItem = await D(page, `const it = m.data.items.find(i => !i.id.startsWith('demo-') && i.cutoutId); return it ? { id: it.id, name: it.name, cutoutId: it.cutoutId } : null;`);
+  check('there is a cut-out item to edit', !!cutItem);
+  const openEdit = async (name) => {
+    await go(page, 'closet', 500);
+    await page.evaluate((n) => { [...document.querySelectorAll('.hang-item')].find((e) => (e.getAttribute('aria-label') || '').startsWith(n)).click(); }, name);
+    await page.waitForSelector('dialog.sheet[open] .bg-opt');
+  };
+  const sheetRadio = (n) => page.locator('dialog.sheet[open]').getByRole('radio', { name: n });
+  await openEdit(cutItem.name);
+  check('edit sheet shows "Background removed" selected', (await sheetRadio('Background removed').getAttribute('aria-checked')) === 'true');
+  await page.screenshot({ path: `${shots}/05c-edit-background.png` });
+  await sheetRadio('Original photo').click();
+  await page.locator('dialog.sheet').getByRole('button', { name: 'Save changes' }).click();
+  await page.waitForTimeout(500);
+  const off = await D(page, `const it = m.data.items.find(i => i.id === a.id); const store = await import('./src/store.js'); return { cutoutId: it.cutoutId, photo: !!it.photoId, oldBlob: !!(await store.getPhotoBlob(a.cutoutId)) };`, cutItem);
+  check('turning the background off clears cutoutId and deletes that photo', off.cutoutId === null && off.photo && off.oldBlob === false, JSON.stringify(off));
+  await openEdit(cutItem.name);
+  check('edit sheet reopens on "Original photo"', (await sheetRadio('Original photo').getAttribute('aria-checked')) === 'true');
+  await sheetRadio('Background removed').click();
+  await page.waitForFunction(() => document.querySelector('dialog.sheet[open] .bg-opt[aria-checked="true"]') && /removed/i.test(document.querySelector('dialog.sheet[open] .bg-opt[aria-checked="true"]').textContent), null, { timeout: 15000 }).catch(() => {});
+  const onNow = (await sheetRadio('Background removed').getAttribute('aria-checked')) === 'true';
+  check('turning it back on recomputes the cutout from the stored photo', onNow);
+  await page.locator('dialog.sheet').getByRole('button', { name: 'Save changes' }).click();
+  await page.waitForTimeout(600);
+  const on2 = await D(page, `const it = m.data.items.find(i => i.id === a.id); const store = await import('./src/store.js'); const b = it.cutoutId ? await store.getPhotoBlob(it.cutoutId) : null; return { id: it.cutoutId, type: b && b.type };`, cutItem);
+  check('the recomputed cutout is stored', !!on2.id && /image\/(webp|png)/.test(on2.type || ''), JSON.stringify(on2));
+
+  // ---- snap safety net: a plaid close-up that cannot be cut out cleanly defaults to the plain photo
+  await go(page, 'snap', 600);
+  await page.waitForSelector('.snap-start');
+  const plaidUrl = await page.evaluate(() => {
+    const c = document.createElement('canvas'); c.width = 800; c.height = 700; const g = c.getContext('2d');
+    for (let y = 0; y < 700; y += 40) for (let x = 0; x < 800; x += 40) { const k = ((x / 40) % 2) + ((y / 40) % 2); g.fillStyle = k === 0 ? '#bc2026' : k === 1 ? '#701a1e' : '#1a1818'; g.fillRect(x, y, 40, 40); }
+    return c.toDataURL('image/png');
+  });
+  await page.locator('input[type=file][multiple]').setInputFiles({ name: 'plaid.png', mimeType: 'image/png', buffer: Buffer.from(plaidUrl.split(',')[1], 'base64') });
+  await page.waitForSelector('.stage .bbox', { timeout: 20000 });
+  await page.getByRole('button', { name: /^Review/ }).click();
+  await page.waitForSelector('.rcard', { timeout: 20000 });
+  check('plaid close-up defaults to the original photo (no chewed-up cutout)', await page.locator('.rcard .crop.cut').count() === 0 && (await radio('Original photo').getAttribute('aria-checked')) === 'true');
+  check('review explains why there is no cutout', /keeping your photo|kept your photo/i.test(await page.locator('.rcard .cut-note').textContent()), await page.locator('.rcard .cut-note').textContent());
+  await page.screenshot({ path: `${shots}/05d-snap-plaid-closeup.png` });
+  await page.getByRole('button', { name: 'Skip this one' }).click();
+  await page.waitForSelector('.snap-start');
 
   // ---- profile + selfie
   await go(page, 'profile', 700);

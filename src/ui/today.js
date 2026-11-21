@@ -313,6 +313,7 @@ export function mount(root, { navigate }) {
       score, stage,
       dock,
       h('div', { class: 't-actions' }, h('div', { class: 'feel-row t-feel' }, dislike, wear_, likeB), h('div', { class: 't-extra' }, improveBtn, battle)),
+      h('a', { class: 'ck-entry', href: '#/check', 'data-goto': 'check' }, h('span', { class: 'ck-entry-emoji', 'aria-hidden': 'true' }, '📸'), 'Rate what I’m wearing'),
       h('div', { class: 't-links' },
         !(data.settings.profile && data.settings.profile.cutoutId) ? h('a', { class: 'btn btn-ghost btn-small', href: '#/profile' }, '🎨 Find your colors') : null,
         h('a', { class: 'btn btn-ghost btn-small', href: '#/plan' }, '🗓️ Plan the week')),
