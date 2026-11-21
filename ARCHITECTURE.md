@@ -296,7 +296,8 @@ scores the outfit, tells them how it looks on them (complexion), and keeps a dia
 **Route:** `#/check` (`src/ui/check.js`). Entry points: a button on Today ("📸 Rate what I'm wearing") and the Lookbook diary.
 
 **Data (owned by Opus, already built):**
-- `model.makeCheck(c)` normalizes `{ id, date, createdAt, photoId, itemIds:{slot:id}, extras:{slot:item}, score, occasion, mood:'love'|'ok'|'meh'|null, note }`.
+- `model.makeCheck(c)` normalizes `{ id, date, createdAt, photoId, itemIds:{slot:id}, extras:{slot:item}, score, occasion, mood:'love'|'ok'|'meh'|null, note }`
+  plus `roast` (string ≤ 400 chars). Bad scores get roasted (src/engine/roast.js, honest + clean, grounded in real reasons; setting `roast`, default on)..
   `extras` are pieces the user is wearing that are not in the closet (built with `makeItem`, never added to the closet unless the user taps "Add to closet").
 - `store.listChecks / putCheck / deleteCheck` (IndexedDB store `checks`, DB v3; included in backups with their photos).
 - `data.checks`, `saveCheck(check, photoBlob)`, `removeCheck(id)`, `checkItems(check) -> {slot:item}`; emits `'checks'`.

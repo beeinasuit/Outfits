@@ -7,7 +7,7 @@ const DB_NAME = 'fit-machine';
 const DB_VERSION = 3;
 const KEYS = { items: 'id', photos: 'id', feedback: 'key', settings: 'k', events: 'id', checks: 'id' };
 export const MAX_EVENTS = 5000;
-const DEFAULT_SETTINGS = { onboarded: false, autoHamper: true, useTaste: true, profile: null, customOccasions: {}, plan: {}, occasion: 'any', weather: 'none', theme: 'auto', haptics: true, shake: false, lastBackup: null, remindedAt: 0 };
+const DEFAULT_SETTINGS = { onboarded: false, autoHamper: true, useTaste: true, profile: null, customOccasions: {}, plan: {}, occasion: 'any', weather: 'none', theme: 'auto', roast: true, haptics: true, shake: false, lastBackup: null, remindedAt: 0 };
 
 let db = null;
 let mode = 'idb';

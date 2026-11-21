@@ -344,6 +344,7 @@ export function todayISO(d = new Date()) {
  * itemIds: { slot: closetItemId } for pieces matched to the closet.
  * extras:  { slot: item } for pieces NOT in the closet (made with makeItem; never saved to the closet).
  * mood: how the user felt in it ('love' | 'ok' | 'meh' | null).
+ * roast: the roast text shown for a low score (saved so the diary shows the same one).
  */
 export function makeCheck(c) {
   if (!c || typeof c !== 'object') return null;
@@ -363,6 +364,7 @@ export function makeCheck(c) {
     occasion: typeof c.occasion === 'string' ? c.occasion.slice(0, 40) : 'any',
     mood: ['love', 'ok', 'meh'].includes(c.mood) ? c.mood : null,
     note: typeof c.note === 'string' ? c.note.replace(/[\u0000-\u001f]/g, ' ').slice(0, 200) : '',
+    roast: typeof c.roast === 'string' ? c.roast.replace(/[\u0000-\u0009\u000b-\u001f]/g, ' ').slice(0, 400) : '',
   };
 }
 
