@@ -129,6 +129,40 @@ function dilate(src, w, h, r, tmp, out) {
 }
 
 
+/** Box-filter density of a 0/1 mask (radius r), as Float32 0..1. */
+function density(src, w, h, r) {
+  const tmp = new Float32Array(w * h), out = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) {
+    let s = 0;
+    for (let k = -r; k <= r; k++) s += src[y * w + Math.min(w - 1, Math.max(0, k))];
+    for (let x = 0; x < w; x++) {
+      tmp[y * w + x] = s;
+      s += src[y * w + Math.min(w - 1, x + r + 1)] - src[y * w + Math.max(0, x - r)];
+    }
+  }
+  const win = (2 * r + 1) * (2 * r + 1);
+  for (let x = 0; x < w; x++) {
+    let s = 0;
+    for (let k = -r; k <= r; k++) s += tmp[Math.min(h - 1, Math.max(0, k)) * w + x];
+    for (let y = 0; y < h; y++) {
+      out[y * w + x] = s / win;
+      s += tmp[Math.min(h - 1, y + r + 1) * w + x] - tmp[Math.max(0, y - r) * w + x];
+    }
+  }
+  return out;
+}
+
+function reclaimHoles(M, w, h, T1, T2, dev) {
+  const N = w * h, m = Math.min(w, h);
+  const r = Math.max(3, Math.round(0.035 * m)), rc = Math.max(3, Math.round(0.05 * m));
+  const D = density(M, w, h, r);
+  const K = new Uint8Array(N);
+  dilate(M, w, h, rc, T1, T2); erode(T2, w, h, rc, T1, K);
+  let add = 0;
+  for (let p = 0; p < N; p++) if (K[p] && !M[p] && D[p] >= 0.35 && dev[p] >= 0.5) { T1[p] = 1; add++; } else T1[p] = 0;
+  if (add) for (let p = 0; p < N; p++) if (T1[p]) M[p] = 1;
+}
+
 /**
  * Background as a mixture of color clusters (k-means, k<=4, on border-ring Lab samples).
  * Returns {cl, isBg(L,a,b)}; a pixel is background when it is inside any cluster's radius, on the line between two
@@ -375,8 +409,13 @@ function segment(im, opts) {
     }
   }
 
-  // 4. morphology
+  // 3c. carved items: a plaid/flannel whose colors the background model also contains (brown stripes on a wood floor, gray
+  //     checks on gray carpet) is classified stripe by stripe. Where the foreground is a dense-but-holey patch, bridge
+  //     the holes: close with a large window, but only take back pixels that sit in a locally dense foreground.
   const T1 = new Uint8Array(N), T2 = new Uint8Array(N);
+  reclaimHoles(M, w, h, T1, T2, dev);
+
+  // 4. morphology
   erode(M, w, h, 1, T1, T2); dilate(T2, w, h, 1, T1, M);           // open 3x3
   // close 5x5, but only across pixels that deviate somewhat from the background model: a gap that is clearly
   // sheet-colored (two items laid a few px apart) stays open, a faint stripe inside a striped shirt is bridged.
@@ -403,10 +442,11 @@ function segment(im, opts) {
   }
   let fg = 0;
   for (let p = 0; p < N; p++) fg += M[p];
-  if (fg === 0) {
-    if (patterned) return [{ x: 0, y: 0, w: W, h: H, area: W * H, mask: new Uint8Array(W * H).fill(1) }];
-    return [];
-  }
+  // The border ring is not a plain sheet (several colors, or a wide spread): when nothing solid is found, the likely story
+  // is a garment that fills the frame and polluted the background model. Boxing the whole photo beats finding nothing.
+  const busyFrame = (mixture && mixture.cl.length >= 2) || tolL > 12 || tolC > 12;
+  const wholeFrame = () => [{ x: 0, y: 0, w: W, h: H, area: W * H, mask: new Uint8Array(W * H).fill(1) }];
+  if (fg === 0) return patterned || busyFrame ? wholeFrame() : [];
   if (fg / N > 0.85) {
     return [{ x: 0, y: 0, w: W, h: H, area: W * H, mask: new Uint8Array(W * H).fill(1) }];
   }
@@ -446,7 +486,7 @@ function segment(im, opts) {
   let live = comps.filter((c) => c.area >= tinyArea);
   live.sort((a, b) => b.area - a.area);
   live = live.slice(0, 80);
-  if (!live.length) return [];
+  if (!live.length) return busyFrame ? wholeFrame() : [];
 
   const parent = live.map((_, i) => i);
   const find = (i) => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
@@ -490,7 +530,7 @@ function segment(im, opts) {
   }
   groups.sort((a, b) => b.area - a.area);
   groups = groups.slice(0, maxItems);
-  if (!groups.length) return [];
+  if (!groups.length) return busyFrame ? wholeFrame() : [];
   const rootToGroup = new Map(groups.map((g, k) => [g.root, k]));
   live.forEach((c, i) => { const k = rootToGroup.get(find(i)); if (k !== undefined) groupOfComp[c.id] = k; });
 
@@ -585,4 +625,88 @@ export function refineMaskAlpha(imageData, mask, opts = {}) {
     out[i] = Math.round(t * 255);
   }
   return out;
+}
+
+/**
+ * How trustworthy is a cutout mask? Looks at the mask only (box-sized, w*h).
+ *   fill     share of the box that is "item"
+ *   largest  share of item pixels in the biggest connected piece (1 = one solid piece)
+ *   holes    share of the filled silhouette that is enclosed background (see-through holes)
+ *   compact  edge length relative to a plain blob of the same area (carved/striped masks are >> 1)
+ *   full     the mask covers (nearly) the whole box: "keep it all", not a real cutout
+ * `ok` is false when the cutout would likely look chewed up, so callers should keep the plain photo.
+ * @returns {{ok:boolean,score:number,fill:number,largest:number,holes:number,compact:number,full:boolean}}
+ */
+export function maskQuality(mask, w, h) {
+  const N = w * h;
+  const bad = { ok: false, score: 0, fill: 0, largest: 0, holes: 0, compact: 0, full: false };
+  if (!mask || !(N > 0) || mask.length < N) return bad;
+  let on = 0;
+  for (let i = 0; i < N; i++) if (mask[i]) on++;
+  if (!on) return bad;
+  const fill = on / N;
+  if (fill >= 0.985) return { ok: true, score: 1, fill, largest: 1, holes: 0, compact: 1, full: true };
+  // 4-connected components of the item
+  const lab = new Int32Array(N), stk = new Int32Array(N);
+  let largest = 0, edge = 0;
+  for (let s = 0; s < N; s++) {
+    if (!mask[s] || lab[s]) continue;
+    let sp = 0, cnt = 0; stk[sp++] = s; lab[s] = 1;
+    while (sp) {
+      const p = stk[--sp]; cnt++;
+      const x = p % w;
+      if (x > 0 && mask[p - 1] && !lab[p - 1]) { lab[p - 1] = 1; stk[sp++] = p - 1; }
+      if (x < w - 1 && mask[p + 1] && !lab[p + 1]) { lab[p + 1] = 1; stk[sp++] = p + 1; }
+      if (p >= w && mask[p - w] && !lab[p - w]) { lab[p - w] = 1; stk[sp++] = p - w; }
+      if (p + w < N && mask[p + w] && !lab[p + w]) { lab[p + w] = 1; stk[sp++] = p + w; }
+    }
+    if (cnt > largest) largest = cnt;
+  }
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const p = y * w + x;
+    if (!mask[p]) continue;
+    if (x === 0 || y === 0 || x === w - 1 || y === h - 1 || !mask[p - 1] || !mask[p + 1] || !mask[p - w] || !mask[p + w]) edge++;
+  }
+  // enclosed background: flood the off-pixels from the frame
+  const seen = new Uint8Array(N); let qt = 0;
+  const seed = (p) => { if (!mask[p] && !seen[p]) { seen[p] = 1; stk[qt++] = p; } };
+  for (let x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
+  while (qt) {
+    const p = stk[--qt], x = p % w;
+    if (x > 0) seed(p - 1);
+    if (x < w - 1) seed(p + 1);
+    if (p >= w) seed(p - w);
+    if (p + w < N) seed(p + w);
+  }
+  let enclosed = 0;
+  for (let p = 0; p < N; p++) if (!mask[p] && !seen[p]) enclosed++;
+  const holes = enclosed / (on + enclosed);
+  const largestShare = largest / on;
+  const compact = edge / (4 * Math.sqrt(on));
+  const ok = fill >= 0.2 && largestShare >= 0.85 && holes <= 0.06 && compact <= 2.2;
+  const score = Math.max(0, Math.min(1, Math.min(largestShare, 1 - holes * 4, 1.6 - compact * 0.5, fill * 3)));
+  return { ok, score, fill, largest: largestShare, holes, compact, full: false };
+}
+
+/**
+ * Mask for one user-chosen crop (review step, after the box was edited): the biggest item in the crop. When the
+ * crop holds nothing separable (the garment fills it, or it is carved up) the answer is the whole crop.
+ * @param {{width:number,height:number,data:Uint8ClampedArray}} imageData  small RGBA crop (<= ~256px)
+ * @returns {{mask:Uint8Array,quality:object,full:boolean}} mask is imageData-sized
+ */
+export function segmentCrop(imageData) {
+  const w = imageData.width, h = imageData.height;
+  let best = null;
+  try {
+    for (const b of segmentItems(imageData, { padding: 0, maxItems: 6 }) || []) if (b.mask && (!best || b.area > best.area)) best = b;
+  } catch (e) { best = null; }
+  let mask = null;
+  if (best) {
+    mask = new Uint8Array(w * h);
+    for (let y = 0; y < best.h; y++) for (let x = 0; x < best.w; x++) if (best.mask[y * best.w + x] && best.y + y < h && best.x + x < w) mask[(best.y + y) * w + best.x + x] = 1;
+  }
+  const q = mask ? maskQuality(mask, w, h) : null;
+  if (!mask || !q.ok) { mask = new Uint8Array(w * h).fill(1); return { mask, quality: maskQuality(mask, w, h), full: true }; }
+  return { mask, quality: q, full: q.full };
 }
