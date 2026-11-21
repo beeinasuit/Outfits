@@ -4,6 +4,7 @@ import { h, clear, cap } from './dom.js';
 import { icon } from './icons.js';
 import { slotIllustration } from './illustrations.js';
 import { buzz } from './fx.js';
+import * as store from '../store.js';
 
 export const PICKER_SLOTS = SLOTS.filter((s) => s !== 'extra');
 const WARM_SLOTS = ['top', 'layer', 'neckwear', 'headwear'];
@@ -184,4 +185,72 @@ export function buildItemForm(draft, { onChange = () => {}, idPrefix = 'f' + Mat
   );
   root.refreshColors = renderColors;
   return root;
+}
+
+// ---------- background removal on/off for an item that already has a photo (edit sheet) ----------
+let visionLoad = null;
+const loadVision = () => visionLoad || (visionLoad = Promise.all([import('../vision/image.js'), import('../vision/segment.js'), import('./maskutil.js')]).then(([img, seg, mu]) => ({ ...img, ...seg, ...mu })));
+
+/**
+ * "Background removed / Original photo" toggle with a live preview. Returns null for items without a photo.
+ * Nothing is stored until Save: the choice lives in `draft._bg`, and `resolveCutoutId` applies it.
+ * Turning it ON for an item without a cutout recomputes it from the stored photo.
+ */
+export function buildBackgroundControl(draft, item) {
+  if (!item || !item.photoId) return null;
+  const st = (draft._bg = { on: !!item.cutoutId, blob: null, busy: false });
+  const img = h('img', { class: 'crop', alt: '' });
+  const note = h('p', { class: 'cut-note', role: 'status', 'aria-live': 'polite' });
+  const mk = (label, on) => h('button', { class: 'bg-opt', type: 'button', role: 'radio', 'aria-checked': 'false', onclick: () => choose(on) },
+    h('span', { class: 'bg-ico', 'aria-hidden': 'true', html: icon('check', { size: 16, sw: 3.4 }) }), label);
+  const bOn = mk('Background removed', true), bOff = mk('Original photo', false);
+  let blobUrl = null;
+  const paint = async () => {
+    bOn.setAttribute('aria-checked', String(st.on)); bOff.setAttribute('aria-checked', String(!st.on));
+    bOn.disabled = bOff.disabled = st.busy;
+    let url = null;
+    try {
+      if (st.on && st.blob) { if (!blobUrl) blobUrl = URL.createObjectURL(st.blob); url = blobUrl; }
+      else url = await store.getPhotoURL(st.on && item.cutoutId ? item.cutoutId : item.photoId);
+    } catch { url = null; }
+    if (url) img.src = url;
+    img.className = 'crop' + (st.on ? ' cut' : '');
+    img.alt = st.on ? 'Cutout preview' : 'Original photo preview';
+  };
+  async function choose(on) {
+    if (st.busy || st.on === on) return;
+    buzz(8);
+    note.textContent = '';
+    if (on && !item.cutoutId && !st.blob) {
+      st.busy = true; note.textContent = 'Finding the outline…'; await paint();
+      try {
+        const v = await loadVision();
+        const photo = await store.getPhotoBlob(item.photoId);
+        const bmp = await v.fileToBitmap(photo);
+        const canvas = v.bitmapToCanvas(bmp, 800);
+        const r = v.cutoutFromCrop(v, canvas);
+        if (!r.cutout) note.textContent = 'I couldn’t find a clean outline, so the photo stays as it is.';
+        else {
+          st.blob = await v.canvasToBlob(r.cutout, { maxDim: 600, type: 'image/webp', quality: 0.85, alpha: true });
+          st.on = true;
+          note.textContent = r.confident ? '' : 'Not totally sure about the edges. Tap “Original photo” if they look off.';
+        }
+      } catch (e) { console.warn('cutout failed', e); note.textContent = 'That didn’t work, so the photo stays as it is.'; }
+      st.busy = false;
+    } else st.on = on;
+    await paint();
+  }
+  paint();
+  return h('div', { class: 'fld bg-edit-wrap' }, h('div', { class: 'legend' }, 'Photo'),
+    h('div', { class: 'bg-edit' }, img, h('div', { class: 'bg-pick' }, h('div', { class: 'bg-seg', role: 'radiogroup', 'aria-label': 'Photo style' }, bOn, bOff), note)));
+}
+
+/** Apply the edit sheet's background choice on Save: returns the cutoutId to keep (null = none). */
+export async function resolveCutoutId(draft, item) {
+  const st = draft._bg;
+  let id = item.cutoutId || null;
+  if (!st) return id;
+  if (!st.on) { if (id) { try { await store.deletePhoto(id); } catch { /* ignore */ } } return null; }
+  if (!id && st.blob) id = await store.putPhoto(st.blob);
+  return id;
 }

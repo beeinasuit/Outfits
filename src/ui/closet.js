@@ -6,7 +6,7 @@ import { mascot, illustrate } from './illustrations.js';
 import { itemArt } from './itemart.js';
 import { buzz, reduced, confetti } from './fx.js';
 import { toast, sheet, confirmDialog } from './overlay.js';
-import { buildItemForm, itemToDraft, draftToItem } from './itemform.js';
+import { buildItemForm, itemToDraft, draftToItem, buildBackgroundControl, resolveCutoutId } from './itemform.js';
 import { data, saveItem, removeItem, removeDemo, loadDemo, demoCount, laundryDay, setClean, isDemo } from './data.js';
 
 const RAIL_SLOTS = SLOTS.filter((s) => s !== 'extra');
@@ -97,12 +97,14 @@ export function mount(root, { navigate }) {
     const save = h('button', { class: 'btn btn-cobalt', type: 'button' }, 'Save changes');
     const washBtn = h('button', { class: 'btn btn-ghost', type: 'button', html: `${icon('droplet', { size: 18 })} ${orig.available ? 'Send to hamper' : 'Mark clean'}` });
     const del = h('button', { class: 'btn btn-danger-ghost', type: 'button', html: `${icon('trash', { size: 18 })} Delete` });
-    const content = h('div', { class: 'edit' }, preview, form, h('div', { class: 'sheet-actions' }, save, washBtn, del));
+    const bgControl = buildBackgroundControl(d, orig);
+    const content = h('div', { class: 'edit' }, preview, bgControl, form, h('div', { class: 'sheet-actions' }, save, washBtn, del));
     const s = sheet({ title: 'Edit item', content });
     save.addEventListener('click', async () => {
       // Editing a sample piece makes it the user's own: new id, so "Remove samples" / "Load samples" never touch it.
       const adopt = isDemo(orig);
-      await saveItem(draftToItem(d, { id: adopt ? newId() : orig.id, photoId: orig.photoId, cutoutId: orig.cutoutId, worn: orig.worn, lastWashed: orig.lastWashed, createdAt: orig.createdAt, available: orig.available }));
+      const cutoutId = await resolveCutoutId(d, orig);
+      await saveItem(draftToItem(d, { id: adopt ? newId() : orig.id, photoId: orig.photoId, cutoutId, worn: orig.worn, lastWashed: orig.lastWashed, createdAt: orig.createdAt, available: orig.available }));
       if (adopt) await removeItem(orig.id);
       s.close(); toast('Saved.');
     });
