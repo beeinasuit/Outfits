@@ -8,7 +8,13 @@
 //      treated as a shadow and stays background.
 //   4. morphology: open 3x3 (kills speckle, keeps thin belts), close 5x5, fill enclosed holes
 //   5. iterative connected components, merge overlapping boxes and tiny fragments next to big items
+//   5b. busy prints (plaid, flannel): holes in a dense foreground patch are reclaimed before labeling, and carved groups are
+//       consolidated (big closing, hole fill). A garment touching the frame can pollute the border model: when nothing solid
+//       comes out, the ring arcs that share the center's colors are dropped and the pipeline runs again; a busy frame with
+//       no solid result becomes one whole-frame item.
 //   6. pad, clamp, sort row-major, cap, build per-box masks at full resolution
+//
+// Also exported: maskQuality (is a cutout mask trustworthy?) and segmentCrop (mask for one user-drawn box).
 //
 // Known limitations: items that touch each other merge into one box; an item whose color is within a few
 // delta-E of the sheet (white shirt on a white sheet) is only partly found; strongly textured/patterned
