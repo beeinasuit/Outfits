@@ -1,8 +1,11 @@
 import test from 'node:test';
+import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { roastOutfit, roastLevel, problemGroups, fill, TEMPLATES, HEADLINES, LIGHT_PREFIX, FIX_TEMPLATES, NO_FIX_TEMPLATES, ROAST_FULL_BELOW, ROAST_LIGHT_BELOW } from '../../src/engine/roast.js';
 import { scoreOutfit } from '../../src/engine/score.js';
-import { makeItem, COLOR_FAMILIES } from '../../src/model.js';
+import { makeItem, COLOR_FAMILIES, OCCASIONS, makeOccasion } from '../../src/model.js';
+import { demoItems } from '../../src/ui/data.js';
+import { OCC_PHRASE, occasionPhrase, GROUP_TAGS } from '../../src/engine/roast.js';
 
 const C = (f) => [{ hex: COLOR_FAMILIES[f].hex, family: f, weight: 1 }];
 const mk = (slot, kind, name, fam, extra = {}) => makeItem({ id: name, slot, kind, name, colors: C(fam), ...extra });
@@ -48,9 +51,10 @@ test('full roast: headline, 2-3 problem lines, ends with the rescue swap, names 
   assert.equal(r.level, 'full');
   assert.ok(r.headline.length > 10);
   assert.equal(r.lines.length, 4); // 3 problems + rescue
-  assert.match(r.lines[r.lines.length - 1], /navy chinos/);
+  assert.match(r.lines[r.lines.length - 1], /your navy chinos/);
   assert.match(r.lines[r.lines.length - 1], /\+14/);
   assert.deepEqual(r.groups, ['colorClash', 'formality', 'muddy']);
+  assert.ok(!/ the navy chinos/.test(r.text));
   assert.ok(r.text.length <= 400);
 });
 
@@ -120,4 +124,39 @@ test('integrates with the real engine: dress shoes + a graphic tee + shorts get 
 
 test('fill handles capitalized tokens', () => {
   assert.equal(fill('{A} and {b}', { a: 'red', b: 'blue' }), 'Red and blue');
+});
+
+// ---------- sentence quality: every problem tag x occasion x real closet outfits ----------
+const BAD = [/[{}]/, /undefined/, /\bnull\b/, /\s{2,}/, /\ba a\b/i, /\byour your\b/i, /\bthe the\b/i, /\bthis outfit this outfit\b/i, /\bfor for\b/i, /\bNaN\b/];
+test('sentence quality + sample dump (tests/unit/roast-samples.txt)', () => {
+  const D = demoItems();
+  const by = (n) => D.find((i) => i.name === n);
+  const outfits = [
+    { top: by('Navy oxford'), bottom: by('Khaki chinos'), shoes: by('Brown boots'), belt: by('Brown leather belt') },
+    { top: by('White tee'), bottom: by('Black joggers'), shoes: by('Black derbies') },
+    { top: by('Blue stripe shirt'), bottom: by('Dark denim jeans'), shoes: by('White sneakers'), layer: by('Navy blazer'), neckwear: by('Burgundy tie'), headwear: by('Gray beanie') },
+    { top: makeItem({ id: 'x1', slot: 'top', kind: 'graphic tee', name: 'Red graphic tee', colors: C('red'), pattern: 'graphic' }), bottom: makeItem({ id: 'x2', slot: 'bottom', kind: 'athletic shorts', name: 'Black athletic shorts', colors: C('black') }), shoes: by('Black derbies') },
+  ];
+  const custom = makeOccasion({ label: 'Book Club', emoji: '📚', min: 2, max: 3 });
+  const occs = [['any', null], ['wedding', OCCASIONS.wedding], ['work', OCCASIONS.work], ['errands', OCCASIONS.errands], ['book-club', custom]];
+  const tags = [...Object.keys(GROUP_TAGS), 'mystery-tag'];
+  const out = [];
+  for (const tag of tags) for (const [ok, od] of occs) for (const [oi, items] of outfits.entries()) for (const weather of ['cold', 'hot', null]) {
+    const culpritItem = items.top;
+    const reasons = [R(tag, -8, `${culpritItem.name} is not right for something.`)];
+    const swap = { slot: 'bottom', cur: items.bottom, delta: 11, row: { item: by('Navy chinos'), score: 70 } };
+    for (const score of [30, 62]) {
+      const r = roastOutfit(items, { score, reasons, swap }, { occasion: ok, occasionDef: od, weather }, { seed: `${tag}${ok}${oi}${weather}${score}` });
+      for (const re of BAD) assert.ok(!re.test(r.text), `${tag}/${ok}: ${r.text}`);
+      for (const l of r.lines) assert.ok(/^[“A-Z0-9‘]/.test(l), `line must start capitalized: ${l}`);
+      const occTag = GROUP_TAGS[tag] === 'occasion';
+      if (score === 30 && weather === (tag.startsWith('weather') || tag.startsWith('rain') ? 'cold' : null) && (occTag ? ok !== 'any' : ok === 'any')) out.push(`[${tag} | ${ok} | outfit ${oi} | ${weather || '-'}]\n${r.headline}\n${r.lines.join('\n')}\n`);
+    }
+  }
+  fs.writeFileSync(new URL('./roast-samples.txt', import.meta.url), out.join('\n'));
+  assert.ok(out.length > 150);
+  assert.equal(occasionPhrase({ occasion: 'wedding' }), 'a wedding');
+  assert.equal(occasionPhrase({ occasion: 'x', occasionDef: { label: 'Book Club' } }), 'your book club');
+  assert.ok(Object.keys(OCC_PHRASE).every((k) => OCCASIONS[k]));
+  assert.ok(Object.keys(OCCASIONS).filter((k) => k !== 'any').every((k) => OCC_PHRASE[k]), 'every built-in occasion has a phrase');
 });

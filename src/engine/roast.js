@@ -12,7 +12,7 @@ export const ROAST_LIGHT_BELOW = 70;
 const GROUP_OF = {
   'color-clash': 'colorClash', 'color-risky': 'colorClash', 'color-clash-mild': 'colorClash',
   'contrast-muddy': 'muddy', 'contrast-denim': 'muddy',
-  'pattern-busy': 'pattern', 'pattern-risky': 'pattern', 'statement-many': 'pattern', 'pattern-graphic': 'pattern', 'occasion-muted-pattern': 'pattern',
+  'pattern-busy': 'pattern', 'pattern-risky': 'pattern', 'statement-many': 'pattern', 'pattern-graphic': 'graphic',
   'formality-clash': 'formality', 'formality-gap': 'formality', 'formality-shoes': 'formality', 'shoes-sporty': 'formality', 'shoes-oxford-jeans': 'formality',
   'shoes-sandals-formal': 'formality', 'shorts-dressy': 'formality',
   'weather-cold': 'cold', 'weather-shorts-cold': 'cold', 'weather-footwear': 'cold', 'weather-nolayer': 'cold',
@@ -20,7 +20,7 @@ const GROUP_OF = {
   'rain-none': 'rain', 'rain-suede': 'rain',
   'shoes-heavy-sandals': 'mixedSeason', 'shorts-heavy': 'mixedSeason', 'shorts-boots': 'mixedSeason',
   'occasion-avoid': 'occasion', 'occasion-off': 'occasion', 'occasion-avoid-color': 'occasion', 'occasion-muted': 'occasion', 'occasion-layer': 'occasion', 'occasion-hat': 'occasion',
-  'leather-clash': 'leather', 'leather-near': 'leather', 'belt-formality': 'leather', 'belt-casual': 'leather', 'belt-no-loops': 'leather', 'belt-missing': 'leather',
+  'leather-clash': 'leather', 'leather-near': 'leather', 'belt-formality': 'beltFormality', 'belt-casual': 'beltFormality', 'belt-no-loops': 'beltLoops', 'belt-missing': 'beltMissing',
   'tie-no-collar': 'neck', 'bowtie-informal': 'neck', 'tie-too-casual': 'neck', 'hat-mismatch': 'neck', 'hat-casual': 'neck',
   'complexion-off': 'complexion',
   'recently-worn': 'repeat',
@@ -29,21 +29,22 @@ const GROUP_OF = {
 
 // Tokens: {a} {b} colors, {top} {bottom} {shoes} item names (lowercase), {X}/{x} the piece a reason is about, {fam} its color,
 // {hi}/{lo} dressiest / most casual piece, {p1}/{p2} patterned pieces, {occ} occasion, {w} weather, {P1}/{A}/... capitalized forms.
+export const GROUP_TAGS = GROUP_OF;
 export const TEMPLATES = {
   colorClash: [
     '{A} and {b} in one outfit? That’s not a color story, that’s a custody battle.',
     '{A} next to {b}: your clothes are fighting and nobody’s refereeing.',
     'A traffic accident between {a} and {b}, and you wore it on purpose.',
     '{A} and {b} are shouting over each other. Pick a lane.',
-    'The {a} and the {b} have never met before, and it shows.',
+    '{A} and {b} have never met before, and it shows.',
     'Somewhere a color wheel is filing a complaint about {a} plus {b}.',
     '{A} with {b}: bold, sure. Good, no.',
   ],
   muddy: [
     '{Top} and {bottom} are the same shade of nothing. It’s an outfit-shaped blur.',
-    'Your {top} and {bottom} blend together like they’re trying to avoid being noticed.',
+    '{Top} and {bottom} blend together like they’re trying to avoid being noticed.',
     '{Top} over {bottom}: so little contrast I assumed it was one very long garment.',
-    'Matching the {top} to the {bottom} this closely isn’t style, it’s camouflage.',
+    'Matching {top} to {bottom} this closely isn’t style, it’s camouflage.',
     '{Top} and {bottom} melted into one puddle of sameness.',
     'Contrast called in sick today. {Top} and {bottom} never showed up as two things.',
   ],
@@ -55,18 +56,26 @@ export const TEMPLATES = {
     'Pattern on pattern, and not the cool way. {P1}, meet {p2}, please stop.',
     '{P1} with {p2}: that’s not mixing patterns, that’s a hostage situation.',
   ],
+  graphic: [
+    '{X} is a casual-hour piece and the rest of this outfit is not.',
+    '{X} is doing a lot of talking in an outfit that didn’t ask.',
+    'Nobody asked {x} to join the dressier half of this outfit. It came anyway.',
+    '{X} is the loudest thing in the room, and the room is trying to be classy.',
+    'The graphic on {x} is fighting everything around it.',
+    '{X} walked into the wrong dress code and stayed for the whole night.',
+  ],
   formality: [
     '{Hi} with {lo}? You dressed for two different events and attended both.',
     '{Hi} and {lo} don’t belong at the same party, let alone in the same outfit.',
     '{Hi} and {lo} walked in together and the whole room felt the tension.',
-    'Your {hi} is dressed for a wedding and your {lo} is dressed for a nap.',
+    '{Hi} is dressed for a wedding and {lo} is dressed for a nap.',
     '{Hi} with {lo}: the outfit equivalent of a tuxedo T-shirt.',
-    'Somewhere between the {hi} and the {lo}, the plan fell apart.',
+    'Somewhere between {hi} and {lo}, the plan fell apart.',
   ],
   cold: [
     'The forecast says {w} and you dressed like it’s a rumor.',
-    'Dressed for {w} weather? Bold. Your outfit has clearly never been outside.',
-    'That outfit is brave and the weather is going to make you pay for it.',
+    'Dressed for {w} weather? Bold. This outfit has clearly never been outside.',
+    'This outfit is brave and the weather is going to make you pay for it.',
     '{W} weather will find every gap in this outfit. Enjoy.',
     'This is an outfit for a warm room that doesn’t exist today.',
     'Your sweater drawer is filing a missing-persons report on today’s outfit.',
@@ -75,13 +84,13 @@ export const TEMPLATES = {
     'It’s {w} out and this outfit is a slow-cooker with sleeves.',
     '{W} weather and you chose heat retention. Respect the commitment, question the plan.',
     'This outfit looks great for a sauna. You are not going to a sauna.',
-    'Wearing that in {w} weather is a cry for shade.',
-    'Your outfit forgot to check the temperature. It’ll find out by lunch.',
+    'Wearing this in {w} weather is a cry for shade.',
+    'This outfit forgot to check the temperature. It’ll find out by lunch.',
     'The sun is looking at this outfit like it’s dinner.',
   ],
   rain: [
     'Wet day, no rain jacket. Optimism is a look, I guess.',
-    'The sky has plans and your outfit did not read them.',
+    'The sky has plans and this outfit did not read them.',
     'This outfit will not survive a drizzle, and neither will your mood.',
     'Dry-clean-only energy on a rainy day. Brave.',
     'Puddles are going to have opinions about this outfit.',
@@ -90,26 +99,50 @@ export const TEMPLATES = {
   mixedSeason: [
     'Pick a season. This outfit is wearing all of them at once.',
     'Half of this outfit is packed for the beach and half for a blizzard.',
-    'Your outfit has a split personality and the weather forecast doesn’t know which to believe.',
+    'This outfit has a split personality and the forecast doesn’t know which half to believe.',
     'This is what happens when you get dressed in the dark in four different months.',
     'Mixed signals, and they’re all coming from your wardrobe.',
     'The pieces in this outfit come from different calendars.',
   ],
   occasion: [
     '{X} for {occ}? Bold of you.',
-    'Nobody has ever been to {occ} in {x} and thought “nailed it.”',
+    'Nobody has ever shown up for {occ} in {x} and thought “nailed it.”',
     'I’ve seen the dress code for {occ}. {X} didn’t get the memo.',
     'For {occ}, {x} is a lovely surprise. Nobody wanted that surprise.',
-    '{X} is a lot of look for {occ}, and not a good kind of lot.',
+    '{X} is a lot of look for {occ}, and not the good kind of lot.',
     'If {occ} had a bouncer, {x} would be waiting outside.',
   ],
   leather: [
-    'Belt and shoes are both leather and both disagree about the shade.',
+    'Belt and shoes are both leather and they disagree about the shade.',
     'Your belt and shoes are so close and yet so wrong. Almost-matching is worse than not matching.',
-    'The belt situation is a mystery wrapped in a buckle. Fix the belt.',
-    'Somewhere a leather-matching rule is weeping softly over your belt.',
-    'Belt trouble: the kind you can see from across the street.',
-    'That belt is doing its own thing, and its own thing isn’t working.',
+    'Somewhere a leather-matching rule is weeping softly over your belt and shoes.',
+    'Belt and shoes: two kinds of leather having an argument at your feet and waist.',
+    'Those two leathers look like cousins who don’t speak at family dinners.',
+    'Your belt and shoes are doing their own thing, and it isn’t working.',
+  ],
+  beltMissing: [
+    'Belt loops with no belt. Those loops are just decorative at this point.',
+    'You own a belt and those pants have loops. The belt is waiting by the door.',
+    'The loops on {bottom} are begging for a belt. They’re loops with no purpose.',
+    'A belt would finish this. Instead, your loops are unemployed.',
+    'Belt loops, no belt: the outfit equivalent of a sentence with no period.',
+    'Your belt feels left out, and so do your loops.',
+  ],
+  beltLoops: [
+    'A belt with pants that have no belt loops. That belt has nothing to hold on to.',
+    'That belt is performing a job that doesn’t exist on those pants.',
+    'No loops, yet a belt. Bold form of accessorizing.',
+    'The belt is a nice touch, if the pants had anywhere to put it.',
+    'A belt on loopless pants is just a very optimistic strap.',
+    'Those pants never asked for a belt, and the belt knows it.',
+  ],
+  beltFormality: [
+    'That belt is from a different dress code than the rest of the outfit.',
+    'Your belt and the rest of the outfit aren’t dressed for the same day.',
+    'The belt thinks it’s at one event and everything else thinks it’s at another.',
+    'That belt is either too fancy or too casual, and both are wrong.',
+    'Belt formality mismatch: small accessory, big announcement.',
+    'Your belt didn’t get the memo about today’s dress level.',
   ],
   neck: [
     '{X} and this outfit are not on speaking terms.',
@@ -123,7 +156,7 @@ export const TEMPLATES = {
     'That {fam} is draining you like a vampire with a coupon.',
     '{X} is a lovely {fam}. On a hanger. Far from you.',
     '{Fam} is not your color today, and {x} knows it. So does the mirror.',
-    'Of the colors on the wheel, {x} picked the one that makes your whole look go quiet.',
+    'Of all the colors on the wheel, you picked the {fam} that makes your whole look go quiet.',
     'Your palette filed a formal complaint about {x}.',
     '{X} in {fam}: bold choice, if the goal was to disappear into the background.',
   ],
@@ -204,7 +237,21 @@ function seedRng(seed) {
 const lc = (s) => String(s || '').toLowerCase();
 const capIt = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
 const pretty = (f) => String(f || '').replace('-', ' ');
-const nameOf = (it, dflt) => (it && it.name ? lc(it.name) : dflt);
+
+/** Sentence-ready occasion phrases ("for a wedding", "for work"). Custom occasions become "your <label>". */
+export const OCC_PHRASE = {
+  lounge: 'a lazy day at home', casual: 'a casual day', weekend: 'the weekend', errands: 'errands', outdoors: 'a day outdoors', travel: 'a travel day',
+  party: 'a night out', date: 'date night', work: 'work', interview: 'a job interview', church: 'church', wedding: 'a wedding', funeral: 'a funeral', formal: 'a black-tie event',
+};
+export function occasionPhrase(ctx) {
+  const key = ctx && ctx.occasion;
+  if (key && OCC_PHRASE[key]) return OCC_PHRASE[key];
+  const label = ctx && ctx.occasionDef && ctx.occasionDef.label;
+  if (key && key !== 'any' && label) return `your ${lc(label)}`;
+  return 'the occasion';
+}
+const WEATHER_WORD = { hot: 'hot', warm: 'warm', mild: 'mild', cold: 'cold', freezing: 'freezing' };
+const yours = (it, dflt) => (it && it.name ? `your ${lc(it.name)}` : dflt);
 
 function culprit(reason, items) {
   const t = lc(reason.text);
@@ -212,7 +259,7 @@ function culprit(reason, items) {
   return list.find((it) => it.name && t.includes(lc(it.name))) || null;
 }
 
-function buildVars(items, reason, ctx) {
+function buildVars(items, reason, ctx, group) {
   const all = Object.values(items || {}).filter(Boolean);
   const top = items.top, bottom = items.bottom;
   const loud = all.map((i) => i.colors && i.colors[0] && i.colors[0].family).filter((f, k, arr) => f && arr.indexOf(f) === k);
@@ -220,22 +267,28 @@ function buildVars(items, reason, ctx) {
   const colorsPool = accents.length >= 2 ? accents : loud;
   const a = pretty(colorsPool[0] || (top && top.colors[0].family) || 'color'), b = pretty(colorsPool[1] || (bottom && bottom.colors[0].family) || 'another color');
   const byF = all.filter((i) => Number.isFinite(i.formality)).sort((x, y) => y.formality - x.formality);
-  const hi = byF[0], lo = byF[byF.length - 1];
+  let hi = byF[0], lo = byF.slice().reverse().find((i) => i !== hi) || byF[byF.length - 1];
+  if (reason && /^(formality-shoes|shoes-)/.test(reason.tag) && items.shoes) {
+    // a shoe problem is about the shoes versus whatever they clash with most
+    const others = [items.top, items.bottom, items.layer].filter((i) => i && Number.isFinite(i.formality));
+    const far = others.sort((p, q) => Math.abs(q.formality - items.shoes.formality) - Math.abs(p.formality - items.shoes.formality))[0];
+    if (far) [hi, lo] = items.shoes.formality >= far.formality ? [items.shoes, far] : [far, items.shoes];
+  }
   const pat = all.filter((i) => i.pattern && i.pattern !== 'solid');
-  const x = (reason && culprit(reason, items)) || null;
-  const near = x || items.layer || top;
-  const occDef = ctx && ctx.occasionDef;
-  const occ = occDef && occDef.label ? lc(occDef.label) : (ctx && ctx.occasion && ctx.occasion !== 'any' ? lc(ctx.occasion) : 'this occasion');
-  const w = ctx && ctx.weather ? lc(ctx.weather) : 'today’s';
-  const v = {
-    a, b, top: nameOf(top, 'top'), bottom: nameOf(bottom, 'pants'), shoes: nameOf(items.shoes, 'shoes'),
-    x: x ? nameOf(x, 'this outfit') : 'this outfit', fam: pretty(near && near.colors && near.colors[0] ? near.colors[0].family : 'color'),
-    hi: nameOf(hi, 'dressy piece'), lo: nameOf(lo, 'casual piece'),
-    p1: nameOf(pat[0] || top, 'top'), p2: nameOf(pat[1] || bottom, 'bottom'),
-    occ, w, r: reason ? String(reason.text || '').replace(/[.!]+$/, '') : 'something', R: reason ? String(reason.text || '') : '',
+  const p1 = pat[0] || top, p2 = pat[1] || (p1 === top ? bottom : top);
+  let x = group === 'neck' ? (items.neckwear || items.headwear || null) : (reason && culprit(reason, items)) || null;
+  if (!x && group === 'complexion') x = items.layer || top || null;
+  if (!x && group === 'graphic') x = pat.find((i) => i.pattern === 'graphic') || top || null;
+  const wk = ctx && WEATHER_WORD[ctx.weather];
+  const w = wk || (group === 'hot' ? 'hot' : 'cold');
+  return {
+    a, b, top: yours(top, 'your top'), bottom: yours(bottom, 'your pants'), shoes: yours(items.shoes, 'your shoes'),
+    x: yours(x, group === 'neck' ? 'that accessory' : 'this outfit'), fam: pretty(x && x.colors && x.colors[0] ? x.colors[0].family : 'color'),
+    hi: yours(hi, 'your dressiest piece'), lo: yours(lo, 'your most casual piece'),
+    p1: yours(p1, 'your top'), p2: yours(p2, 'your bottoms'),
+    occ: occasionPhrase(ctx), w,
+    r: reason ? String(reason.text || '').replace(/[.!]+$/, '') : 'something', R: reason ? String(reason.text || '') : '',
   };
-  if (!x && near && ['complexion'].length) v.x = nameOf(near, 'this outfit');
-  return v;
 }
 export function fill(tpl, v) {
   return String(tpl).replace(/\{([A-Za-z0-9]+)\}/g, (m, k) => {
@@ -259,7 +312,7 @@ function fixLine(swap, rng, v) {
   const to = swap.row ? swap.row.item : swap.item;
   const cur = swap.cur || null;
   const d = Math.round(swap.delta || (swap.row && swap.row.delta) || 0);
-  const action = !to ? `ditch the ${nameOf(cur, 'extra')}` : cur ? `swap ${nameOf(cur, 'that piece')} for ${nameOf(to, 'something else')}` : `add ${nameOf(to, 'something')}`;
+  const action = !to ? `ditch ${yours(cur, 'the extra piece')}` : cur ? `swap ${yours(cur, 'that piece')} for ${yours(to, 'something else')}` : `add ${yours(to, 'something')}`;
   const tpl = FIX_TEMPLATES[Math.floor(rng() * FIX_TEMPLATES.length)];
   return fill(tpl, { ...v, action, d: String(d) }).replace(/\{action\}/g, action);
 }
@@ -288,13 +341,13 @@ export function roastOutfit(items, result, ctx = {}, { seed = 'roast' } = {}) {
     const rng = seedRng(seed);
     const used = new Set();
     const probs = problemGroups(result.reasons);
-    const base = buildVars(items, null, ctx);
+    const base = buildVars(items, null, ctx, '');
     const head = level === 'full' ? (score < 25 ? HEADLINES.low : score < 40 ? HEADLINES.mid : HEADLINES.high) : HEADLINES.light;
     const headline = head[Math.floor(rng() * head.length)];
     const take = level === 'full' ? Math.min(3, Math.max(2, probs.length)) : 1;
     const lines = [], groups = [];
     for (const p of probs.slice(0, take)) {
-      const v = buildVars(items, p.reason, ctx);
+      const v = buildVars(items, p.reason, ctx, p.group);
       let line = fill(pickTemplate(p.group, rng, used), v);
       if (level === 'light') line = `${LIGHT_PREFIX[Math.floor(rng() * LIGHT_PREFIX.length)]} ${line}`;
       lines.push(line); groups.push(p.group);

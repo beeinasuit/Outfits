@@ -209,8 +209,18 @@ try {
   await page.waitForSelector('.ck-score .t-meter');
   await page.locator('.occ-chip[data-key="wedding"]').click();
   await page.waitForSelector('.ck-roast:not([hidden])', { timeout: 8000 });
+  // let the count-up and sticker animations finish before reading numbers or taking the picture
+  await page.waitForFunction(() => document.querySelector('.ck-score .t-num').textContent === document.querySelector('.ck-score .t-meter').getAttribute('aria-valuenow'), null, { timeout: 8000 });
+  await page.waitForFunction(() => !document.getAnimations().some((a) => a.playState === 'running' && a.effect && a.effect.getComputedTiming().iterations !== Infinity), null, { timeout: 8000 }).catch(() => {});
+  await settle(page);
   const roastTxt = await page.locator('.ck-roast').textContent();
   const sc2 = Number(await page.locator('.ck-score .t-meter').getAttribute('aria-valuenow'));
+  const num2 = Number(await page.locator('.ck-score .t-num').textContent());
+  const swapNow = (await page.locator('.ck-swap-text small').last().textContent()).match(/(\d+) → (\d+)/);
+  check('meter number, aria value and the best move\'s "before" score all agree', num2 === sc2 && swapNow && Number(swapNow[1]) === sc2, `${num2}/${sc2}/${swapNow && swapNow[0]}`);
+  check('roast level matches the score band (<55 = full roast)', (sc2 < 55) === /The roast/.test(roastTxt), `${sc2}`);
+  check('"What\'s working" and "Easy fixes" are never empty boxes', (await page.locator('.ck-card:has(> h3:text-is("What’s working")), .ck-card:has(> h3:text-is("Easy fixes"))').evaluateAll((els) => els.map((e) => e.innerText.trim().length))).every((n) => n > 30));
+  check('roast sentences have no template leftovers', !/[{}]|undefined|null|\s{3,}/.test(roastTxt));
   check('a bad score gets roasted', sc2 < 55 && /🔥/.test(roastTxt) && (await page.locator('.ck-roast-lines li').count()) >= 2, `${sc2}: ${roastTxt.slice(0, 160)}`);
   check('roast ends with the rescue swap', /\+\d+/.test(await page.locator('.ck-roast-lines li.fix').textContent()));
   await page.screenshot({ path: path.join(shots, '6-roast.png'), fullPage: true });

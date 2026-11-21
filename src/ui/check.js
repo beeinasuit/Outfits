@@ -346,7 +346,6 @@ export function mount(root, { navigate }) {
       selectItem(slot, it, { extra: true });
       s.sh.close();
       afterPick(slot, false, it.id);
-      toast(`Got it: ${it.name}. It won’t be added to your closet unless you say so.`);
     } }, 'Use this');
     s.sh = sheet({ title: `What are you wearing as your ${(SLOT_LABELS[slot] || slot).toLowerCase()}?`, content: h('div', { class: 'ck-extra' },
       h('p', { class: 'hint' }, 'A one-off for today. I’ll score it with the rest.'),
@@ -432,28 +431,30 @@ export function mount(root, { navigate }) {
     return best;
   }
 
+  let resultToken = 0;
   async function computeResult() {
+    const my = ++resultToken;
     const items = currentItems();
     const ctx = await engineCtx();
     const res = scoreOutfit(items, ctx);
     let swap = null;
     try { swap = bestSwap(items, { ...ctx, maxReasons: 6 }); } catch (e) { console.warn(e); }
     const roast = roastOutfit(items, { score: res.score, reasons: res.reasons, swap }, ctx, { seed: S.seed });
+    if (my !== resultToken) return false; // a newer occasion change is already being scored: score, roast, fixes and swap always come from one run
     S.result = { items, score: res.score, reasons: res.reasons, swap, roast, profile: !!ctx.profile };
+    return true;
   }
 
   async function scoreIt() {
     const items = currentItems();
     if (!items.top || !items.bottom) return;
     S.occasion = S.occasion || data.settings.occasion || 'any';
-    await computeResult();
-    go('score');
+    if (await computeResult()) go('score');
   }
 
   async function rescore() {
     const prev = S.result ? S.result.score : 0;
-    await computeResult();
-    if (alive && S.step === 'score') { scoreEls.fillAll(prev); }
+    if ((await computeResult()) && alive && S.step === 'score' && scoreEls) { scoreEls.fillAll(prev); }
   }
 
   let scoreEls = null;

@@ -1,0 +1,1339 @@
+[color-clash | any | outfit 0 | -]
+Bless your heart. And your closet.
+Navy and beige in one outfit? That’s not a color story, that’s a custody battle.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[color-clash | any | outfit 1 | -]
+That’s a lot of effort for this result.
+White with black: bold, sure. Good, no.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[color-clash | any | outfit 2 | -]
+The mirror is being very polite right now.
+Light blue and burgundy have never met before, and it shows.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[color-clash | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Red and black are shouting over each other. Pick a lane.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[color-risky | any | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+A traffic accident between navy and beige, and you wore it on purpose.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[color-risky | any | outfit 1 | -]
+Bless your heart. And your closet.
+White and black are shouting over each other. Pick a lane.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[color-risky | any | outfit 2 | -]
+Bless your heart. And your closet.
+Light blue and burgundy are shouting over each other. Pick a lane.
+Fine, there’s a way out: swap your dark denim jeans for your navy chinos (+11). You’re welcome.
+
+[color-risky | any | outfit 3 | -]
+That’s a lot of effort for this result.
+Red and black have never met before, and it shows.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[color-clash-mild | any | outfit 0 | -]
+Bless your heart. And your closet.
+Navy and beige in one outfit? That’s not a color story, that’s a custody battle.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[color-clash-mild | any | outfit 1 | -]
+That’s a lot of effort for this result.
+A traffic accident between white and black, and you wore it on purpose.
+Fine, there’s a way out: swap your black joggers for your navy chinos (+11). You’re welcome.
+
+[color-clash-mild | any | outfit 2 | -]
+The mirror is being very polite right now.
+Light blue next to burgundy: your clothes are fighting and nobody’s refereeing.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[color-clash-mild | any | outfit 3 | -]
+Bless your heart. And your closet.
+A traffic accident between red and black, and you wore it on purpose.
+Rescue mission: swap your black athletic shorts for your navy chinos and watch the score climb +11.
+
+[contrast-muddy | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford and your khaki chinos are the same shade of nothing. It’s an outfit-shaped blur.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[contrast-muddy | any | outfit 1 | -]
+The mirror is being very polite right now.
+Your white tee and your black joggers blend together like they’re trying to avoid being noticed.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[contrast-muddy | any | outfit 2 | -]
+That’s a lot of effort for this result.
+Your blue stripe shirt and your dark denim jeans blend together like they’re trying to avoid being noticed.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[contrast-muddy | any | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee and your black athletic shorts are the same shade of nothing. It’s an outfit-shaped blur.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[contrast-denim | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Matching your navy oxford to your khaki chinos this closely isn’t style, it’s camouflage.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[contrast-denim | any | outfit 1 | -]
+Bless your heart. And your closet.
+Your white tee and your black joggers blend together like they’re trying to avoid being noticed.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[contrast-denim | any | outfit 2 | -]
+The mirror is being very polite right now.
+Your blue stripe shirt and your dark denim jeans melted into one puddle of sameness.
+Your closet has the fix: swap your dark denim jeans for your navy chinos. That’s +11 points.
+
+[contrast-denim | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Contrast called in sick today. Your red graphic tee and your black athletic shorts never showed up as two things.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[pattern-busy | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford with your khaki chinos: that’s not mixing patterns, that’s a hostage situation.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[pattern-busy | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Your white tee and your black joggers are both screaming for attention. Neither is winning.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[pattern-busy | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Your blue stripe shirt and your dark denim jeans are both screaming for attention. Neither is winning.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[pattern-busy | any | outfit 3 | -]
+The mirror is being very polite right now.
+Your red graphic tee and your black athletic shorts are both screaming for attention. Neither is winning.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[pattern-risky | any | outfit 0 | -]
+The mirror is being very polite right now.
+Your navy oxford and your khaki chinos are both screaming for attention. Neither is winning.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[pattern-risky | any | outfit 1 | -]
+The mirror is being very polite right now.
+Your white tee and your black joggers are both screaming for attention. Neither is winning.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[pattern-risky | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Your eyes called. They’d like a break from your blue stripe shirt and your dark denim jeans.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[pattern-risky | any | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee and your black athletic shorts are both screaming for attention. Neither is winning.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[statement-many | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford with your khaki chinos: that’s not mixing patterns, that’s a hostage situation.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[statement-many | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Your white tee with your black joggers: that’s not mixing patterns, that’s a hostage situation.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[statement-many | any | outfit 2 | -]
+The mirror is being very polite right now.
+Pattern on pattern, and not the cool way. Your blue stripe shirt, meet your dark denim jeans, please stop.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[statement-many | any | outfit 3 | -]
+The mirror is being very polite right now.
+Your eyes called. They’d like a break from your red graphic tee and your black athletic shorts.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[pattern-graphic | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford walked into the wrong dress code and stayed for the whole night.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[pattern-graphic | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+The graphic on your white tee is fighting everything around it.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[pattern-graphic | any | outfit 2 | -]
+Bless your heart. And your closet.
+Your blue stripe shirt is a casual-hour piece and the rest of this outfit is not.
+Rescue mission: swap your dark denim jeans for your navy chinos and watch the score climb +11.
+
+[pattern-graphic | any | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee walked into the wrong dress code and stayed for the whole night.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[formality-clash | any | outfit 0 | -]
+The mirror is being very polite right now.
+Your navy oxford and your brown leather belt walked in together and the whole room felt the tension.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[formality-clash | any | outfit 1 | -]
+The mirror is being very polite right now.
+Your black derbies and your black joggers don’t belong at the same party, let alone in the same outfit.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[formality-clash | any | outfit 2 | -]
+Bless your heart. And your closet.
+Your navy blazer with your gray beanie? You dressed for two different events and attended both.
+Your closet has the fix: swap your dark denim jeans for your navy chinos. That’s +11 points.
+
+[formality-clash | any | outfit 3 | -]
+That’s a lot of effort for this result.
+Your black derbies and your black athletic shorts walked in together and the whole room felt the tension.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[formality-gap | any | outfit 0 | -]
+The mirror is being very polite right now.
+Your navy oxford is dressed for a wedding and your brown leather belt is dressed for a nap.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[formality-gap | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Your black derbies with your black joggers? You dressed for two different events and attended both.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[formality-gap | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Your navy blazer and your gray beanie walked in together and the whole room felt the tension.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[formality-gap | any | outfit 3 | -]
+Bless your heart. And your closet.
+Your black derbies with your black athletic shorts: the outfit equivalent of a tuxedo T-shirt.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[formality-shoes | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Your brown boots and your navy oxford walked in together and the whole room felt the tension.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[formality-shoes | any | outfit 1 | -]
+The mirror is being very polite right now.
+Your black derbies with your black joggers: the outfit equivalent of a tuxedo T-shirt.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[formality-shoes | any | outfit 2 | -]
+The mirror is being very polite right now.
+Your navy blazer is dressed for a wedding and your white sneakers is dressed for a nap.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[formality-shoes | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Your black derbies with your red graphic tee? You dressed for two different events and attended both.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[shoes-sporty | any | outfit 0 | -]
+Bless your heart. And your closet.
+Somewhere between your brown boots and your navy oxford, the plan fell apart.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[shoes-sporty | any | outfit 1 | -]
+That’s a lot of effort for this result.
+Your black derbies and your black joggers walked in together and the whole room felt the tension.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[shoes-sporty | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Your navy blazer is dressed for a wedding and your white sneakers is dressed for a nap.
+Your closet has the fix: swap your dark denim jeans for your navy chinos. That’s +11 points.
+
+[shoes-sporty | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Your black derbies with your red graphic tee: the outfit equivalent of a tuxedo T-shirt.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[shoes-oxford-jeans | any | outfit 0 | -]
+Bless your heart. And your closet.
+Your brown boots with your navy oxford? You dressed for two different events and attended both.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[shoes-oxford-jeans | any | outfit 1 | -]
+That’s a lot of effort for this result.
+Somewhere between your black derbies and your black joggers, the plan fell apart.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[shoes-oxford-jeans | any | outfit 2 | -]
+Bless your heart. And your closet.
+Your navy blazer is dressed for a wedding and your white sneakers is dressed for a nap.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[shoes-oxford-jeans | any | outfit 3 | -]
+The mirror is being very polite right now.
+Your black derbies is dressed for a wedding and your red graphic tee is dressed for a nap.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[shoes-sandals-formal | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Your brown boots is dressed for a wedding and your navy oxford is dressed for a nap.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[shoes-sandals-formal | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Somewhere between your black derbies and your black joggers, the plan fell apart.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[shoes-sandals-formal | any | outfit 2 | -]
+Bless your heart. And your closet.
+Your navy blazer is dressed for a wedding and your white sneakers is dressed for a nap.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[shoes-sandals-formal | any | outfit 3 | -]
+Bless your heart. And your closet.
+Somewhere between your black derbies and your red graphic tee, the plan fell apart.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[shorts-dressy | any | outfit 0 | -]
+Bless your heart. And your closet.
+Your navy oxford with your brown leather belt? You dressed for two different events and attended both.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[shorts-dressy | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Your black derbies and your black joggers walked in together and the whole room felt the tension.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[shorts-dressy | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Your navy blazer and your gray beanie walked in together and the whole room felt the tension.
+Rescue mission: swap your dark denim jeans for your navy chinos and watch the score climb +11.
+
+[shorts-dressy | any | outfit 3 | -]
+Bless your heart. And your closet.
+Your black derbies with your black athletic shorts? You dressed for two different events and attended both.
+Rescue mission: swap your black athletic shorts for your navy chinos and watch the score climb +11.
+
+[weather-cold | any | outfit 0 | cold]
+Bless your heart. And your closet.
+Cold weather will find every gap in this outfit. Enjoy.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[weather-cold | any | outfit 1 | cold]
+Bold. Brave. Wrong, but brave.
+Cold weather will find every gap in this outfit. Enjoy.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[weather-cold | any | outfit 2 | cold]
+Bless your heart. And your closet.
+Your sweater drawer is filing a missing-persons report on today’s outfit.
+Your closet has the fix: swap your dark denim jeans for your navy chinos. That’s +11 points.
+
+[weather-cold | any | outfit 3 | cold]
+That’s a lot of effort for this result.
+The forecast says cold and you dressed like it’s a rumor.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[weather-shorts-cold | any | outfit 0 | cold]
+Bless your heart. And your closet.
+This outfit is brave and the weather is going to make you pay for it.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[weather-shorts-cold | any | outfit 1 | cold]
+Bless your heart. And your closet.
+The forecast says cold and you dressed like it’s a rumor.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[weather-shorts-cold | any | outfit 2 | cold]
+Bold. Brave. Wrong, but brave.
+The forecast says cold and you dressed like it’s a rumor.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[weather-shorts-cold | any | outfit 3 | cold]
+Bless your heart. And your closet.
+The forecast says cold and you dressed like it’s a rumor.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[weather-footwear | any | outfit 0 | cold]
+Bless your heart. And your closet.
+Cold weather will find every gap in this outfit. Enjoy.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[weather-footwear | any | outfit 1 | cold]
+Bless your heart. And your closet.
+This outfit is brave and the weather is going to make you pay for it.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[weather-footwear | any | outfit 2 | cold]
+That’s a lot of effort for this result.
+Cold weather will find every gap in this outfit. Enjoy.
+Fine, there’s a way out: swap your dark denim jeans for your navy chinos (+11). You’re welcome.
+
+[weather-footwear | any | outfit 3 | cold]
+That’s a lot of effort for this result.
+Dressed for cold weather? Bold. This outfit has clearly never been outside.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[weather-nolayer | any | outfit 0 | cold]
+Bold. Brave. Wrong, but brave.
+This is an outfit for a warm room that doesn’t exist today.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[weather-nolayer | any | outfit 1 | cold]
+Bless your heart. And your closet.
+This is an outfit for a warm room that doesn’t exist today.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[weather-nolayer | any | outfit 2 | cold]
+The mirror is being very polite right now.
+Your sweater drawer is filing a missing-persons report on today’s outfit.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[weather-nolayer | any | outfit 3 | cold]
+Bless your heart. And your closet.
+Your sweater drawer is filing a missing-persons report on today’s outfit.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[weather-hot | any | outfit 0 | cold]
+The mirror is being very polite right now.
+It’s cold out and this outfit is a slow-cooker with sleeves.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[weather-hot | any | outfit 1 | cold]
+Bless your heart. And your closet.
+This outfit forgot to check the temperature. It’ll find out by lunch.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[weather-hot | any | outfit 2 | cold]
+The mirror is being very polite right now.
+Cold weather and you chose heat retention. Respect the commitment, question the plan.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[weather-hot | any | outfit 3 | cold]
+That’s a lot of effort for this result.
+This outfit forgot to check the temperature. It’ll find out by lunch.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[weather-accessory-hot | any | outfit 0 | cold]
+The mirror is being very polite right now.
+Cold weather and you chose heat retention. Respect the commitment, question the plan.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[weather-accessory-hot | any | outfit 1 | cold]
+That’s a lot of effort for this result.
+It’s cold out and this outfit is a slow-cooker with sleeves.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[weather-accessory-hot | any | outfit 2 | cold]
+Bold. Brave. Wrong, but brave.
+The sun is looking at this outfit like it’s dinner.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[weather-accessory-hot | any | outfit 3 | cold]
+The mirror is being very polite right now.
+It’s cold out and this outfit is a slow-cooker with sleeves.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[rain-none | any | outfit 0 | cold]
+That’s a lot of effort for this result.
+The sky has plans and this outfit did not read them.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[rain-none | any | outfit 1 | cold]
+Bold. Brave. Wrong, but brave.
+Dry-clean-only energy on a rainy day. Brave.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[rain-none | any | outfit 2 | cold]
+That’s a lot of effort for this result.
+Puddles are going to have opinions about this outfit.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[rain-none | any | outfit 3 | cold]
+Bless your heart. And your closet.
+Dry-clean-only energy on a rainy day. Brave.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[rain-suede | any | outfit 0 | cold]
+Bless your heart. And your closet.
+Dry-clean-only energy on a rainy day. Brave.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[rain-suede | any | outfit 1 | cold]
+Bless your heart. And your closet.
+The sky has plans and this outfit did not read them.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[rain-suede | any | outfit 2 | cold]
+That’s a lot of effort for this result.
+Puddles are going to have opinions about this outfit.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[rain-suede | any | outfit 3 | cold]
+Bless your heart. And your closet.
+Dry-clean-only energy on a rainy day. Brave.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[shoes-heavy-sandals | any | outfit 0 | -]
+Bless your heart. And your closet.
+This outfit has a split personality and the forecast doesn’t know which half to believe.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[shoes-heavy-sandals | any | outfit 1 | -]
+That’s a lot of effort for this result.
+The pieces in this outfit come from different calendars.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[shoes-heavy-sandals | any | outfit 2 | -]
+That’s a lot of effort for this result.
+Pick a season. This outfit is wearing all of them at once.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[shoes-heavy-sandals | any | outfit 3 | -]
+Bless your heart. And your closet.
+The pieces in this outfit come from different calendars.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[shorts-heavy | any | outfit 0 | -]
+The mirror is being very polite right now.
+This is what happens when you get dressed in the dark in four different months.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[shorts-heavy | any | outfit 1 | -]
+That’s a lot of effort for this result.
+Pick a season. This outfit is wearing all of them at once.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[shorts-heavy | any | outfit 2 | -]
+The mirror is being very polite right now.
+Mixed signals, and they’re all coming from your wardrobe.
+Rescue mission: swap your dark denim jeans for your navy chinos and watch the score climb +11.
+
+[shorts-heavy | any | outfit 3 | -]
+That’s a lot of effort for this result.
+Pick a season. This outfit is wearing all of them at once.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[shorts-boots | any | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+Half of this outfit is packed for the beach and half for a blizzard.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[shorts-boots | any | outfit 1 | -]
+That’s a lot of effort for this result.
+Half of this outfit is packed for the beach and half for a blizzard.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[shorts-boots | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Pick a season. This outfit is wearing all of them at once.
+Rescue mission: swap your dark denim jeans for your navy chinos and watch the score climb +11.
+
+[shorts-boots | any | outfit 3 | -]
+That’s a lot of effort for this result.
+Half of this outfit is packed for the beach and half for a blizzard.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[occasion-avoid | wedding | outfit 0 | -]
+That’s a lot of effort for this result.
+For a wedding, your navy oxford is a lovely surprise. Nobody wanted that surprise.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[occasion-avoid | wedding | outfit 1 | -]
+That’s a lot of effort for this result.
+Your white tee for a wedding? Bold of you.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[occasion-avoid | wedding | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+For a wedding, your blue stripe shirt is a lovely surprise. Nobody wanted that surprise.
+Fine, there’s a way out: swap your dark denim jeans for your navy chinos (+11). You’re welcome.
+
+[occasion-avoid | wedding | outfit 3 | -]
+That’s a lot of effort for this result.
+If a wedding had a bouncer, your red graphic tee would be waiting outside.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[occasion-avoid | work | outfit 0 | -]
+The mirror is being very polite right now.
+Your navy oxford is a lot of look for work, and not the good kind of lot.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[occasion-avoid | work | outfit 1 | -]
+The mirror is being very polite right now.
+If work had a bouncer, your white tee would be waiting outside.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[occasion-avoid | work | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+If work had a bouncer, your blue stripe shirt would be waiting outside.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-avoid | work | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Your red graphic tee is a lot of look for work, and not the good kind of lot.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[occasion-avoid | errands | outfit 0 | -]
+The mirror is being very polite right now.
+For errands, your navy oxford is a lovely surprise. Nobody wanted that surprise.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[occasion-avoid | errands | outfit 1 | -]
+Bless your heart. And your closet.
+Your white tee for errands? Bold of you.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[occasion-avoid | errands | outfit 2 | -]
+That’s a lot of effort for this result.
+Your blue stripe shirt for errands? Bold of you.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-avoid | errands | outfit 3 | -]
+The mirror is being very polite right now.
+Your red graphic tee for errands? Bold of you.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[occasion-avoid | book-club | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+For your book club, your navy oxford is a lovely surprise. Nobody wanted that surprise.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[occasion-avoid | book-club | outfit 1 | -]
+The mirror is being very polite right now.
+I’ve seen the dress code for your book club. Your white tee didn’t get the memo.
+Fine, there’s a way out: swap your black joggers for your navy chinos (+11). You’re welcome.
+
+[occasion-avoid | book-club | outfit 2 | -]
+Bless your heart. And your closet.
+Your blue stripe shirt is a lot of look for your book club, and not the good kind of lot.
+Rescue mission: swap your dark denim jeans for your navy chinos and watch the score climb +11.
+
+[occasion-avoid | book-club | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee for your book club? Bold of you.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-off | wedding | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+Your navy oxford is a lot of look for a wedding, and not the good kind of lot.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[occasion-off | wedding | outfit 1 | -]
+Bless your heart. And your closet.
+Your white tee is a lot of look for a wedding, and not the good kind of lot.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[occasion-off | wedding | outfit 2 | -]
+That’s a lot of effort for this result.
+Your blue stripe shirt for a wedding? Bold of you.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-off | wedding | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee for a wedding? Bold of you.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[occasion-off | work | outfit 0 | -]
+That’s a lot of effort for this result.
+Nobody has ever shown up for work in your navy oxford and thought “nailed it.”
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[occasion-off | work | outfit 1 | -]
+The mirror is being very polite right now.
+For work, your white tee is a lovely surprise. Nobody wanted that surprise.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[occasion-off | work | outfit 2 | -]
+The mirror is being very polite right now.
+If work had a bouncer, your blue stripe shirt would be waiting outside.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-off | work | outfit 3 | -]
+The mirror is being very polite right now.
+Your red graphic tee for work? Bold of you.
+Rescue mission: swap your black athletic shorts for your navy chinos and watch the score climb +11.
+
+[occasion-off | errands | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+Nobody has ever shown up for errands in your navy oxford and thought “nailed it.”
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-off | errands | outfit 1 | -]
+Bless your heart. And your closet.
+Nobody has ever shown up for errands in your white tee and thought “nailed it.”
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[occasion-off | errands | outfit 2 | -]
+Bless your heart. And your closet.
+I’ve seen the dress code for errands. Your blue stripe shirt didn’t get the memo.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-off | errands | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Your red graphic tee is a lot of look for errands, and not the good kind of lot.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[occasion-off | book-club | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+For your book club, your navy oxford is a lovely surprise. Nobody wanted that surprise.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-off | book-club | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+I’ve seen the dress code for your book club. Your white tee didn’t get the memo.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[occasion-off | book-club | outfit 2 | -]
+That’s a lot of effort for this result.
+Your blue stripe shirt for your book club? Bold of you.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-off | book-club | outfit 3 | -]
+The mirror is being very polite right now.
+Your red graphic tee is a lot of look for your book club, and not the good kind of lot.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[occasion-avoid-color | wedding | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+For a wedding, your navy oxford is a lovely surprise. Nobody wanted that surprise.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[occasion-avoid-color | wedding | outfit 1 | -]
+That’s a lot of effort for this result.
+Nobody has ever shown up for a wedding in your white tee and thought “nailed it.”
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[occasion-avoid-color | wedding | outfit 2 | -]
+That’s a lot of effort for this result.
+If a wedding had a bouncer, your blue stripe shirt would be waiting outside.
+Rescue mission: swap your dark denim jeans for your navy chinos and watch the score climb +11.
+
+[occasion-avoid-color | wedding | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee is a lot of look for a wedding, and not the good kind of lot.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[occasion-avoid-color | work | outfit 0 | -]
+That’s a lot of effort for this result.
+I’ve seen the dress code for work. Your navy oxford didn’t get the memo.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-avoid-color | work | outfit 1 | -]
+The mirror is being very polite right now.
+Your white tee for work? Bold of you.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[occasion-avoid-color | work | outfit 2 | -]
+Bless your heart. And your closet.
+If work had a bouncer, your blue stripe shirt would be waiting outside.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-avoid-color | work | outfit 3 | -]
+That’s a lot of effort for this result.
+For work, your red graphic tee is a lovely surprise. Nobody wanted that surprise.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[occasion-avoid-color | errands | outfit 0 | -]
+Bless your heart. And your closet.
+Your navy oxford for errands? Bold of you.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[occasion-avoid-color | errands | outfit 1 | -]
+Bless your heart. And your closet.
+Your white tee is a lot of look for errands, and not the good kind of lot.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-avoid-color | errands | outfit 2 | -]
+That’s a lot of effort for this result.
+For errands, your blue stripe shirt is a lovely surprise. Nobody wanted that surprise.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-avoid-color | errands | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Nobody has ever shown up for errands in your red graphic tee and thought “nailed it.”
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[occasion-avoid-color | book-club | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford for your book club? Bold of you.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-avoid-color | book-club | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+For your book club, your white tee is a lovely surprise. Nobody wanted that surprise.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[occasion-avoid-color | book-club | outfit 2 | -]
+The mirror is being very polite right now.
+Your blue stripe shirt for your book club? Bold of you.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-avoid-color | book-club | outfit 3 | -]
+That’s a lot of effort for this result.
+I’ve seen the dress code for your book club. Your red graphic tee didn’t get the memo.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[occasion-muted | wedding | outfit 0 | -]
+The mirror is being very polite right now.
+Nobody has ever shown up for a wedding in your navy oxford and thought “nailed it.”
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-muted | wedding | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+If a wedding had a bouncer, your white tee would be waiting outside.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[occasion-muted | wedding | outfit 2 | -]
+The mirror is being very polite right now.
+Your blue stripe shirt for a wedding? Bold of you.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-muted | wedding | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee is a lot of look for a wedding, and not the good kind of lot.
+Rescue mission: swap your black athletic shorts for your navy chinos and watch the score climb +11.
+
+[occasion-muted | work | outfit 0 | -]
+Bless your heart. And your closet.
+I’ve seen the dress code for work. Your navy oxford didn’t get the memo.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[occasion-muted | work | outfit 1 | -]
+That’s a lot of effort for this result.
+Your white tee for work? Bold of you.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[occasion-muted | work | outfit 2 | -]
+Bless your heart. And your closet.
+Your blue stripe shirt for work? Bold of you.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-muted | work | outfit 3 | -]
+That’s a lot of effort for this result.
+Your red graphic tee for work? Bold of you.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-muted | errands | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford for errands? Bold of you.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-muted | errands | outfit 1 | -]
+Bless your heart. And your closet.
+Your white tee for errands? Bold of you.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-muted | errands | outfit 2 | -]
+That’s a lot of effort for this result.
+I’ve seen the dress code for errands. Your blue stripe shirt didn’t get the memo.
+Fine, there’s a way out: swap your dark denim jeans for your navy chinos (+11). You’re welcome.
+
+[occasion-muted | errands | outfit 3 | -]
+That’s a lot of effort for this result.
+If errands had a bouncer, your red graphic tee would be waiting outside.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[occasion-muted | book-club | outfit 0 | -]
+The mirror is being very polite right now.
+Your navy oxford is a lot of look for your book club, and not the good kind of lot.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-muted | book-club | outfit 1 | -]
+That’s a lot of effort for this result.
+For your book club, your white tee is a lovely surprise. Nobody wanted that surprise.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-muted | book-club | outfit 2 | -]
+The mirror is being very polite right now.
+Your blue stripe shirt is a lot of look for your book club, and not the good kind of lot.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-muted | book-club | outfit 3 | -]
+The mirror is being very polite right now.
+Your red graphic tee for your book club? Bold of you.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[occasion-layer | wedding | outfit 0 | -]
+The mirror is being very polite right now.
+Your navy oxford is a lot of look for a wedding, and not the good kind of lot.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[occasion-layer | wedding | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Your white tee for a wedding? Bold of you.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[occasion-layer | wedding | outfit 2 | -]
+Bless your heart. And your closet.
+For a wedding, your blue stripe shirt is a lovely surprise. Nobody wanted that surprise.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-layer | wedding | outfit 3 | -]
+Bless your heart. And your closet.
+Your red graphic tee for a wedding? Bold of you.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[occasion-layer | work | outfit 0 | -]
+That’s a lot of effort for this result.
+For work, your navy oxford is a lovely surprise. Nobody wanted that surprise.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-layer | work | outfit 1 | -]
+That’s a lot of effort for this result.
+For work, your white tee is a lovely surprise. Nobody wanted that surprise.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[occasion-layer | work | outfit 2 | -]
+Bless your heart. And your closet.
+Your blue stripe shirt is a lot of look for work, and not the good kind of lot.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-layer | work | outfit 3 | -]
+Bless your heart. And your closet.
+I’ve seen the dress code for work. Your red graphic tee didn’t get the memo.
+Rescue mission: swap your black athletic shorts for your navy chinos and watch the score climb +11.
+
+[occasion-layer | errands | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+Your navy oxford for errands? Bold of you.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[occasion-layer | errands | outfit 1 | -]
+The mirror is being very polite right now.
+Nobody has ever shown up for errands in your white tee and thought “nailed it.”
+Fine, there’s a way out: swap your black joggers for your navy chinos (+11). You’re welcome.
+
+[occasion-layer | errands | outfit 2 | -]
+The mirror is being very polite right now.
+I’ve seen the dress code for errands. Your blue stripe shirt didn’t get the memo.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-layer | errands | outfit 3 | -]
+Bless your heart. And your closet.
+Your red graphic tee for errands? Bold of you.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[occasion-layer | book-club | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+If your book club had a bouncer, your navy oxford would be waiting outside.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-layer | book-club | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+If your book club had a bouncer, your white tee would be waiting outside.
+Fine, there’s a way out: swap your black joggers for your navy chinos (+11). You’re welcome.
+
+[occasion-layer | book-club | outfit 2 | -]
+That’s a lot of effort for this result.
+Your blue stripe shirt for your book club? Bold of you.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-layer | book-club | outfit 3 | -]
+The mirror is being very polite right now.
+Nobody has ever shown up for your book club in your red graphic tee and thought “nailed it.”
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-hat | wedding | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford is a lot of look for a wedding, and not the good kind of lot.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[occasion-hat | wedding | outfit 1 | -]
+That’s a lot of effort for this result.
+Your white tee is a lot of look for a wedding, and not the good kind of lot.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[occasion-hat | wedding | outfit 2 | -]
+Bless your heart. And your closet.
+Your blue stripe shirt for a wedding? Bold of you.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-hat | wedding | outfit 3 | -]
+Bless your heart. And your closet.
+Your red graphic tee for a wedding? Bold of you.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[occasion-hat | work | outfit 0 | -]
+Bless your heart. And your closet.
+For work, your navy oxford is a lovely surprise. Nobody wanted that surprise.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-hat | work | outfit 1 | -]
+That’s a lot of effort for this result.
+Nobody has ever shown up for work in your white tee and thought “nailed it.”
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[occasion-hat | work | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Your blue stripe shirt for work? Bold of you.
+Fine, there’s a way out: swap your dark denim jeans for your navy chinos (+11). You’re welcome.
+
+[occasion-hat | work | outfit 3 | -]
+The mirror is being very polite right now.
+Your red graphic tee for work? Bold of you.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[occasion-hat | errands | outfit 0 | -]
+That’s a lot of effort for this result.
+Your navy oxford is a lot of look for errands, and not the good kind of lot.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[occasion-hat | errands | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Your white tee for errands? Bold of you.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-hat | errands | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+For errands, your blue stripe shirt is a lovely surprise. Nobody wanted that surprise.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[occasion-hat | errands | outfit 3 | -]
+The mirror is being very polite right now.
+I’ve seen the dress code for errands. Your red graphic tee didn’t get the memo.
+Salvation exists: swap your black athletic shorts for your navy chinos. +11.
+
+[occasion-hat | book-club | outfit 0 | -]
+That’s a lot of effort for this result.
+If your book club had a bouncer, your navy oxford would be waiting outside.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[occasion-hat | book-club | outfit 1 | -]
+That’s a lot of effort for this result.
+If your book club had a bouncer, your white tee would be waiting outside.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[occasion-hat | book-club | outfit 2 | -]
+That’s a lot of effort for this result.
+For your book club, your blue stripe shirt is a lovely surprise. Nobody wanted that surprise.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[occasion-hat | book-club | outfit 3 | -]
+The mirror is being very polite right now.
+Your red graphic tee is a lot of look for your book club, and not the good kind of lot.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[leather-clash | any | outfit 0 | -]
+The mirror is being very polite right now.
+Somewhere a leather-matching rule is weeping softly over your belt and shoes.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[leather-clash | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Somewhere a leather-matching rule is weeping softly over your belt and shoes.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[leather-clash | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Belt and shoes are both leather and they disagree about the shade.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[leather-clash | any | outfit 3 | -]
+The mirror is being very polite right now.
+Somewhere a leather-matching rule is weeping softly over your belt and shoes.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[leather-near | any | outfit 0 | -]
+Bless your heart. And your closet.
+Those two leathers look like cousins who don’t speak at family dinners.
+Salvation exists: swap your khaki chinos for your navy chinos. +11.
+
+[leather-near | any | outfit 1 | -]
+That’s a lot of effort for this result.
+Somewhere a leather-matching rule is weeping softly over your belt and shoes.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[leather-near | any | outfit 2 | -]
+Bless your heart. And your closet.
+Those two leathers look like cousins who don’t speak at family dinners.
+Your closet has the fix: swap your dark denim jeans for your navy chinos. That’s +11 points.
+
+[leather-near | any | outfit 3 | -]
+The mirror is being very polite right now.
+Those two leathers look like cousins who don’t speak at family dinners.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[belt-formality | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Belt formality mismatch: small accessory, big announcement.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[belt-formality | any | outfit 1 | -]
+The mirror is being very polite right now.
+That belt is from a different dress code than the rest of the outfit.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[belt-formality | any | outfit 2 | -]
+That’s a lot of effort for this result.
+Your belt and the rest of the outfit aren’t dressed for the same day.
+Your closet has the fix: swap your dark denim jeans for your navy chinos. That’s +11 points.
+
+[belt-formality | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Your belt didn’t get the memo about today’s dress level.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[belt-casual | any | outfit 0 | -]
+The mirror is being very polite right now.
+Your belt and the rest of the outfit aren’t dressed for the same day.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[belt-casual | any | outfit 1 | -]
+Bless your heart. And your closet.
+The belt thinks it’s at one event and everything else thinks it’s at another.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[belt-casual | any | outfit 2 | -]
+That’s a lot of effort for this result.
+The belt thinks it’s at one event and everything else thinks it’s at another.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[belt-casual | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Your belt didn’t get the memo about today’s dress level.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[belt-no-loops | any | outfit 0 | -]
+That’s a lot of effort for this result.
+No loops, yet a belt. Bold form of accessorizing.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[belt-no-loops | any | outfit 1 | -]
+That’s a lot of effort for this result.
+A belt with pants that have no belt loops. That belt has nothing to hold on to.
+Fine, there’s a way out: swap your black joggers for your navy chinos (+11). You’re welcome.
+
+[belt-no-loops | any | outfit 2 | -]
+That’s a lot of effort for this result.
+A belt on loopless pants is just a very optimistic strap.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[belt-no-loops | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Those pants never asked for a belt, and the belt knows it.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[belt-missing | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Belt loops, no belt: the outfit equivalent of a sentence with no period.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[belt-missing | any | outfit 1 | -]
+That’s a lot of effort for this result.
+Belt loops with no belt. Those loops are just decorative at this point.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[belt-missing | any | outfit 2 | -]
+The mirror is being very polite right now.
+Belt loops with no belt. Those loops are just decorative at this point.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[belt-missing | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+Belt loops, no belt: the outfit equivalent of a sentence with no period.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[tie-no-collar | any | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+That accessory is trying very hard in an outfit that stopped trying.
+Rescue mission: swap your khaki chinos for your navy chinos and watch the score climb +11.
+
+[tie-no-collar | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+That accessory is trying very hard in an outfit that stopped trying.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[tie-no-collar | any | outfit 2 | -]
+Bless your heart. And your closet.
+Your burgundy tie is trying very hard in an outfit that stopped trying.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[tie-no-collar | any | outfit 3 | -]
+That’s a lot of effort for this result.
+That accessory is the one guest who showed up to the wrong party.
+Rescue mission: swap your black athletic shorts for your navy chinos and watch the score climb +11.
+
+[bowtie-informal | any | outfit 0 | -]
+That’s a lot of effort for this result.
+You added that accessory like it was going to help. It had other plans.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[bowtie-informal | any | outfit 1 | -]
+Bless your heart. And your closet.
+The mismatch between that accessory and everything else is, frankly, a lot.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[bowtie-informal | any | outfit 2 | -]
+The mirror is being very polite right now.
+Somebody told your burgundy tie it was invited. It was not.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[bowtie-informal | any | outfit 3 | -]
+Bless your heart. And your closet.
+The mismatch between that accessory and everything else is, frankly, a lot.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[tie-too-casual | any | outfit 0 | -]
+That’s a lot of effort for this result.
+Somebody told that accessory it was invited. It was not.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[tie-too-casual | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+The mismatch between that accessory and everything else is, frankly, a lot.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[tie-too-casual | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Somebody told your burgundy tie it was invited. It was not.
+Fine, there’s a way out: swap your dark denim jeans for your navy chinos (+11). You’re welcome.
+
+[tie-too-casual | any | outfit 3 | -]
+That’s a lot of effort for this result.
+That accessory and this outfit are not on speaking terms.
+Emergency repair: swap your black athletic shorts for your navy chinos. +11.
+
+[hat-mismatch | any | outfit 0 | -]
+The mirror is being very polite right now.
+The mismatch between that accessory and everything else is, frankly, a lot.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[hat-mismatch | any | outfit 1 | -]
+Bless your heart. And your closet.
+You added that accessory like it was going to help. It had other plans.
+Plot twist: swap your black joggers for your navy chinos. +11 and suddenly we’re friends.
+
+[hat-mismatch | any | outfit 2 | -]
+Bold. Brave. Wrong, but brave.
+Your burgundy tie is the one guest who showed up to the wrong party.
+Rescue mission: swap your dark denim jeans for your navy chinos and watch the score climb +11.
+
+[hat-mismatch | any | outfit 3 | -]
+Bold. Brave. Wrong, but brave.
+You added that accessory like it was going to help. It had other plans.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[hat-casual | any | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+That accessory and this outfit are not on speaking terms.
+Plot twist: swap your khaki chinos for your navy chinos. +11 and suddenly we’re friends.
+
+[hat-casual | any | outfit 1 | -]
+Bless your heart. And your closet.
+Somebody told that accessory it was invited. It was not.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[hat-casual | any | outfit 2 | -]
+That’s a lot of effort for this result.
+Your burgundy tie and this outfit are not on speaking terms.
+Emergency repair: swap your dark denim jeans for your navy chinos. +11.
+
+[hat-casual | any | outfit 3 | -]
+That’s a lot of effort for this result.
+That accessory and this outfit are not on speaking terms.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[complexion-off | any | outfit 0 | -]
+That’s a lot of effort for this result.
+That navy is draining you like a vampire with a coupon.
+Fine, there’s a way out: swap your khaki chinos for your navy chinos (+11). You’re welcome.
+
+[complexion-off | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Of all the colors on the wheel, you picked the white that makes your whole look go quiet.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[complexion-off | any | outfit 2 | -]
+That’s a lot of effort for this result.
+That light blue is draining you like a vampire with a coupon.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[complexion-off | any | outfit 3 | -]
+The mirror is being very polite right now.
+Red is not your color today, and your red graphic tee knows it. So does the mirror.
+Your closet has the fix: swap your black athletic shorts for your navy chinos. That’s +11 points.
+
+[recently-worn | any | outfit 0 | -]
+The mirror is being very polite right now.
+I recognize this outfit from somewhere. Probably the last few days.
+Emergency repair: swap your khaki chinos for your navy chinos. +11.
+
+[recently-worn | any | outfit 1 | -]
+Bold. Brave. Wrong, but brave.
+Some of this is wearing out its welcome in your lineup.
+Rescue mission: swap your black joggers for your navy chinos and watch the score climb +11.
+
+[recently-worn | any | outfit 2 | -]
+That’s a lot of effort for this result.
+Rotation matters. Some of this outfit is on its third lap.
+Plot twist: swap your dark denim jeans for your navy chinos. +11 and suddenly we’re friends.
+
+[recently-worn | any | outfit 3 | -]
+The mirror is being very polite right now.
+The pieces here are asking for a day off.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
+
+[feedback-disliked | any | outfit 0 | -]
+That’s a lot of effort for this result.
+You already voted this combo down once. Past you had taste.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[feedback-disliked | any | outfit 1 | -]
+Bless your heart. And your closet.
+Your own taste notes warned you about this one.
+Your closet has the fix: swap your black joggers for your navy chinos. That’s +11 points.
+
+[feedback-disliked | any | outfit 2 | -]
+Bless your heart. And your closet.
+Your own taste notes warned you about this one.
+Salvation exists: swap your dark denim jeans for your navy chinos. +11.
+
+[feedback-disliked | any | outfit 3 | -]
+Bless your heart. And your closet.
+Past you gave this combo a thumbs down. Past you was right.
+Rescue mission: swap your black athletic shorts for your navy chinos and watch the score climb +11.
+
+[feedback-pair-disliked | any | outfit 0 | -]
+The mirror is being very polite right now.
+Your own taste notes warned you about this one.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[feedback-pair-disliked | any | outfit 1 | -]
+The mirror is being very polite right now.
+This pairing is on your own naughty list. You wore it anyway.
+Salvation exists: swap your black joggers for your navy chinos. +11.
+
+[feedback-pair-disliked | any | outfit 2 | -]
+The mirror is being very polite right now.
+You already voted this combo down once. Past you had taste.
+Your closet has the fix: swap your dark denim jeans for your navy chinos. That’s +11 points.
+
+[feedback-pair-disliked | any | outfit 3 | -]
+That’s a lot of effort for this result.
+You’ve rejected this exact vibe before. Rebel behavior, wrong rebellion.
+Fine, there’s a way out: swap your black athletic shorts for your navy chinos (+11). You’re welcome.
+
+[mystery-tag | any | outfit 0 | -]
+Bold. Brave. Wrong, but brave.
+“Navy oxford is not right for something.” Noted. Loudly.
+Your closet has the fix: swap your khaki chinos for your navy chinos. That’s +11 points.
+
+[mystery-tag | any | outfit 1 | -]
+Bless your heart. And your closet.
+The scorecard says: White tee is not right for something. I’m just the messenger.
+Emergency repair: swap your black joggers for your navy chinos. +11.
+
+[mystery-tag | any | outfit 2 | -]
+The mirror is being very polite right now.
+The scorecard says: Blue stripe shirt is not right for something. I’m just the messenger.
+Fine, there’s a way out: swap your dark denim jeans for your navy chinos (+11). You’re welcome.
+
+[mystery-tag | any | outfit 3 | -]
+Bless your heart. And your closet.
+Filed under “could be better”: Red graphic tee is not right for something.
+Plot twist: swap your black athletic shorts for your navy chinos. +11 and suddenly we’re friends.
