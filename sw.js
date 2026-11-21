@@ -5,7 +5,7 @@ const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'styles/app.css', 'styles/today.css', 'styles/extra.css', 'styles/check.css',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png',
   'src/app.js', 'src/model.js', 'src/store.js',
-  'src/engine/rules.js', 'src/engine/score.js', 'src/engine/build.js', 'src/engine/taste.js',
+  'src/engine/rules.js', 'src/engine/score.js', 'src/engine/build.js', 'src/engine/taste.js', 'src/engine/match.js', 'src/engine/roast.js',
   'src/vision/color.js', 'src/vision/segment.js', 'src/vision/image.js', 'src/vision/skin.js', 'src/vision/wearing.js',
   'src/ui/closet.js', 'src/ui/data.js', 'src/ui/dom.js', 'src/ui/fx.js', 'src/ui/icons.js', 'src/ui/illustrations.js', 'src/ui/itemart.js',
   'src/ui/itemform.js', 'src/ui/looks.js', 'src/ui/onboarding.js', 'src/ui/overlay.js', 'src/ui/settings.js', 'src/ui/snap.js',
