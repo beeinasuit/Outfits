@@ -1,7 +1,8 @@
 // FIT CHECK ("Rate what I'm wearing"): photo -> line up -> which pieces -> score -> log it to the diary.
 // Everything happens on the phone: the photo is read by src/vision/wearing.js, pieces are matched with
 // src/engine/match.js, the score comes from the same engine as Today. No network.
-import { SLOTS, SLOT_LABELS, KINDS, COLOR_FAMILIES, NEAR_FACE, makeItem, makeCheck, outfitKey, todayISO } from '../model.js';
+import { SLOTS, SLOT_LABELS, KINDS, COLOR_FAMILIES, NEAR_FACE, makeItem, makeCheck, outfitKey, todayISO, newId } from '../model.js';
+import { roastOutfit } from '../engine/roast.js';
 import { scoreOutfit } from '../engine/score.js';
 import { rankForSlot } from '../engine/build.js';
 import { matchBand } from '../engine/match.js';
@@ -12,7 +13,7 @@ import { buzz, confetti, countUp, reduced, verdict } from './fx.js';
 import { toast, announce, sheet } from './overlay.js';
 import { occasionPicker } from './occasions.js';
 import { getPhotoURL } from '../store.js';
-import { data, getContext, allOccasions, saveCheck, saveItem, logWorn, setFeedback } from './data.js';
+import { data, getContext, allOccasions, saveCheck, saveItem, logWorn, setFeedback, setSetting } from './data.js';
 
 const BAND_SLOTS = ['top', 'bottom', 'shoes'];
 const OPTIONAL = ['layer', 'belt', 'neckwear', 'headwear'];
@@ -32,7 +33,7 @@ const inCloset = (it) => !!it && data.items.some((x) => x.id === it.id);
 // Flow state survives tab switches (like the Add-clothes screen) until the user starts over or saves.
 const S = {
   step: 'start', error: '', busyMsg: '', photo: null, guide: null, analysis: null, matches: {},
-  sel: {}, skipped: {}, occasion: null, mood: null, note: '', result: null, saved: null, saving: false,
+  sel: {}, skipped: {}, occasion: null, mood: null, note: '', result: null, saved: null, saving: false, seed: newId(),
 };
 let mods = null;
 async function vision() {
@@ -46,7 +47,7 @@ async function vision() {
 function resetFlow() {
   if (S.photo && S.photo.url) URL.revokeObjectURL(S.photo.url);
   Object.assign(S, { step: 'start', error: '', busyMsg: '', photo: null, guide: null, analysis: null, matches: {}, sel: {}, skipped: {},
-    occasion: null, mood: null, note: '', result: null, saved: null, saving: false });
+    occasion: null, mood: null, note: '', result: null, saved: null, saving: false, seed: newId() });
 }
 
 /** Item picture: cutout when there is one, then the photo, then the drawn illustration. */
@@ -104,9 +105,10 @@ export function mount(root, { navigate }) {
   }
 
   async function onFiles(list) {
-    const file = list && [...list].find((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
-    camInput.value = ''; libInput.value = '';
-    if (!list || !list.length) return;
+    const picked = list ? [...list] : [];
+    const file = picked.find((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
+    camInput.value = ''; libInput.value = ''; // the FileList is live: copy first, then clear
+    if (!picked.length) return;
     if (!file) { toast('That doesn’t look like a photo.'); return; }
     busy('Getting a good look at you…');
     try {
@@ -430,26 +432,27 @@ export function mount(root, { navigate }) {
     return best;
   }
 
-  async function scoreIt() {
+  async function computeResult() {
     const items = currentItems();
-    if (!items.top || !items.bottom) return;
-    S.occasion = S.occasion || data.settings.occasion || 'any';
     const ctx = await engineCtx();
     const res = scoreOutfit(items, ctx);
     let swap = null;
     try { swap = bestSwap(items, { ...ctx, maxReasons: 6 }); } catch (e) { console.warn(e); }
-    S.result = { items, score: res.score, reasons: res.reasons, swap, profile: !!ctx.profile };
+    const roast = roastOutfit(items, { score: res.score, reasons: res.reasons, swap }, ctx, { seed: S.seed });
+    S.result = { items, score: res.score, reasons: res.reasons, swap, roast, profile: !!ctx.profile };
+  }
+
+  async function scoreIt() {
+    const items = currentItems();
+    if (!items.top || !items.bottom) return;
+    S.occasion = S.occasion || data.settings.occasion || 'any';
+    await computeResult();
     go('score');
   }
 
   async function rescore() {
-    const items = currentItems();
     const prev = S.result ? S.result.score : 0;
-    const ctx = await engineCtx();
-    const res = scoreOutfit(items, ctx);
-    let swap = null;
-    try { swap = bestSwap(items, { ...ctx, maxReasons: 6 }); } catch { /* ignore */ }
-    S.result = { items, score: res.score, reasons: res.reasons, swap, profile: !!ctx.profile };
+    await computeResult();
     if (alive && S.step === 'score') { scoreEls.fillAll(prev); }
   }
 
@@ -520,6 +523,25 @@ export function mount(root, { navigate }) {
       }
       announce(`Fit score ${r.score}: ${v.short}.`);
       paintBody();
+      paintRoast(!instant);
+    }
+
+    const roastBox = h('section', { class: 'ck-roast', 'aria-live': 'polite' });
+    function paintRoast(reveal) {
+      const r = S.result.roast;
+      const on = data.settings.roast !== false;
+      roastBox.hidden = !r || r.level === 'none';
+      if (roastBox.hidden) return;
+      roastBox.classList.toggle('muted', !on);
+      roastBox.classList.remove('reveal'); if (reveal && on && !reduced()) { void roastBox.offsetWidth; roastBox.classList.add('reveal'); }
+      const toggle = h('button', { class: 'btn btn-small btn-ghost ck-easy', type: 'button', 'aria-pressed': String(!on), 'data-act': 'go-easy',
+        onclick: async () => { await setSetting({ roast: !on }); paintRoast(!on); } }, on ? 'Go easy on me' : 'Roast me again 🔥');
+      if (!on) { roastBox.replaceChildren(h('p', { class: 'ck-roast-off' }, 'Roast is off. Gentle mode.'), toggle); return; }
+      roastBox.replaceChildren(
+        h('h3', { class: 'ck-roast-title' }, h('span', { 'aria-hidden': 'true' }, '🔥'), r.level === 'full' ? ' The roast' : ' A little jab'),
+        r.headline ? h('p', { class: 'ck-roast-head' }, r.headline) : null,
+        h('ul', { class: 'ck-roast-lines' }, r.lines.map((l, i) => h('li', { class: i === r.lines.length - 1 && r.level === 'full' ? 'fix' : '' }, l))),
+        toggle);
     }
 
     function pieces() {
@@ -549,7 +571,7 @@ export function mount(root, { navigate }) {
     const view = h('div', { class: 'ck-scoreview' },
       stepper(4),
       h('h2', { class: 'sr-only', id: 'screen-title', tabindex: '-1' }, 'Your fit check score'),
-      h('div', { class: 'ck-hero' }, polaroid, score),
+      h('div', { class: 'ck-hero' }, polaroid, score), roastBox,
       h('fieldset', { class: 'fld ck-occ' }, h('legend', {}, 'Dressing for'), occ),
       body, logBox,
       h('div', { class: 'ck-nav' }, h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => go('what') }, 'Change pieces'), h('button', { class: 'btn btn-ghost', type: 'button', 'data-act': 'again', onclick: () => { resetFlow(); go('start'); } }, 'Start over')));
@@ -605,7 +627,7 @@ export function mount(root, { navigate }) {
       const items = S.result.items;
       const itemIds = {}, extras = {}, closetOnly = {};
       for (const [slot, it] of Object.entries(items)) { if (inCloset(it)) { itemIds[slot] = it.id; closetOnly[slot] = it; } else extras[slot] = it; }
-      const check = makeCheck({ date: todayISO(), itemIds, extras, score: S.result.score, occasion: S.occasion || 'any', mood: S.mood, note: S.note });
+      const check = makeCheck({ date: todayISO(), itemIds, extras, score: S.result.score, occasion: S.occasion || 'any', mood: S.mood, note: S.note, roast: S.result.roast && S.result.roast.level !== 'none' && data.settings.roast !== false ? S.result.roast.text : '' });
       const rec = await saveCheck(check, blob);
       S.saved = rec;
       let hampered = 0;
